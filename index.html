@@ -7,16 +7,18 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Arial, "PingFang SC", sans-serif; background: #08151c; color: #eef6f2; }
-    .app { min-height: 100vh; display: grid; grid-template-columns: 300px 1fr; }
-    aside { padding: 20px; background: #10222b; border-right: 1px solid #24414b; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 320px 1fr; }
+    aside { padding: 20px; background: #10222b; border-right: 1px solid #24414b; overflow-y: auto; max-height: 100vh; }
     h1 { margin: 0 0 8px; font-size: 26px; }
     h2 { margin: 18px 0 8px; font-size: 17px; }
     p { color: #a8bbc0; line-height: 1.55; }
     button { width: 100%; border: 0; border-radius: 8px; padding: 11px 12px; margin: 6px 0; background: #e7c46a; color: #15212a; font-weight: 800; cursor: pointer; }
     button.secondary { background: #24414b; color: #eef6f2; }
+    button.danger { background: #8a3b3b; color: #eef6f2; }
+    button:disabled { opacity: .4; cursor: not-allowed; }
     .stat { display: grid; grid-template-columns: 1fr auto; gap: 6px; padding: 8px 0; border-bottom: 1px solid #24414b; color: #c9d7d7; }
     .game { position: relative; display: grid; place-items: center; padding: 18px; }
-    canvas { width: min(100%, 900px); max-height: calc(100vh - 36px); aspect-ratio: 16 / 10; border: 1px solid #315762; border-radius: 8px; background: #0a2735; }
+    canvas { width: min(100%, 900px); max-height: calc(100vh - 36px); aspect-ratio: 16 / 10; border: 1px solid #315762; border-radius: 8px; background: #0a2735; display: block; }
     .overlay { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
     .panel { width: min(430px, calc(100% - 28px)); background: rgba(13, 29, 37, .94); border: 1px solid #385c65; border-radius: 8px; padding: 22px; pointer-events: auto; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
     .hidden { display: none; }
@@ -40,17 +42,36 @@
     .settings-label { font-size: 14px; color: #c9d7d7; }
     .settings-value { font-size: 13px; color: #e7c46a; min-width: 32px; text-align: right; }
     input[type="range"] { width: 100%; accent-color: #e7c46a; margin-top: 4px; }
+    input[type="text"], input[type="number"] { width: 100%; background: #0a1f27; border: 1px solid #24414b; border-radius: 6px; padding: 8px 10px; color: #eef6f2; font-size: 14px; }
+    input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #e7c46a; }
     .toggle { position: relative; width: 44px; height: 24px; background: #24414b; border-radius: 12px; cursor: pointer; transition: background .2s; }
     .toggle.on { background: #e7c46a; }
     .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #eef6f2; border-radius: 50%; transition: transform .2s; }
     .toggle.on::after { transform: translateX(20px); }
     .pause-hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(13,29,37,.75); color: #a8bbc0; font-size: 13px; padding: 6px 16px; border-radius: 6px; pointer-events: none; }
-    .game-settings-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(13,29,37,.75); color: #eef6f2; font-size: 18px; cursor: pointer; display: grid; place-items: center; transition: background .2s; z-index: 5; }
+    .game-settings-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(13,29,37,.75); color: #eef6f2; font-size: 18px; cursor: pointer; display: grid; place-items: center; transition: background .2s; z-index: 5; margin: 0; padding: 0; width: 36px; }
     .game-settings-btn:hover { background: rgba(13,29,37,.9); }
     .settings-panel-modal { width: min(380px, calc(100% - 28px)); }
     .settings-panel-modal h2 { margin: 0 0 14px; font-size: 20px; }
     .settings-panel-modal input[type="range"] { margin-bottom: 8px; }
-    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; } canvas { max-height: 62vh; } }
+
+    .editor-tool-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin: 8px 0; }
+    .editor-tool { background: #142f3a; border: 1px solid #24414b; color: #c9d7d7; border-radius: 6px; padding: 8px 4px; cursor: pointer; text-align: center; font-size: 13px; transition: all .15s; margin: 0; font-weight: 600; }
+    .editor-tool:hover { border-color: #3d6a78; }
+    .editor-tool.active { background: #e7c46a; color: #15212a; border-color: #e7c46a; }
+    .editor-hint { font-size: 12px; color: #a8bbc0; line-height: 1.5; padding: 8px; background: #0a1f27; border-radius: 6px; margin: 6px 0; }
+    .editor-section { margin: 14px 0; padding-top: 10px; border-top: 1px solid #24414b; }
+    .editor-section:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
+    .editor-section-title { font-size: 14px; color: #e7c46a; font-weight: 700; margin-bottom: 8px; }
+    .editor-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .custom-tag { display: inline-block; background: #3d6a78; color: #eef6f2; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+    .edit-btn { display: inline-block; background: #24414b; color: #e7c46a; font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; float: right; margin-top: 2px; }
+    .edit-btn:hover { background: #3d6a78; }
+    .level-header { display: flex; align-items: center; justify-content: space-between; }
+    .canvas-wrapper { position: relative; }
+    .canvas-cursor-hint { position: absolute; bottom: 10px; left: 10px; background: rgba(13,29,37,.85); color: #e7c46a; font-size: 12px; padding: 6px 12px; border-radius: 6px; pointer-events: none; }
+
+    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } }
   </style>
 </head>
 <body>
@@ -61,6 +82,7 @@
         <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
         <button id="startBtn">开始第1关</button>
         <button id="levelSelectBtn" class="secondary">选择关卡</button>
+        <button id="editorBtn" class="secondary">关卡编辑器</button>
         <button id="pauseBtn" class="secondary">暂停</button>
         <button id="settingsBtn" class="secondary">游戏设置</button>
         <h2>状态</h2>
@@ -76,6 +98,7 @@
           <div class="key">R 重开本关</div>
         </div>
       </div>
+
       <div id="settingsPanel" class="hidden">
         <h1>游戏设置</h1>
         <div class="settings-row">
@@ -98,16 +121,107 @@
         </div>
         <button id="backFromSettingsBtn" class="secondary back-btn">返回</button>
       </div>
+
       <div id="levelSelectPanel" class="hidden">
         <h1>选择关卡</h1>
-        <p>从已解锁的关卡中选择，通关后自动解锁下一关。</p>
+        <p>从已解锁的关卡中选择，通关后自动解锁下一关。自定义关卡可随时编辑。</p>
         <div id="levelCards" class="level-select"></div>
         <button id="backToMenuBtn" class="secondary back-btn">返回主菜单</button>
       </div>
+
+      <div id="editorPanel" class="hidden">
+        <h1>关卡编辑器</h1>
+        <p>创建你的专属关卡。在画布上放置暗礁和雾区，调整船只和港湾参数。</p>
+
+        <div class="editor-section">
+          <div class="editor-section-title">关卡信息</div>
+          <div class="settings-row">
+            <span class="settings-label">关卡名称</span>
+          </div>
+          <input type="text" id="editorLevelName" placeholder="我的自定义关卡" maxlength="20">
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">编辑工具</div>
+          <div class="editor-tool-row">
+            <div class="editor-tool active" data-tool="select">选择/移动</div>
+            <div class="editor-tool" data-tool="rock">放置暗礁</div>
+            <div class="editor-tool" data-tool="fog">放置雾区</div>
+          </div>
+          <div class="editor-hint" id="editorHint">点击选中元素，拖动移动，双击删除。选择工具后点击画布放置。</div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">船只配置</div>
+          <div class="settings-row">
+            <span class="settings-label">船只数量</span>
+            <span id="boatCountValue" class="settings-value">3</span>
+          </div>
+          <input type="range" id="boatCountRange" min="1" max="10" value="3">
+          <div class="settings-row">
+            <span class="settings-label">起点起始Y</span>
+            <span id="boatStartYValue" class="settings-value">130</span>
+          </div>
+          <input type="range" id="boatStartYRange" min="60" max="400" value="130">
+          <div class="settings-row">
+            <span class="settings-label">起点分布高度</span>
+            <span id="boatSpreadValue" class="settings-value">330</span>
+          </div>
+          <input type="range" id="boatSpreadRange" min="50" max="450" value="330">
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">目标港湾</div>
+          <div class="settings-row">
+            <span class="settings-label">港湾X位置</span>
+            <span id="harborXValue" class="settings-value">900</span>
+          </div>
+          <input type="range" id="harborXRange" min="700" max="930" value="900">
+          <div class="settings-row">
+            <span class="settings-label">港湾上边界</span>
+            <span id="harborTopValue" class="settings-value">70</span>
+          </div>
+          <input type="range" id="harborTopRange" min="20" max="250" value="70">
+          <div class="settings-row">
+            <span class="settings-label">港湾下边界</span>
+            <span id="harborBottomValue" class="settings-value">530</span>
+          </div>
+          <input type="range" id="harborBottomRange" min="350" max="580" value="530">
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">选中元素</div>
+          <div id="selectedInfo" class="editor-hint">未选中任何元素</div>
+          <div id="selectedRadiusControl" class="hidden">
+            <div class="settings-row">
+              <span class="settings-label">半径大小</span>
+              <span id="selectedRadiusValue" class="settings-value">30</span>
+            </div>
+            <input type="range" id="selectedRadiusRange" min="10" max="120" value="30">
+            <button id="deleteSelectedBtn" class="danger">删除选中元素</button>
+          </div>
+        </div>
+
+        <div class="editor-section">
+          <div class="editor-section-title">操作</div>
+          <div class="editor-btn-row">
+            <button id="playtestBtn" class="secondary">试玩关卡</button>
+            <button id="clearLevelBtn" class="danger">清空布局</button>
+          </div>
+          <button id="saveLevelBtn">保存关卡</button>
+          <div id="saveStatus" class="editor-hint"></div>
+          <button id="backFromEditorBtn" class="secondary back-btn">返回主菜单</button>
+        </div>
+      </div>
     </aside>
+
     <main class="game">
-      <canvas id="game" width="960" height="600"></canvas>
+      <div class="canvas-wrapper">
+        <canvas id="game" width="960" height="600"></canvas>
+        <div class="canvas-cursor-hint hidden" id="cursorHint"></div>
+      </div>
       <button class="game-settings-btn" id="gameSettingsBtn" title="游戏设置">⚙</button>
+      <button class="game-settings-btn" id="backFromPlaytestBtn" title="返回编辑器" style="top: 60px; display: none;">✕</button>
       <div class="pause-hint hidden" id="pauseHint">按 P 暂停游戏</div>
       <div class="overlay" id="overlay">
         <div class="panel">
@@ -143,6 +257,196 @@
     </main>
   </div>
   <script>
+    // ===================== LevelData 模块：关卡数据层 =====================
+    const LevelData = (function() {
+      const BUILTIN_KEY = "zfl26BuiltinUnlocked";
+      const CUSTOM_KEY = "zfl26CustomLevels";
+      const BEST_KEY = "zfl26Best";
+      const LEVEL_BESTS_KEY = "zfl26LevelBests";
+
+      const builtinLevels = [
+        {
+          id: "builtin_0",
+          name: "初夜启航",
+          boats: 3,
+          boatStartY: 130,
+          boatSpread: 330,
+          rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}],
+          fog: [{x:560,y:250,r:90}],
+          harbor: { x: 900, top: 70, bottom: 530 }
+        },
+        {
+          id: "builtin_1",
+          name: "迷雾渐浓",
+          boats: 4,
+          boatStartY: 130,
+          boatSpread: 330,
+          rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}],
+          fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}],
+          harbor: { x: 900, top: 70, bottom: 530 }
+        },
+        {
+          id: "builtin_2",
+          name: "风暴前夕",
+          boats: 5,
+          boatStartY: 130,
+          boatSpread: 330,
+          rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}],
+          fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}],
+          harbor: { x: 900, top: 70, bottom: 530 }
+        }
+      ];
+
+      function loadCustomLevels() {
+        try {
+          const stored = localStorage.getItem(CUSTOM_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return [];
+      }
+
+      function saveCustomLevels(levels) {
+        localStorage.setItem(CUSTOM_KEY, JSON.stringify(levels));
+      }
+
+      function getAllLevels() {
+        return builtinLevels.concat(loadCustomLevels());
+      }
+
+      function getBuiltinCount() {
+        return builtinLevels.length;
+      }
+
+      function getLevelById(id) {
+        return getAllLevels().find(l => l.id === id);
+      }
+
+      function getLevelIndex(id) {
+        return getAllLevels().findIndex(l => l.id === id);
+      }
+
+      function isCustomLevel(id) {
+        return id && id.startsWith("custom_");
+      }
+
+      function isBuiltinLevel(id) {
+        return id && id.startsWith("builtin_");
+      }
+
+      function saveCustomLevel(levelData) {
+        const customs = loadCustomLevels();
+        if (levelData.id && isCustomLevel(levelData.id)) {
+          const idx = customs.findIndex(l => l.id === levelData.id);
+          if (idx >= 0) {
+            customs[idx] = levelData;
+          } else {
+            customs.push(levelData);
+          }
+        } else {
+          levelData.id = "custom_" + Date.now();
+          customs.push(levelData);
+        }
+        saveCustomLevels(customs);
+        return levelData;
+      }
+
+      function deleteCustomLevel(id) {
+        if (!isCustomLevel(id)) return false;
+        const customs = loadCustomLevels().filter(l => l.id !== id);
+        saveCustomLevels(customs);
+        const levelBests = JSON.parse(localStorage.getItem(LEVEL_BESTS_KEY) || "{}");
+        delete levelBests[id];
+        localStorage.setItem(LEVEL_BESTS_KEY, JSON.stringify(levelBests));
+        return true;
+      }
+
+      function createEmptyCustomLevel() {
+        return {
+          id: null,
+          name: "我的自定义关卡",
+          boats: 3,
+          boatStartY: 130,
+          boatSpread: 330,
+          rocks: [],
+          fog: [],
+          harbor: { x: 900, top: 70, bottom: 530 }
+        };
+      }
+
+      function loadBuiltinUnlocked() {
+        return Number(localStorage.getItem(BUILTIN_KEY) || 1);
+      }
+
+      function saveBuiltinUnlocked(unlocked) {
+        localStorage.setItem(BUILTIN_KEY, unlocked);
+      }
+
+      function loadGlobalBest() {
+        return Number(localStorage.getItem(BEST_KEY) || 0);
+      }
+
+      function saveGlobalBest(best) {
+        localStorage.setItem(BEST_KEY, best);
+      }
+
+      function loadLevelBests() {
+        try {
+          const stored = localStorage.getItem(LEVEL_BESTS_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {};
+      }
+
+      function saveLevelBest(levelId, score) {
+        const levelBests = loadLevelBests();
+        const current = Number(levelBests[levelId] || 0);
+        if (score > current) {
+          levelBests[levelId] = score;
+          localStorage.setItem(LEVEL_BESTS_KEY, JSON.stringify(levelBests));
+          return score;
+        }
+        return current;
+      }
+
+      function normalizeLevel(level) {
+        return {
+          id: level.id || null,
+          name: level.name || "未命名关卡",
+          boats: level.boats || 3,
+          boatStartY: level.boatStartY != null ? level.boatStartY : 130,
+          boatSpread: level.boatSpread != null ? level.boatSpread : 330,
+          rocks: (level.rocks || []).map(r => ({ x: r.x, y: r.y, r: r.r })),
+          fog: (level.fog || []).map(f => ({ x: f.x, y: f.y, r: f.r })),
+          harbor: level.harbor ? {
+            x: level.harbor.x != null ? level.harbor.x : 900,
+            top: level.harbor.top != null ? level.harbor.top : 70,
+            bottom: level.harbor.bottom != null ? level.harbor.bottom : 530
+          } : { x: 900, top: 70, bottom: 530 }
+        };
+      }
+
+      return {
+        builtinLevels,
+        getAllLevels,
+        getBuiltinCount,
+        getLevelById,
+        getLevelIndex,
+        isCustomLevel,
+        isBuiltinLevel,
+        saveCustomLevel,
+        deleteCustomLevel,
+        createEmptyCustomLevel,
+        loadBuiltinUnlocked,
+        saveBuiltinUnlocked,
+        loadGlobalBest,
+        saveGlobalBest,
+        loadLevelBests,
+        saveLevelBest,
+        normalizeLevel
+      };
+    })();
+
+    // ===================== SoundManager =====================
     const SoundManager = {
       audioContext: null,
       enabled: true,
@@ -251,6 +555,7 @@
       }
     };
 
+    // ===================== DOM 引用 =====================
     const canvas = document.querySelector("#game");
     const ctx = canvas.getContext("2d");
     const overlay = document.querySelector("#overlay");
@@ -264,9 +569,11 @@
     const arrivedText = document.querySelector("#arrivedText");
     const bestText = document.querySelector("#bestText");
     const levelSelectBtn = document.querySelector("#levelSelectBtn");
+    const editorBtn = document.querySelector("#editorBtn");
     const backToMenuBtn = document.querySelector("#backToMenuBtn");
     const mainMenu = document.querySelector("#mainMenu");
     const levelSelectPanel = document.querySelector("#levelSelectPanel");
+    const editorPanel = document.querySelector("#editorPanel");
     const levelCards = document.querySelector("#levelCards");
     const settingsBtn = document.querySelector("#settingsBtn");
     const settingsPanel = document.querySelector("#settingsPanel");
@@ -287,14 +594,39 @@
     const modalSensitivityRange = document.querySelector("#modalSensitivityRange");
     const modalSensitivityValue = document.querySelector("#modalSensitivityValue");
     const modalPauseHintToggle = document.querySelector("#modalPauseHintToggle");
+    const cursorHint = document.querySelector("#cursorHint");
+    const backFromPlaytestBtn = document.querySelector("#backFromPlaytestBtn");
 
-    const levels = [
-      { name: "初夜启航", boats: 3, rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}], fog: [{x:560,y:250,r:90}] },
-      { name: "迷雾渐浓", boats: 4, rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}], fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}] },
-      { name: "风暴前夕", boats: 5, rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}], fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}] }
-    ];
+    // ===================== 编辑器 DOM 引用 =====================
+    const editorLevelName = document.querySelector("#editorLevelName");
+    const editorHint = document.querySelector("#editorHint");
+    const editorTools = document.querySelectorAll(".editor-tool");
+    const boatCountRange = document.querySelector("#boatCountRange");
+    const boatCountValue = document.querySelector("#boatCountValue");
+    const boatStartYRange = document.querySelector("#boatStartYRange");
+    const boatStartYValue = document.querySelector("#boatStartYValue");
+    const boatSpreadRange = document.querySelector("#boatSpreadRange");
+    const boatSpreadValue = document.querySelector("#boatSpreadValue");
+    const harborXRange = document.querySelector("#harborXRange");
+    const harborXValue = document.querySelector("#harborXValue");
+    const harborTopRange = document.querySelector("#harborTopRange");
+    const harborTopValue = document.querySelector("#harborTopValue");
+    const harborBottomRange = document.querySelector("#harborBottomRange");
+    const harborBottomValue = document.querySelector("#harborBottomValue");
+    const selectedInfo = document.querySelector("#selectedInfo");
+    const selectedRadiusControl = document.querySelector("#selectedRadiusControl");
+    const selectedRadiusRange = document.querySelector("#selectedRadiusRange");
+    const selectedRadiusValue = document.querySelector("#selectedRadiusValue");
+    const deleteSelectedBtn = document.querySelector("#deleteSelectedBtn");
+    const playtestBtn = document.querySelector("#playtestBtn");
+    const clearLevelBtn = document.querySelector("#clearLevelBtn");
+    const saveLevelBtn = document.querySelector("#saveLevelBtn");
+    const saveStatus = document.querySelector("#saveStatus");
+    const backFromEditorBtn = document.querySelector("#backFromEditorBtn");
+
+    // ===================== 游戏状态 =====================
     let state = "menu";
-    let level = 0;
+    let currentLevelId = "builtin_0";
     let score = 0;
     let levelScore = 0;
     let beamAngle = -0.15;
@@ -303,22 +635,16 @@
     let keys = {};
     let last = 0;
     const lighthouse = { x: 110, y: 300 };
+    let playtestLevel = null;
 
-    function loadProgress() {
-      const unlocked = Number(localStorage.getItem("zfl26Unlocked") || 1);
-      const best = Number(localStorage.getItem("zfl26Best") || 0);
-      let levelBests = {};
-      try {
-        const stored = localStorage.getItem("zfl26LevelBests");
-        if (stored) {
-          levelBests = JSON.parse(stored);
-        }
-      } catch (e) {
-        levelBests = {};
-      }
-      return { unlocked, best, levelBests };
-    }
+    // ===================== 编辑器状态 =====================
+    let editorLevel = LevelData.createEmptyCustomLevel();
+    let editorTool = "select";
+    let editorSelected = null;
+    let editorDragging = false;
+    let editorDragOffset = { x: 0, y: 0 };
 
+    // ===================== 设置 =====================
     function loadSettings() {
       try {
         const stored = localStorage.getItem("zfl26Settings");
@@ -355,38 +681,43 @@
       pauseHintEl.classList.toggle("hidden", !gameSettings.pauseHint || state !== "playing");
     }
 
-    function saveUnlocked(unlocked) {
-      localStorage.setItem("zfl26Unlocked", unlocked);
-    }
-
-    function saveBest(best) {
-      localStorage.setItem("zfl26Best", best);
-    }
-
-    function saveLevelBest(levelIndex, score) {
-      const levelBests = JSON.parse(localStorage.getItem("zfl26LevelBests") || "{}");
-      const current = Number(levelBests[levelIndex] || 0);
-      if (score > current) {
-        levelBests[levelIndex] = score;
-        localStorage.setItem("zfl26LevelBests", JSON.stringify(levelBests));
-        return score;
-      }
-      return current;
-    }
-
     function updateGlobalBest() {
-      const { best } = loadProgress();
-      bestText.textContent = best;
+      bestText.textContent = LevelData.loadGlobalBest();
     }
 
+    function getCurrentLevelData() {
+      if (playtestLevel) return playtestLevel;
+      return LevelData.getLevelById(currentLevelId) || LevelData.builtinLevels[0];
+    }
+
+    function getCurrentLevelIndex() {
+      if (playtestLevel) return -1;
+      return LevelData.getLevelIndex(currentLevelId);
+    }
+
+    // ===================== 关卡选择渲染 =====================
     function renderLevelCards() {
-      const { unlocked, levelBests } = loadProgress();
+      const builtinUnlocked = LevelData.loadBuiltinUnlocked();
+      const levelBests = LevelData.loadLevelBests();
+      const allLevels = LevelData.getAllLevels();
+      const builtinCount = LevelData.getBuiltinCount();
+
       levelCards.innerHTML = "";
-      levels.forEach(function(lvl, idx) {
-        const isUnlocked = idx < unlocked;
-        const levelBest = levelBests[idx] || 0;
+
+      allLevels.forEach(function(lvl, idx) {
+        const isBuiltin = LevelData.isBuiltinLevel(lvl.id);
+        let isUnlocked;
+        if (isBuiltin) {
+          const builtinIdx = parseInt(lvl.id.split("_")[1]);
+          isUnlocked = builtinIdx < builtinUnlocked;
+        } else {
+          isUnlocked = true;
+        }
+
+        const levelBest = levelBests[lvl.id] || 0;
         const card = document.createElement("div");
         card.className = "level-card" + (isUnlocked ? "" : " locked");
+
         let bestTextHtml = "";
         if (isUnlocked) {
           if (levelBest > 0) {
@@ -397,48 +728,84 @@
         } else {
           bestTextHtml = '<span class="no-record">通关前一关解锁</span>';
         }
+
         const lockIcon = isUnlocked ? "" : ' <span class="lock-icon">🔒</span>';
+        const customTag = isBuiltin ? "" : ' <span class="custom-tag">自定义</span>';
+        const editBtnHtml = isBuiltin ? "" : ' <span class="edit-btn" data-edit="' + lvl.id + '">编辑</span>';
+
+        const displayIdx = isBuiltin ? (parseInt(lvl.id.split("_")[1]) + 1) : (idx - builtinCount + 1);
+        const prefix = isBuiltin ? "第" + displayIdx + "关：" : "自定义" + displayIdx + "：";
+
         card.innerHTML =
-          '<h3>第' + (idx + 1) + '关：' + lvl.name + lockIcon + '</h3>' +
-          '<div class="level-stats">' +
+          '<div class="level-header"><h3 style="margin:0;">' + prefix + lvl.name + customTag + lockIcon + '</h3>' + editBtnHtml + '</div>' +
+          '<div class="level-stats" style="margin-top:8px;">' +
             '<span>船只</span><b>' + lvl.boats + ' 艘</b>' +
             '<span>暗礁</span><b>' + lvl.rocks.length + ' 个</b>' +
             '<span>雾区</span><b>' + lvl.fog.length + ' 个</b>' +
           '</div>' +
           '<div class="level-best">' + bestTextHtml + '</div>';
+
         if (isUnlocked) {
-          card.onclick = function() { startFromLevel(idx); };
+          card.onclick = function(e) {
+            if (e.target && e.target.classList && e.target.classList.contains("edit-btn")) return;
+            startFromLevel(lvl.id);
+          };
         }
         levelCards.appendChild(card);
       });
+
+      levelCards.querySelectorAll(".edit-btn").forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          const id = btn.getAttribute("data-edit");
+          openEditorForLevel(id);
+        };
+      });
     }
 
+    // ===================== 面板切换 =====================
     function showLevelSelect() {
       mainMenu.classList.add("hidden");
       settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
       levelSelectPanel.classList.remove("hidden");
       renderLevelCards();
       state = "levelSelect";
+      cursorHint.classList.add("hidden");
+      backFromPlaytestBtn.style.display = "none";
     }
 
     function showMainMenu() {
       mainMenu.classList.remove("hidden");
       levelSelectPanel.classList.add("hidden");
       settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
       state = "menu";
-      show("夜间灯塔守望", "照亮航道，护送全部船只抵达右侧港湾。", "开始游戏", function() { level = 0; score = 0; resetLevel(); });
+      playtestLevel = null;
+      cursorHint.classList.add("hidden");
+      backFromPlaytestBtn.style.display = "none";
+      show("夜间灯塔守望", "照亮航道，护送全部船只抵达右侧港湾。", "开始游戏", function() {
+        currentLevelId = "builtin_0";
+        score = 0;
+        resetLevel();
+      });
     }
 
     function showSettings() {
       mainMenu.classList.add("hidden");
       levelSelectPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
       settingsPanel.classList.remove("hidden");
       applySettings();
     }
 
     function hideSettings() {
       settingsPanel.classList.add("hidden");
-      mainMenu.classList.remove("hidden");
+      if (state === "editor") {
+        editorPanel.classList.remove("hidden");
+      } else {
+        mainMenu.classList.remove("hidden");
+      }
     }
 
     let prevState = "menu";
@@ -460,8 +827,185 @@
       }
     }
 
-    function startFromLevel(levelIndex) {
-      level = levelIndex;
+    // ===================== 编辑器功能 =====================
+    function openEditorForLevel(levelId) {
+      if (levelId && LevelData.isCustomLevel(levelId)) {
+        const existing = LevelData.getLevelById(levelId);
+        if (existing) {
+          editorLevel = LevelData.normalizeLevel(JSON.parse(JSON.stringify(existing)));
+        } else {
+          editorLevel = LevelData.createEmptyCustomLevel();
+        }
+      } else {
+        editorLevel = LevelData.createEmptyCustomLevel();
+      }
+      syncEditorToUI();
+      showEditorPanel();
+    }
+
+    function showEditorPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      editorPanel.classList.remove("hidden");
+      state = "editor";
+      editorSelected = null;
+      editorTool = "select";
+      updateEditorTools();
+      updateSelectedInfo();
+      cursorHint.classList.remove("hidden");
+      cursorHint.textContent = "编辑器模式：点击画布放置或选择元素";
+      backFromPlaytestBtn.style.display = "none";
+      saveStatus.textContent = "";
+    }
+
+    function syncEditorToUI() {
+      editorLevelName.value = editorLevel.name || "";
+      boatCountRange.value = editorLevel.boats;
+      boatCountValue.textContent = editorLevel.boats;
+      boatStartYRange.value = editorLevel.boatStartY;
+      boatStartYValue.textContent = editorLevel.boatStartY;
+      boatSpreadRange.value = editorLevel.boatSpread;
+      boatSpreadValue.textContent = editorLevel.boatSpread;
+      harborXRange.value = editorLevel.harbor.x;
+      harborXValue.textContent = editorLevel.harbor.x;
+      harborTopRange.value = editorLevel.harbor.top;
+      harborTopValue.textContent = editorLevel.harbor.top;
+      harborBottomRange.value = editorLevel.harbor.bottom;
+      harborBottomValue.textContent = editorLevel.harbor.bottom;
+    }
+
+    function updateEditorTools() {
+      editorTools.forEach(function(tool) {
+        tool.classList.toggle("active", tool.getAttribute("data-tool") === editorTool);
+      });
+      switch (editorTool) {
+        case "select":
+          editorHint.textContent = "点击选中元素，拖动移动，双击或使用按钮删除。";
+          break;
+        case "rock":
+          editorHint.textContent = "在画布上点击放置暗礁。";
+          break;
+        case "fog":
+          editorHint.textContent = "在画布上点击放置雾区。";
+          break;
+      }
+    }
+
+    function updateSelectedInfo() {
+      if (!editorSelected) {
+        selectedInfo.textContent = "未选中任何元素";
+        selectedRadiusControl.classList.add("hidden");
+        return;
+      }
+      const { type, index } = editorSelected;
+      const arr = type === "rock" ? editorLevel.rocks : editorLevel.fog;
+      const elem = arr[index];
+      if (!elem) {
+        editorSelected = null;
+        updateSelectedInfo();
+        return;
+      }
+      selectedInfo.textContent = (type === "rock" ? "暗礁" : "雾区") + " #" + (index + 1) +
+        "  位置: (" + Math.round(elem.x) + ", " + Math.round(elem.y) + ")";
+      selectedRadiusControl.classList.remove("hidden");
+      selectedRadiusRange.value = elem.r;
+      selectedRadiusValue.textContent = elem.r;
+    }
+
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
+    function hitTestElement(x, y) {
+      for (let i = editorLevel.rocks.length - 1; i >= 0; i--) {
+        const r = editorLevel.rocks[i];
+        if (Math.hypot(x - r.x, y - r.y) < r.r + 5) {
+          return { type: "rock", index: i };
+        }
+      }
+      for (let i = editorLevel.fog.length - 1; i >= 0; i--) {
+        const f = editorLevel.fog[i];
+        if (Math.hypot(x - f.x, y - f.y) < f.r + 5) {
+          return { type: "fog", index: i };
+        }
+      }
+      return null;
+    }
+
+    function onCanvasMouseDown(e) {
+      if (state !== "editor") return;
+      e.preventDefault();
+      const pos = getCanvasCoords(e);
+
+      if (editorTool === "select") {
+        const hit = hitTestElement(pos.x, pos.y);
+        if (hit) {
+          editorSelected = hit;
+          const arr = hit.type === "rock" ? editorLevel.rocks : editorLevel.fog;
+          const elem = arr[hit.index];
+          editorDragging = true;
+          editorDragOffset = { x: pos.x - elem.x, y: pos.y - elem.y };
+          updateSelectedInfo();
+        } else {
+          editorSelected = null;
+          updateSelectedInfo();
+        }
+      } else if (editorTool === "rock") {
+        editorLevel.rocks.push({ x: pos.x, y: pos.y, r: 30 });
+        editorSelected = { type: "rock", index: editorLevel.rocks.length - 1 };
+        updateSelectedInfo();
+      } else if (editorTool === "fog") {
+        editorLevel.fog.push({ x: pos.x, y: pos.y, r: 80 });
+        editorSelected = { type: "fog", index: editorLevel.fog.length - 1 };
+        updateSelectedInfo();
+      }
+    }
+
+    function onCanvasMouseMove(e) {
+      if (state !== "editor" || !editorDragging || !editorSelected) return;
+      const pos = getCanvasCoords(e);
+      const arr = editorSelected.type === "rock" ? editorLevel.rocks : editorLevel.fog;
+      const elem = arr[editorSelected.index];
+      if (elem) {
+        elem.x = Math.max(20, Math.min(940, pos.x - editorDragOffset.x));
+        elem.y = Math.max(20, Math.min(580, pos.y - editorDragOffset.y));
+        updateSelectedInfo();
+      }
+    }
+
+    function onCanvasMouseUp() {
+      editorDragging = false;
+    }
+
+    function onCanvasDoubleClick(e) {
+      if (state !== "editor") return;
+      const pos = getCanvasCoords(e);
+      const hit = hitTestElement(pos.x, pos.y);
+      if (hit) {
+        deleteEditorElement(hit);
+      }
+    }
+
+    function deleteEditorElement(target) {
+      const t = target || editorSelected;
+      if (!t) return;
+      const arr = t.type === "rock" ? editorLevel.rocks : editorLevel.fog;
+      arr.splice(t.index, 1);
+      editorSelected = null;
+      updateSelectedInfo();
+    }
+
+    // ===================== 游戏逻辑 =====================
+    function startFromLevel(levelId) {
+      currentLevelId = levelId;
+      playtestLevel = null;
       levelScore = 0;
       score = 0;
       showMainMenu();
@@ -471,17 +1015,23 @@
     function resetLevel() {
       applySettings();
       SoundManager.startGame();
-      const data = levels[level];
+      const data = getCurrentLevelData();
       levelScore = score;
+      const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
       boats = Array.from({ length: data.boats }, function(_, i) {
+        const startY = data.boatStartY != null ? data.boatStartY : 130;
+        const spread = data.boatSpread != null ? data.boatSpread : 330;
+        const lvlIdx = getCurrentLevelIndex();
+        const difficulty = lvlIdx >= 0 ? Math.min(lvlIdx, 5) : 1;
         return {
           x: 40 - i * 42,
-          y: 130 + i * (330 / Math.max(1, data.boats - 1)),
-          speed: 26 + level * 8 + i * 3,
-          drift: (i % 2 ? 1 : -1) * (12 + level * 3),
+          y: startY + i * (spread / Math.max(1, data.boats - 1)),
+          speed: 26 + difficulty * 8 + i * 3,
+          drift: (i % 2 ? 1 : -1) * (12 + difficulty * 3),
           lit: 3.2,
           arrived: false,
-          lost: false
+          lost: false,
+          harborX: harbor.x
         };
       });
       beamAngle = -0.1;
@@ -502,13 +1052,17 @@
     }
 
     function hitRock(boat) {
-      return levels[level].rocks.some(rock => Math.hypot(boat.x - rock.x, boat.y - rock.y) < rock.r + 9);
+      const data = getCurrentLevelData();
+      return data.rocks.some(rock => Math.hypot(boat.x - rock.x, boat.y - rock.y) < rock.r + 9);
     }
 
     function update(dt) {
       if (state !== "playing") return;
       if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
       if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
+      const data = getCurrentLevelData();
+      const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
+
       for (const boat of boats) {
         if (boat.arrived || boat.lost) continue;
         const lit = inBeam(boat);
@@ -522,7 +1076,7 @@
           end(false, "有船只迷航或触礁，守望失败。");
           return;
         }
-        if (boat.x > 900) {
+        if (boat.x > harbor.x) {
           boat.arrived = true;
           SoundManager.boatArrived();
           score += Math.round(100 + boat.lit * 20);
@@ -530,18 +1084,28 @@
       }
       if (boats.every(boat => boat.arrived)) {
         const currentLevelScore = score - levelScore;
-        saveLevelBest(level, currentLevelScore);
-        const { unlocked } = loadProgress();
-        if (level + 1 >= unlocked && level < levels.length - 1) {
-          saveUnlocked(level + 2);
+        const lvlId = playtestLevel ? "__playtest__" : currentLevelId;
+        if (!playtestLevel) {
+          LevelData.saveLevelBest(lvlId, currentLevelScore);
         }
-        const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
-        saveBest(totalBest);
+        const builtinIdx = LevelData.isBuiltinLevel(currentLevelId) ? parseInt(currentLevelId.split("_")[1]) : -1;
+        if (builtinIdx >= 0 && !playtestLevel) {
+          const unlocked = LevelData.loadBuiltinUnlocked();
+          if (builtinIdx + 1 >= unlocked && builtinIdx < LevelData.getBuiltinCount() - 1) {
+            LevelData.saveBuiltinUnlocked(builtinIdx + 2);
+          }
+        }
+        const totalBest = Math.max(LevelData.loadGlobalBest(), score);
+        LevelData.saveGlobalBest(totalBest);
         updateGlobalBest();
         SoundManager.victory();
-        if (level < levels.length - 1) {
-          level += 1;
-          show("第" + (level) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
+
+        if (playtestLevel) {
+          end(true, "试玩通关！本关得分：" + currentLevelScore + "。你可以继续调整关卡或保存。");
+        } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
+          const nextId = "builtin_" + (builtinIdx + 1);
+          currentLevelId = nextId;
+          show("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
           state = "between";
         } else {
           end(true, "本关得分：" + currentLevelScore + "。全部船只安全抵达，今晚的海图被你守住了。");
@@ -553,12 +1117,21 @@
     function end(win, text) {
       state = "ended";
       updatePauseHint();
-      if (win) {
-        const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
-        saveBest(totalBest);
+      if (win && !playtestLevel) {
+        const totalBest = Math.max(LevelData.loadGlobalBest(), score);
+        LevelData.saveGlobalBest(totalBest);
       }
       updateGlobalBest();
-      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, "重开", function() { level = 0; score = 0; resetLevel(); });
+      const btnLabel = playtestLevel ? "返回编辑器" : "重开";
+      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, btnLabel, function() {
+        if (playtestLevel) {
+          showEditorPanel();
+        } else {
+          currentLevelId = "builtin_0";
+          score = 0;
+          resetLevel();
+        }
+      });
     }
 
     function show(title, text, button, action) {
@@ -570,13 +1143,25 @@
     }
 
     function updateHud() {
-      levelText.textContent = (level + 1) + " / 3";
+      const data = getCurrentLevelData();
+      const lvlIdx = getCurrentLevelIndex();
+      const builtinCount = LevelData.getBuiltinCount();
+      if (playtestLevel) {
+        levelText.textContent = "试玩 / " + data.name;
+      } else if (lvlIdx >= 0) {
+        levelText.textContent = (lvlIdx + 1) + " / " + LevelData.getAllLevels().length;
+      } else {
+        levelText.textContent = "1 / " + builtinCount;
+      }
       scoreText.textContent = score;
       arrivedText.textContent = boats.filter(boat => boat.arrived).length + " / " + boats.length;
     }
 
-    function draw() {
-      const data = levels[level];
+    // ===================== 绘制 =====================
+    function drawGameScene(drawBoats) {
+      const data = getCurrentLevelData();
+      const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
+
       ctx.clearRect(0, 0, 960, 600);
       const sea = ctx.createLinearGradient(0, 0, 960, 600);
       sea.addColorStop(0, "#08222f");
@@ -585,6 +1170,7 @@
       ctx.fillRect(0, 0, 960, 600);
       ctx.strokeStyle = "rgba(140,190,190,.12)";
       for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+
       for (const fog of data.fog) {
         const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
         g.addColorStop(0, "rgba(180,190,180,.26)");
@@ -597,35 +1183,137 @@
         ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = "#516a62"; ctx.stroke();
       }
-      ctx.save();
-      ctx.translate(lighthouse.x, lighthouse.y);
-      ctx.rotate(beamAngle);
-      ctx.fillStyle = "rgba(247,220,125,.24)";
-      ctx.beginPath();
-      const w = beamWide ? 0.42 : 0.22;
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, 780, -w, w);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-      ctx.fillStyle = "#e7c46a";
-      ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
       ctx.fillStyle = "#87d4e5";
-      ctx.fillRect(900, 70, 28, 460);
-      for (const boat of boats) {
+      const harborH = harbor.bottom - harbor.top;
+      ctx.fillRect(harbor.x, harbor.top, Math.min(28, 960 - harbor.x), harborH);
+      ctx.fillStyle = "rgba(135, 212, 229, .3)";
+      ctx.fillRect(harbor.x - 20, harbor.top, 20, harborH);
+
+      if (drawBoats !== false) {
         ctx.save();
-        ctx.translate(boat.x, boat.y);
-        ctx.fillStyle = boat.arrived ? "#7dd69b" : inBeam(boat) ? "#f5e7a2" : "#c7d7d7";
+        ctx.translate(lighthouse.x, lighthouse.y);
+        ctx.rotate(beamAngle);
+        ctx.fillStyle = "rgba(247,220,125,.24)";
+        ctx.beginPath();
+        const w = beamWide ? 0.42 : 0.22;
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, 780, -w, w);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "#e7c46a";
+        ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
+        for (const boat of boats) {
+          ctx.save();
+          ctx.translate(boat.x, boat.y);
+          ctx.fillStyle = boat.arrived ? "#7dd69b" : inBeam(boat) ? "#f5e7a2" : "#c7d7d7";
+          ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
+          ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
+          ctx.restore();
+        }
+      }
+    }
+
+    function drawEditorScene() {
+      const data = editorLevel;
+      const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
+      const startY = data.boatStartY != null ? data.boatStartY : 130;
+      const spread = data.boatSpread != null ? data.boatSpread : 330;
+
+      ctx.clearRect(0, 0, 960, 600);
+      const sea = ctx.createLinearGradient(0, 0, 960, 600);
+      sea.addColorStop(0, "#08222f");
+      sea.addColorStop(1, "#061017");
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, 0, 960, 600);
+
+      ctx.strokeStyle = "rgba(140,190,190,.08)";
+      ctx.lineWidth = 1;
+      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      for (let y = 0; y < 600; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(960, y); ctx.stroke(); }
+
+      for (let i = 0; i < data.boats; i++) {
+        const by = startY + i * (spread / Math.max(1, data.boats - 1));
+        ctx.save();
+        ctx.translate(40 - i * 42, by);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "#f5e7a2";
         ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
         ctx.restore();
       }
-      if (state === "paused") {
-        ctx.fillStyle = "rgba(0,0,0,.45)";
-        ctx.fillRect(0,0,960,600);
-        ctx.fillStyle = "#fff";
-        ctx.font = "34px Arial";
-        ctx.fillText("已暂停", 420, 300);
+
+      for (const fog of data.fog) {
+        const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
+        g.addColorStop(0, "rgba(180,190,180,.26)");
+        g.addColorStop(1, "rgba(180,190,180,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
+      }
+      for (const rock of data.rocks) {
+        ctx.fillStyle = "#273a3a";
+        ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#516a62"; ctx.lineWidth = 1; ctx.stroke();
+      }
+
+      ctx.fillStyle = "#87d4e5";
+      const harborH = harbor.bottom - harbor.top;
+      ctx.fillRect(harbor.x, harbor.top, Math.min(28, 960 - harbor.x), harborH);
+      ctx.strokeStyle = "#5ab4c7";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 4]);
+      ctx.strokeRect(harbor.x, harbor.top, Math.min(28, 960 - harbor.x), harborH);
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "rgba(135, 212, 229, .2)";
+      ctx.fillRect(harbor.x - 30, harbor.top, 30, harborH);
+
+      ctx.fillStyle = "#e7c46a";
+      ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#b89a4e";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(lighthouse.x, lighthouse.y);
+      ctx.strokeStyle = "rgba(247,220,125,.35)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(0, 0, 760, -0.3, 0.3);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      if (editorSelected) {
+        const { type, index } = editorSelected;
+        const arr = type === "rock" ? editorLevel.rocks : editorLevel.fog;
+        const elem = arr[index];
+        if (elem) {
+          ctx.strokeStyle = "#e7c46a";
+          ctx.lineWidth = 3;
+          ctx.setLineDash([8, 4]);
+          ctx.beginPath();
+          ctx.arc(elem.x, elem.y, elem.r + 6, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+    }
+
+    function draw() {
+      if (state === "editor") {
+        drawEditorScene();
+      } else {
+        drawGameScene(true);
+        if (state === "paused") {
+          ctx.fillStyle = "rgba(0,0,0,.45)";
+          ctx.fillRect(0,0,960,600);
+          ctx.fillStyle = "#fff";
+          ctx.font = "34px Arial";
+          ctx.fillText("已暂停", 420, 300);
+        }
       }
     }
 
@@ -636,6 +1324,7 @@
       draw();
       requestAnimationFrame(loop);
     }
+
     function togglePause() {
       if (state === "playing") {
         gameSettings = loadSettings();
@@ -649,6 +1338,7 @@
         updatePauseHint();
       }
     }
+
     window.addEventListener("keydown", event => {
       SoundManager.unlock();
       const settingsOpen = !settingsOverlay.classList.contains("hidden");
@@ -659,23 +1349,149 @@
         return;
       }
       if (settingsOpen) return;
+      if (state === "editor") return;
       keys[event.key] = true;
       if (event.key === " ") {
         beamWide = !beamWide;
         SoundManager.toggleBeam();
       }
       if (event.key.toLowerCase() === "p") togglePause();
-      if (event.key.toLowerCase() === "r") resetLevel();
+      if (event.key.toLowerCase() === "r") {
+        if (state === "playing" || state === "paused" || state === "ended") {
+          if (playtestLevel) {
+            playtestLevel = LevelData.normalizeLevel(editorLevel);
+          }
+          resetLevel();
+        }
+      }
     });
     window.addEventListener("keyup", event => keys[event.key] = false);
 
     ["click", "touchstart", "pointerdown"].forEach(function(evt) {
       document.addEventListener(evt, function() { SoundManager.unlock(); }, { once: false, passive: true });
     });
+
+    canvas.addEventListener("mousedown", onCanvasMouseDown);
+    canvas.addEventListener("mousemove", onCanvasMouseMove);
+    window.addEventListener("mouseup", onCanvasMouseUp);
+    canvas.addEventListener("dblclick", onCanvasDoubleClick);
+
+    canvas.addEventListener("touchstart", function(e) {
+      if (e.touches.length > 0) {
+        const t = e.touches[0];
+        onCanvasMouseDown({ clientX: t.clientX, clientY: t.clientY, preventDefault: function() { e.preventDefault(); } });
+      }
+    }, { passive: false });
+    canvas.addEventListener("touchmove", function(e) {
+      if (e.touches.length > 0) {
+        const t = e.touches[0];
+        onCanvasMouseMove({ clientX: t.clientX, clientY: t.clientY });
+      }
+    }, { passive: true });
+    canvas.addEventListener("touchend", onCanvasMouseUp);
+
+    editorTools.forEach(function(tool) {
+      tool.addEventListener("click", function() {
+        editorTool = tool.getAttribute("data-tool");
+        updateEditorTools();
+      });
+    });
+
+    editorLevelName.addEventListener("input", function() {
+      editorLevel.name = editorLevelName.value || "未命名关卡";
+    });
+
+    boatCountRange.addEventListener("input", function() {
+      editorLevel.boats = Number(boatCountRange.value);
+      boatCountValue.textContent = editorLevel.boats;
+    });
+    boatStartYRange.addEventListener("input", function() {
+      editorLevel.boatStartY = Number(boatStartYRange.value);
+      boatStartYValue.textContent = editorLevel.boatStartY;
+    });
+    boatSpreadRange.addEventListener("input", function() {
+      editorLevel.boatSpread = Number(boatSpreadRange.value);
+      boatSpreadValue.textContent = editorLevel.boatSpread;
+    });
+
+    harborXRange.addEventListener("input", function() {
+      editorLevel.harbor.x = Number(harborXRange.value);
+      harborXValue.textContent = editorLevel.harbor.x;
+    });
+    harborTopRange.addEventListener("input", function() {
+      editorLevel.harbor.top = Number(harborTopRange.value);
+      if (editorLevel.harbor.top >= editorLevel.harbor.bottom - 20) {
+        editorLevel.harbor.top = editorLevel.harbor.bottom - 20;
+        harborTopRange.value = editorLevel.harbor.top;
+      }
+      harborTopValue.textContent = editorLevel.harbor.top;
+    });
+    harborBottomRange.addEventListener("input", function() {
+      editorLevel.harbor.bottom = Number(harborBottomRange.value);
+      if (editorLevel.harbor.bottom <= editorLevel.harbor.top + 20) {
+        editorLevel.harbor.bottom = editorLevel.harbor.top + 20;
+        harborBottomRange.value = editorLevel.harbor.bottom;
+      }
+      harborBottomValue.textContent = editorLevel.harbor.bottom;
+    });
+
+    selectedRadiusRange.addEventListener("input", function() {
+      if (!editorSelected) return;
+      const { type, index } = editorSelected;
+      const arr = type === "rock" ? editorLevel.rocks : editorLevel.fog;
+      const elem = arr[index];
+      if (elem) {
+        elem.r = Number(selectedRadiusRange.value);
+        selectedRadiusValue.textContent = elem.r;
+      }
+    });
+
+    deleteSelectedBtn.addEventListener("click", function() {
+      deleteEditorElement();
+    });
+
+    playtestBtn.addEventListener("click", function() {
+      playtestLevel = LevelData.normalizeLevel(editorLevel);
+      currentLevelId = "__playtest__";
+      score = 0;
+      levelScore = 0;
+      cursorHint.classList.add("hidden");
+      backFromPlaytestBtn.style.display = "grid";
+      overlay.classList.add("hidden");
+      resetLevel();
+    });
+
+    backFromPlaytestBtn.addEventListener("click", function() {
+      playtestLevel = null;
+      showEditorPanel();
+    });
+
+    clearLevelBtn.addEventListener("click", function() {
+      if (confirm("确定清空所有暗礁和雾区吗？")) {
+        editorLevel.rocks = [];
+        editorLevel.fog = [];
+        editorSelected = null;
+        updateSelectedInfo();
+      }
+    });
+
+    saveLevelBtn.addEventListener("click", function() {
+      const toSave = LevelData.normalizeLevel(editorLevel);
+      const saved = LevelData.saveCustomLevel(toSave);
+      editorLevel = saved;
+      saveStatus.textContent = "✓ 已保存到本地：" + saved.name;
+      saveStatus.style.color = "#7dd69b";
+      setTimeout(function() {
+        saveStatus.textContent = "";
+      }, 3000);
+    });
+
     updateGlobalBest();
-    startBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
+    startBtn.onclick = function() { currentLevelId = "builtin_0"; score = 0; playtestLevel = null; resetLevel(); };
     levelSelectBtn.onclick = showLevelSelect;
+    editorBtn.onclick = function() { openEditorForLevel(null); };
     backToMenuBtn.onclick = showMainMenu;
+    backFromEditorBtn.onclick = showMainMenu;
     pauseBtn.onclick = togglePause;
     settingsBtn.onclick = showSettings;
     backFromSettingsBtn.onclick = hideSettings;
@@ -726,7 +1542,16 @@
         closeGameSettings();
       }
     });
-    overlayBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
+    overlayBtn.onclick = function() {
+      if (playtestLevel) {
+        showEditorPanel();
+      } else {
+        currentLevelId = "builtin_0";
+        score = 0;
+        playtestLevel = null;
+        resetLevel();
+      }
+    };
     applySettings();
     requestAnimationFrame(loop);
   </script>
