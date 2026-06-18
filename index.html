@@ -22,27 +22,49 @@
     .hidden { display: none; }
     .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .key { padding: 8px; background: #142f3a; border-radius: 6px; color: #c9d7d7; }
+    .level-select { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    .level-card { background: #142f3a; border: 1px solid #24414b; border-radius: 8px; padding: 14px; cursor: pointer; transition: all .2s; }
+    .level-card:hover:not(.locked) { border-color: #e7c46a; transform: translateY(-2px); }
+    .level-card.locked { opacity: .45; cursor: not-allowed; }
+    .level-card.active { border-color: #e7c46a; background: #1a3947; }
+    .level-card h3 { margin: 0 0 8px; font-size: 16px; color: #eef6f2; }
+    .level-card.locked h3 { color: #879aa0; }
+    .level-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 12px; color: #a8bbc0; }
+    .level-stats b { color: #eef6f2; font-weight: 600; }
+    .level-best { margin-top: 8px; padding-top: 8px; border-top: 1px solid #24414b; font-size: 13px; color: #e7c46a; }
+    .level-best .no-record { color: #6b8086; }
+    .lock-icon { float: right; font-size: 14px; }
+    .back-btn { margin-top: 12px; }
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; } canvas { max-height: 62vh; } }
   </style>
 </head>
 <body>
   <div class="app">
-    <aside>
-      <h1>夜间灯塔守望</h1>
-      <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
-      <button id="startBtn">开始第1关</button>
-      <button id="pauseBtn" class="secondary">暂停</button>
-      <h2>状态</h2>
-      <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
-      <div class="stat"><span>得分</span><b id="scoreText">0</b></div>
-      <div class="stat"><span>抵达</span><b id="arrivedText">0</b></div>
-      <div class="stat"><span>最佳</span><b id="bestText">0</b></div>
-      <h2>操作</h2>
-      <div class="keys">
-        <div class="key">← / → 旋转光束</div>
-        <div class="key">空格 切换宽度</div>
-        <div class="key">P 暂停</div>
-        <div class="key">R 重开本关</div>
+    <aside id="sidebar">
+      <div id="mainMenu">
+        <h1>夜间灯塔守望</h1>
+        <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
+        <button id="startBtn">开始第1关</button>
+        <button id="levelSelectBtn" class="secondary">选择关卡</button>
+        <button id="pauseBtn" class="secondary">暂停</button>
+        <h2>状态</h2>
+        <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
+        <div class="stat"><span>得分</span><b id="scoreText">0</b></div>
+        <div class="stat"><span>抵达</span><b id="arrivedText">0</b></div>
+        <div class="stat"><span>最佳</span><b id="bestText">0</b></div>
+        <h2>操作</h2>
+        <div class="keys">
+          <div class="key">← / → 旋转光束</div>
+          <div class="key">空格 切换宽度</div>
+          <div class="key">P 暂停</div>
+          <div class="key">R 重开本关</div>
+        </div>
+      </div>
+      <div id="levelSelectPanel" class="hidden">
+        <h1>选择关卡</h1>
+        <p>从已解锁的关卡中选择，通关后自动解锁下一关。</p>
+        <div id="levelCards" class="level-select"></div>
+        <button id="backToMenuBtn" class="secondary back-btn">返回主菜单</button>
       </div>
     </aside>
     <main class="game">
@@ -69,34 +91,137 @@
     const scoreText = document.querySelector("#scoreText");
     const arrivedText = document.querySelector("#arrivedText");
     const bestText = document.querySelector("#bestText");
+    const levelSelectBtn = document.querySelector("#levelSelectBtn");
+    const backToMenuBtn = document.querySelector("#backToMenuBtn");
+    const mainMenu = document.querySelector("#mainMenu");
+    const levelSelectPanel = document.querySelector("#levelSelectPanel");
+    const levelCards = document.querySelector("#levelCards");
 
     const levels = [
-      { boats: 3, rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}], fog: [{x:560,y:250,r:90}] },
-      { boats: 4, rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}], fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}] },
-      { boats: 5, rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}], fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}] }
+      { name: "初夜启航", boats: 3, rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}], fog: [{x:560,y:250,r:90}] },
+      { name: "迷雾渐浓", boats: 4, rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}], fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}] },
+      { name: "风暴前夕", boats: 5, rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}], fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}] }
     ];
     let state = "menu";
     let level = 0;
     let score = 0;
+    let levelScore = 0;
     let beamAngle = -0.15;
     let beamWide = false;
     let boats = [];
     let keys = {};
     let last = 0;
     const lighthouse = { x: 110, y: 300 };
-    bestText.textContent = localStorage.getItem("zfl26Best") || "0";
+
+    function loadProgress() {
+      const unlocked = Number(localStorage.getItem("zfl26Unlocked") || 1);
+      const best = Number(localStorage.getItem("zfl26Best") || 0);
+      let levelBests = {};
+      try {
+        const stored = localStorage.getItem("zfl26LevelBests");
+        if (stored) {
+          levelBests = JSON.parse(stored);
+        }
+      } catch (e) {
+        levelBests = {};
+      }
+      return { unlocked, best, levelBests };
+    }
+
+    function saveUnlocked(unlocked) {
+      localStorage.setItem("zfl26Unlocked", unlocked);
+    }
+
+    function saveBest(best) {
+      localStorage.setItem("zfl26Best", best);
+    }
+
+    function saveLevelBest(levelIndex, score) {
+      const levelBests = JSON.parse(localStorage.getItem("zfl26LevelBests") || "{}");
+      const current = Number(levelBests[levelIndex] || 0);
+      if (score > current) {
+        levelBests[levelIndex] = score;
+        localStorage.setItem("zfl26LevelBests", JSON.stringify(levelBests));
+        return score;
+      }
+      return current;
+    }
+
+    function updateGlobalBest() {
+      const { best } = loadProgress();
+      bestText.textContent = best;
+    }
+
+    function renderLevelCards() {
+      const { unlocked, levelBests } = loadProgress();
+      levelCards.innerHTML = "";
+      levels.forEach(function(lvl, idx) {
+        const isUnlocked = idx < unlocked;
+        const levelBest = levelBests[idx] || 0;
+        const card = document.createElement("div");
+        card.className = "level-card" + (isUnlocked ? "" : " locked");
+        let bestTextHtml = "";
+        if (isUnlocked) {
+          if (levelBest > 0) {
+            bestTextHtml = "最佳：" + levelBest + " 分";
+          } else {
+            bestTextHtml = '<span class="no-record">尚未通关</span>';
+          }
+        } else {
+          bestTextHtml = '<span class="no-record">通关前一关解锁</span>';
+        }
+        const lockIcon = isUnlocked ? "" : ' <span class="lock-icon">🔒</span>';
+        card.innerHTML =
+          '<h3>第' + (idx + 1) + '关：' + lvl.name + lockIcon + '</h3>' +
+          '<div class="level-stats">' +
+            '<span>船只</span><b>' + lvl.boats + ' 艘</b>' +
+            '<span>暗礁</span><b>' + lvl.rocks.length + ' 个</b>' +
+            '<span>雾区</span><b>' + lvl.fog.length + ' 个</b>' +
+          '</div>' +
+          '<div class="level-best">' + bestTextHtml + '</div>';
+        if (isUnlocked) {
+          card.onclick = function() { startFromLevel(idx); };
+        }
+        levelCards.appendChild(card);
+      });
+    }
+
+    function showLevelSelect() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.remove("hidden");
+      renderLevelCards();
+      state = "levelSelect";
+    }
+
+    function showMainMenu() {
+      mainMenu.classList.remove("hidden");
+      levelSelectPanel.classList.add("hidden");
+      state = "menu";
+      show("夜间灯塔守望", "照亮航道，护送全部船只抵达右侧港湾。", "开始游戏", function() { level = 0; score = 0; resetLevel(); });
+    }
+
+    function startFromLevel(levelIndex) {
+      level = levelIndex;
+      levelScore = 0;
+      score = 0;
+      showMainMenu();
+      resetLevel();
+    }
 
     function resetLevel() {
       const data = levels[level];
-      boats = Array.from({ length: data.boats }, (_, i) => ({
-        x: 40 - i * 42,
-        y: 130 + i * (330 / Math.max(1, data.boats - 1)),
-        speed: 26 + level * 8 + i * 3,
-        drift: (i % 2 ? 1 : -1) * (12 + level * 3),
-        lit: 3.2,
-        arrived: false,
-        lost: false
-      }));
+      levelScore = score;
+      boats = Array.from({ length: data.boats }, function(_, i) {
+        return {
+          x: 40 - i * 42,
+          y: 130 + i * (330 / Math.max(1, data.boats - 1)),
+          speed: 26 + level * 8 + i * 3,
+          drift: (i % 2 ? 1 : -1) * (12 + level * 3),
+          lit: 3.2,
+          arrived: false,
+          lost: false
+        };
+      });
       beamAngle = -0.1;
       beamWide = false;
       state = "playing";
@@ -139,12 +264,21 @@
         }
       }
       if (boats.every(boat => boat.arrived)) {
+        const currentLevelScore = score - levelScore;
+        saveLevelBest(level, currentLevelScore);
+        const { unlocked } = loadProgress();
+        if (level + 1 >= unlocked && level < levels.length - 1) {
+          saveUnlocked(level + 2);
+        }
+        const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
+        saveBest(totalBest);
+        updateGlobalBest();
         if (level < levels.length - 1) {
           level += 1;
-          show("第" + level + "关完成", "港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
+          show("第" + (level) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
           state = "between";
         } else {
-          end(true, "全部船只安全抵达，今晚的海图被你守住了。");
+          end(true, "本关得分：" + currentLevelScore + "。全部船只安全抵达，今晚的海图被你守住了。");
         }
       }
       updateHud();
@@ -152,10 +286,12 @@
 
     function end(win, text) {
       state = "ended";
-      const best = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
-      localStorage.setItem("zfl26Best", best);
-      bestText.textContent = best;
-      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, "重开", () => { level = 0; score = 0; resetLevel(); });
+      if (win) {
+        const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
+        saveBest(totalBest);
+      }
+      updateGlobalBest();
+      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, "重开", function() { level = 0; score = 0; resetLevel(); });
     }
 
     function show(title, text, button, action) {
@@ -244,9 +380,12 @@
       if (event.key.toLowerCase() === "r") resetLevel();
     });
     window.addEventListener("keyup", event => keys[event.key] = false);
-    startBtn.onclick = () => { level = 0; score = 0; resetLevel(); };
+    updateGlobalBest();
+    startBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
+    levelSelectBtn.onclick = showLevelSelect;
+    backToMenuBtn.onclick = showMainMenu;
     pauseBtn.onclick = togglePause;
-    overlayBtn.onclick = () => { level = 0; score = 0; resetLevel(); };
+    overlayBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
     requestAnimationFrame(loop);
   </script>
 </body>
