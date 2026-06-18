@@ -457,7 +457,217 @@
       50% { transform: scale(1.2); }
     }
 
-    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } }
+    .log-panel .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .log-panel .filter-row select {
+      width: 100%;
+      background: #0a1f27;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #eef6f2;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .log-panel .filter-row select:focus {
+      outline: none;
+      border-color: #e7c46a;
+    }
+    .log-panel .filter-row.full {
+      grid-template-columns: 1fr;
+    }
+    .log-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 52vh;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-top: 8px;
+    }
+    .log-item {
+      background: #142f3a;
+      border: 1px solid #24414b;
+      border-radius: 8px;
+      padding: 12px 14px;
+      transition: all .2s;
+    }
+    .log-item:hover {
+      border-color: #3d6a78;
+    }
+    .log-item.win {
+      border-left: 3px solid #7dd69b;
+    }
+    .log-item.lose {
+      border-left: 3px solid #e2685d;
+    }
+    .log-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .log-item-level {
+      font-size: 14px;
+      font-weight: 700;
+      color: #eef6f2;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .log-item-result {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+    .log-item-result.win {
+      background: rgba(125, 214, 155, .18);
+      color: #7dd69b;
+    }
+    .log-item-result.lose {
+      background: rgba(226, 104, 93, .18);
+      color: #e2685d;
+    }
+    .log-item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .log-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #24414b;
+      color: #a8bbc0;
+      white-space: nowrap;
+    }
+    .log-tag.custom {
+      background: #3d6a78;
+      color: #eef6f2;
+    }
+    .log-tag.replay {
+      background: rgba(231, 196, 106, .2);
+      color: #e7c46a;
+    }
+    .log-tag.weather {
+      background: rgba(87, 148, 164, .25);
+      color: #87d4e5;
+    }
+    .log-item-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .log-stat {
+      background: #0a1f27;
+      border-radius: 4px;
+      padding: 4px 6px;
+      text-align: center;
+    }
+    .log-stat-label {
+      font-size: 10px;
+      color: #879aa0;
+    }
+    .log-stat-value {
+      font-weight: 700;
+      color: #eef6f2;
+      margin-top: 1px;
+    }
+    .log-item-time {
+      font-size: 11px;
+      color: #6b8086;
+      margin-bottom: 8px;
+    }
+    .log-item-fail {
+      font-size: 12px;
+      color: #e2685d;
+      background: rgba(226, 104, 93, .08);
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .log-item-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .log-btn {
+      flex: 1;
+      border: 0;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+      margin: 0;
+    }
+    .log-btn.primary {
+      background: #e7c46a;
+      color: #15212a;
+    }
+    .log-btn.primary:hover {
+      background: #f0d487;
+    }
+    .log-btn.primary:disabled {
+      background: #3d6a78;
+      color: #879aa0;
+      cursor: not-allowed;
+    }
+    .log-btn.secondary {
+      background: #24414b;
+      color: #eef6f2;
+    }
+    .log-btn.secondary:hover {
+      background: #3d6a78;
+    }
+    .log-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b8086;
+      font-size: 13px;
+    }
+    .log-empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: .5;
+    }
+    .log-summary {
+      background: #142f3a;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+    .log-summary-item-label {
+      font-size: 10px;
+      color: #879aa0;
+    }
+    .log-summary-item-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #e7c46a;
+      margin-top: 2px;
+    }
+    .log-summary-item-value.win { color: #7dd69b; }
+    .log-summary-item-value.lose { color: #e2685d; }
+
+    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } .log-list { max-height: 40vh; } }
   </style>
 </head>
 <body>
@@ -471,6 +681,7 @@
         <button id="editorBtn" class="secondary">关卡编辑器</button>
         <button id="pauseBtn" class="secondary">暂停</button>
         <button id="achievementsBtn" class="secondary">成就与统计</button>
+        <button id="voyageLogBtn" class="secondary">航海日志</button>
         <button id="settingsBtn" class="secondary">游戏设置</button>
         <h2>状态</h2>
         <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
@@ -564,6 +775,59 @@
         </div>
 
         <button id="backFromAchievementsBtn" class="secondary back-btn">返回主菜单</button>
+      </div>
+
+      <div id="voyageLogPanel" class="hidden log-panel">
+        <h1>航海日志</h1>
+        <p>自动记录每一次航行的挑战，重温历史战绩或从失败中重新挑战。</p>
+
+        <div class="section-title">筛选条件</div>
+        <div class="filter-row">
+          <select id="logFilterResult">
+            <option value="all">全部结果</option>
+            <option value="win">仅胜利</option>
+            <option value="lose">仅失败</option>
+          </select>
+          <select id="logFilterSource">
+            <option value="all">全部来源</option>
+            <option value="builtin">仅内置关卡</option>
+            <option value="custom">仅自定义关卡</option>
+          </select>
+        </div>
+        <div class="filter-row full">
+          <select id="logFilterTime">
+            <option value="all">全部时间</option>
+            <option value="today">今天</option>
+            <option value="week">最近7天</option>
+            <option value="month">最近30天</option>
+          </select>
+        </div>
+
+        <div id="logSummary" class="log-summary">
+          <div>
+            <div class="log-summary-item-label">总次数</div>
+            <div class="log-summary-item-value" id="logTotalCount">0</div>
+          </div>
+          <div>
+            <div class="log-summary-item-label">胜利</div>
+            <div class="log-summary-item-value win" id="logWinCount">0</div>
+          </div>
+          <div>
+            <div class="log-summary-item-label">失败</div>
+            <div class="log-summary-item-value lose" id="logLoseCount">0</div>
+          </div>
+        </div>
+
+        <div class="section-title">日志记录 <span style="float:right;font-size:13px;color:#879aa0;font-weight:normal;"><span id="logFilterCount">0</span> 条</span></div>
+        <div id="logList" class="log-list"></div>
+
+        <div class="reset-section">
+          <div class="section-title" style="margin-top:0;">数据管理</div>
+          <p class="reset-hint">清空仅删除航海日志记录，不会影响成就、统计、关卡解锁和最佳分。</p>
+          <button id="clearVoyageLogBtn" class="danger">清空全部日志</button>
+        </div>
+
+        <button id="backFromVoyageLogBtn" class="secondary back-btn">返回主菜单</button>
       </div>
 
       <div id="editorPanel" class="hidden">
@@ -1026,6 +1290,140 @@
         recordLoss,
         resetStats,
         getAll
+      };
+    })();
+
+    // ===================== VoyageLogStore 模块：航海日志存储层 =====================
+    const VoyageLogStore = (function() {
+      const LOG_KEY = "zfl26VoyageLogs";
+      const MAX_LOGS = 500;
+
+      function loadAll() {
+        try {
+          const stored = localStorage.getItem(LOG_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) return parsed;
+          }
+        } catch (e) {}
+        return [];
+      }
+
+      function saveAll(logs) {
+        const trimmed = logs.slice(0, MAX_LOGS);
+        localStorage.setItem(LOG_KEY, JSON.stringify(trimmed));
+      }
+
+      function generateId() {
+        return "log_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+      }
+
+      function createEntry(entryData) {
+        const entry = Object.assign({
+          id: generateId(),
+          levelId: null,
+          levelName: "",
+          isCustom: false,
+          startTime: Date.now(),
+          endTime: null,
+          duration: 0,
+          result: null,
+          score: 0,
+          failReason: null,
+          failReasonText: "",
+          weatherEvents: [],
+          watchedReplay: false
+        }, entryData);
+        return entry;
+      }
+
+      function addEntry(entry) {
+        const logs = loadAll();
+        logs.unshift(entry);
+        saveAll(logs);
+        return entry;
+      }
+
+      function updateEntry(id, updates) {
+        const logs = loadAll();
+        const idx = logs.findIndex(function(l) { return l.id === id; });
+        if (idx >= 0) {
+          logs[idx] = Object.assign({}, logs[idx], updates);
+          saveAll(logs);
+          return logs[idx];
+        }
+        return null;
+      }
+
+      function getEntry(id) {
+        const logs = loadAll();
+        return logs.find(function(l) { return l.id === id; }) || null;
+      }
+
+      function deleteEntry(id) {
+        const logs = loadAll();
+        const filtered = logs.filter(function(l) { return l.id !== id; });
+        saveAll(filtered);
+      }
+
+      function clearAll() {
+        localStorage.removeItem(LOG_KEY);
+      }
+
+      function getFiltered(filters) {
+        const logs = loadAll();
+        const f = filters || {};
+        const now = Date.now();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayStart = today.getTime();
+        const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+        const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+        return logs.filter(function(log) {
+          if (f.result && f.result !== "all") {
+            if (log.result !== f.result) return false;
+          }
+          if (f.source && f.source !== "all") {
+            if (f.source === "builtin" && log.isCustom) return false;
+            if (f.source === "custom" && !log.isCustom) return false;
+          }
+          if (f.time && f.time !== "all") {
+            const t = log.startTime;
+            if (f.time === "today" && t < todayStart) return false;
+            if (f.time === "week" && t < weekAgo) return false;
+            if (f.time === "month" && t < monthAgo) return false;
+          }
+          return true;
+        });
+      }
+
+      function getStats(filteredLogs) {
+        const logs = filteredLogs || loadAll();
+        const winCount = logs.filter(function(l) { return l.result === "win"; }).length;
+        const loseCount = logs.filter(function(l) { return l.result === "lose"; }).length;
+        return {
+          total: logs.length,
+          win: winCount,
+          lose: loseCount
+        };
+      }
+
+      function markReplayWatched(logId) {
+        return updateEntry(logId, { watchedReplay: true });
+      }
+
+      return {
+        loadAll: loadAll,
+        createEntry: createEntry,
+        addEntry: addEntry,
+        updateEntry: updateEntry,
+        getEntry: getEntry,
+        deleteEntry: deleteEntry,
+        clearAll: clearAll,
+        getFiltered: getFiltered,
+        getStats: getStats,
+        markReplayWatched: markReplayWatched
       };
     })();
 
@@ -2117,6 +2515,14 @@
     const statFastestTime = document.querySelector("#statFastestTime");
     const statCurrentStreak = document.querySelector("#statCurrentStreak");
     const statMaxStreak = document.querySelector("#statMaxStreak");
+    const voyageLogBtn = document.querySelector("#voyageLogBtn");
+    const voyageLogPanel = document.querySelector("#voyageLogPanel");
+    const backFromVoyageLogBtn = document.querySelector("#backFromVoyageLogBtn");
+    const clearVoyageLogBtn = document.querySelector("#clearVoyageLogBtn");
+    const logFilterResult = document.querySelector("#logFilterResult");
+    const logFilterSource = document.querySelector("#logFilterSource");
+    const logFilterTime = document.querySelector("#logFilterTime");
+    const logList = document.querySelector("#logList");
 
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
@@ -2160,6 +2566,10 @@
     let levelStartTime = 0;
     let usedWideBeamThisLevel = false;
     let hasBoatLostThisLevel = false;
+    let currentLogId = null;
+    let logWeatherEventsSeen = [];
+    let currentLogFailReason = null;
+    let currentLogFailText = "";
 
     // ===================== 编辑器状态 =====================
     let editorLevel = LevelData.createEmptyCustomLevel();
@@ -2294,6 +2704,197 @@
       mainMenu.classList.remove("hidden");
     }
 
+    function formatDateTime(timestamp) {
+      if (!timestamp) return "--";
+      const d = new Date(timestamp);
+      const pad = function(n) { return n < 10 ? "0" + n : "" + n; };
+      return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    }
+
+    function formatDuration(seconds) {
+      if (seconds == null || isNaN(seconds)) return "--";
+      const s = Math.max(0, Math.round(seconds));
+      const min = Math.floor(s / 60);
+      const sec = s % 60;
+      return min + ":" + (sec < 10 ? "0" : "") + sec;
+    }
+
+    function getWeatherTypeName(type) {
+      const map = {
+        seaBreeze: "🌬️ 海风",
+        denseFog: "🌫️ 浓雾",
+        lighthouseFlash: "⚡ 灯塔闪烁"
+      };
+      return map[type] || type;
+    }
+
+    function showVoyageLogPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.remove("hidden");
+      renderVoyageLogFilters();
+      renderVoyageLogList();
+    }
+
+    function hideVoyageLogPanel() {
+      voyageLogPanel.classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+    }
+
+    let currentLogFilters = { result: "all", source: "all", time: "all" };
+
+    function renderVoyageLogFilters() {
+      const filterResult = document.getElementById("logFilterResult");
+      const filterSource = document.getElementById("logFilterSource");
+      const filterTime = document.getElementById("logFilterTime");
+      if (filterResult) filterResult.value = currentLogFilters.result;
+      if (filterSource) filterSource.value = currentLogFilters.source;
+      if (filterTime) filterTime.value = currentLogFilters.time;
+    }
+
+    function renderVoyageLogSummary(filteredLogs) {
+      const stats = VoyageLogStore.getStats(filteredLogs);
+      const totalEl = document.getElementById("logTotalCount");
+      const winEl = document.getElementById("logWinCount");
+      const loseEl = document.getElementById("logLoseCount");
+      const countEl = document.getElementById("logFilterCount");
+      if (totalEl) totalEl.textContent = stats.total;
+      if (winEl) winEl.textContent = stats.win;
+      if (loseEl) loseEl.textContent = stats.lose;
+      if (countEl) countEl.textContent = filteredLogs.length;
+    }
+
+    function renderVoyageLogList() {
+      const listEl = document.getElementById("logList");
+      if (!listEl) return;
+
+      const filteredLogs = VoyageLogStore.getFiltered(currentLogFilters);
+      renderVoyageLogSummary(filteredLogs);
+
+      if (filteredLogs.length === 0) {
+        listEl.innerHTML =
+          '<div class="log-empty">' +
+            '<div class="log-empty-icon">📜</div>' +
+            '<div>' + (VoyageLogStore.loadAll().length === 0 ? "还没有航海记录，开始你的第一次航行吧！" : "没有符合筛选条件的记录。") + '</div>' +
+          '</div>';
+        return;
+      }
+
+      let html = "";
+      filteredLogs.forEach(function(log) {
+        const resultClass = log.result === "win" ? "win" : "lose";
+        const resultText = log.result === "win" ? "守望成功" : "守望失败";
+        const builtinCount = LevelData.getBuiltinCount();
+        const lvlIdx = LevelData.getLevelIndex(log.levelId);
+        const isBuiltin = LevelData.isBuiltinLevel(log.levelId);
+        const displayIdx = isBuiltin ? (parseInt(log.levelId.split("_")[1]) + 1) : (lvlIdx >= 0 ? (lvlIdx - builtinCount + 1) : "?");
+        const prefix = isBuiltin ? "第" + displayIdx + "关：" : (log.isCustom ? "自定义" + displayIdx + "：" : "");
+
+        let tagsHtml = "";
+        if (log.isCustom) {
+          tagsHtml += '<span class="log-tag custom">自定义关卡</span>';
+        }
+        if (log.watchedReplay) {
+          tagsHtml += '<span class="log-tag replay">🎬 已观看回放</span>';
+        }
+        if (log.weatherEvents && log.weatherEvents.length > 0) {
+          log.weatherEvents.forEach(function(w) {
+            tagsHtml += '<span class="log-tag weather">' + getWeatherTypeName(w) + '</span>';
+          });
+        }
+
+        let failHtml = "";
+        if (log.result === "lose" && log.failReasonText) {
+          failHtml = '<div class="log-item-fail">⚠ ' + log.failReasonText + '</div>';
+        }
+
+        const canRetry = log.levelId && (isBuiltin || log.isCustom);
+        let levelStillExists = true;
+        if (canRetry) {
+          const lvl = LevelData.getLevelById(log.levelId);
+          if (!lvl) levelStillExists = false;
+        }
+        const retryDisabled = !canRetry || !levelStillExists;
+        const retryTitle = !levelStillExists ? "该关卡已被删除" : "";
+
+        html +=
+          '<div class="log-item ' + resultClass + '" data-id="' + log.id + '">' +
+            '<div class="log-item-header">' +
+              '<span class="log-item-level" title="' + prefix + log.levelName + '">' + prefix + log.levelName + '</span>' +
+              '<span class="log-item-result ' + resultClass + '">' + resultText + '</span>' +
+            '</div>';
+
+        if (tagsHtml) {
+          html += '<div class="log-item-tags">' + tagsHtml + '</div>';
+        }
+
+        html +=
+            '<div class="log-item-stats">' +
+              '<div class="log-stat">' +
+                '<div class="log-stat-label">得分</div>' +
+                '<div class="log-stat-value">' + log.score + '</div>' +
+              '</div>' +
+              '<div class="log-stat">' +
+                '<div class="log-stat-label">用时</div>' +
+                '<div class="log-stat-value">' + formatDuration(log.duration) + '</div>' +
+              '</div>' +
+              '<div class="log-stat">' +
+                '<div class="log-stat-label">天气</div>' +
+                '<div class="log-stat-value">' + (log.weatherEvents && log.weatherEvents.length ? log.weatherEvents.length + ' 种' : '无') + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="log-item-time">🕐 ' + formatDateTime(log.startTime) + '</div>';
+
+        if (failHtml) {
+          html += failHtml;
+        }
+
+        html +=
+            '<div class="log-item-actions">' +
+              '<button class="log-btn primary" data-action="retry" data-id="' + log.id + '" ' + (retryDisabled ? 'disabled title="' + retryTitle + '"' : '') + '>' +
+                (retryDisabled ? '不可重挑战' : '🔁 重新挑战') +
+              '</button>' +
+              '<button class="log-btn secondary" data-action="delete" data-id="' + log.id + '">🗑 删除</button>' +
+            '</div>' +
+          '</div>';
+      });
+
+      listEl.innerHTML = html;
+
+      listEl.querySelectorAll('[data-action="retry"]').forEach(function(btn) {
+        btn.onclick = function() {
+          const logId = btn.getAttribute("data-id");
+          retryLogLevel(logId);
+        };
+      });
+      listEl.querySelectorAll('[data-action="delete"]').forEach(function(btn) {
+        btn.onclick = function() {
+          const logId = btn.getAttribute("data-id");
+          if (confirm("确定删除这条航海日志吗？")) {
+            VoyageLogStore.deleteEntry(logId);
+            renderVoyageLogList();
+          }
+        };
+      });
+    }
+
+    function retryLogLevel(logId) {
+      const log = VoyageLogStore.getEntry(logId);
+      if (!log || !log.levelId) {
+        alert("找不到对应的关卡信息。");
+        return;
+      }
+      const lvl = LevelData.getLevelById(log.levelId);
+      if (!lvl) {
+        alert("该关卡已被删除，无法重新挑战。");
+        return;
+      }
+      startFromLevel(log.levelId);
+    }
+
     function showAchievementToast(achievement) {
       const toast = document.createElement("div");
       toast.className = "achievement-toast";
@@ -2418,6 +3019,7 @@
       settingsPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
       achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
       levelSelectPanel.classList.remove("hidden");
       renderLevelCards();
       state = "levelSelect";
@@ -2431,6 +3033,7 @@
       settingsPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
       achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
       state = "menu";
       playtestLevel = null;
       cursorHint.classList.add("hidden");
@@ -2447,6 +3050,7 @@
       levelSelectPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
       achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
       settingsPanel.classList.remove("hidden");
       applySettings();
     }
@@ -2695,6 +3299,9 @@
       levelStartTime = performance.now() / 1000;
       usedWideBeamThisLevel = false;
       hasBoatLostThisLevel = false;
+      logWeatherEventsSeen = [];
+      currentLogFailReason = null;
+      currentLogFailText = "";
       state = "playing";
       overlay.classList.add("hidden");
       updatePauseHint();
@@ -2704,6 +3311,16 @@
       updateWeatherUI();
 
       if (!playtestLevel) {
+        const logEntry = VoyageLogStore.createEntry({
+          levelId: currentLevelId,
+          levelName: data.name || "",
+          isCustom: LevelData.isCustomLevel(currentLevelId),
+          startTime: Date.now(),
+          result: null
+        });
+        const saved = VoyageLogStore.addEntry(logEntry);
+        currentLogId = saved.id;
+
         ReplayRecorder.start(data, currentLevelId, {
           beamAngle: beamAngle,
           beamWide: beamWide,
@@ -2711,6 +3328,8 @@
           boats: boats
         });
         ReplayRecorder.recordEvent("levelStart", { levelId: currentLevelId });
+      } else {
+        currentLogId = null;
       }
     }
 
@@ -2797,6 +3416,14 @@
           boat.lost = true;
           hasBoatLostThisLevel = true;
           SoundManager.crash();
+          const reasonText = {
+            top: "船只偏离上侧安全航道。",
+            bottom: "船只偏离下侧安全航道。",
+            unlit: "船只离开光束太久而迷航。",
+            rock: "船只撞上暗礁。"
+          }[failReason] || "有船只迷航或触礁。";
+          currentLogFailReason = failReason;
+          currentLogFailText = reasonText;
           if (!playtestLevel) {
             StatsStore.recordLoss();
             checkAndNotifyAchievements();
@@ -2858,6 +3485,19 @@
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 你可以继续调整关卡或保存。");
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
+          const endTimestamp = Date.now();
+          const durationSec = performance.now() / 1000 - levelStartTime;
+          if (currentLogId) {
+            VoyageLogStore.updateEntry(currentLogId, {
+              endTime: endTimestamp,
+              duration: durationSec,
+              result: "win",
+              score: currentLevelScore,
+              failReason: null,
+              failReasonText: "",
+              weatherEvents: logWeatherEventsSeen.slice()
+            });
+          }
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordFrame({
               beamAngle: beamAngle,
@@ -2869,6 +3509,9 @@
             }, 1 / 30);
             ReplayRecorder.recordEvent("levelEnd", { win: true, score: score });
             lastReplayData = ReplayRecorder.stop(score, "win");
+            if (lastReplayData && currentLogId) {
+              lastReplayData._logId = currentLogId;
+            }
           }
           const nextId = "builtin_" + (builtinIdx + 1);
           currentLevelId = nextId;
@@ -2897,9 +3540,28 @@
       state = "ended";
       updatePauseHint();
 
+      const endTimestamp = Date.now();
+      const durationSec = performance.now() / 1000 - levelStartTime;
+      const currentLevelScore = score - levelScore;
+
+      if (currentLogId && !playtestLevel) {
+        VoyageLogStore.updateEntry(currentLogId, {
+          endTime: endTimestamp,
+          duration: durationSec,
+          result: win ? "win" : "lose",
+          score: currentLevelScore,
+          failReason: win ? null : currentLogFailReason,
+          failReasonText: win ? "" : currentLogFailText,
+          weatherEvents: logWeatherEventsSeen.slice()
+        });
+      }
+
       if (ReplayRecorder.isRecording()) {
         ReplayRecorder.recordEvent("levelEnd", { win: win, score: score });
         lastReplayData = ReplayRecorder.stop(score, win ? "win" : "lose");
+        if (lastReplayData && currentLogId && !playtestLevel) {
+          lastReplayData._logId = currentLogId;
+        }
       }
 
       if (win && !playtestLevel) {
@@ -2984,6 +3646,9 @@
     let savedGameStateForReplay = null;
 
     function startReplayMode(replayData) {
+      if (replayData && replayData._logId) {
+        VoyageLogStore.markReplayWatched(replayData._logId);
+      }
       savedGameStateForReplay = {
         state: state,
         score: score,
@@ -3591,6 +4256,33 @@
         alert("成就与统计数据已重置。");
       }
     };
+    voyageLogBtn.onclick = showVoyageLogPanel;
+    backFromVoyageLogBtn.onclick = hideVoyageLogPanel;
+    clearVoyageLogBtn.onclick = function() {
+      if (confirm("确定要清空全部航海日志吗？\n\n此操作不会影响成就、统计、关卡解锁和最佳分。")) {
+        VoyageLogStore.clearAll();
+        renderVoyageLogList();
+        alert("航海日志已清空。");
+      }
+    };
+    if (logFilterResult) {
+      logFilterResult.onchange = function() {
+        currentLogFilters.result = logFilterResult.value;
+        renderVoyageLogList();
+      };
+    }
+    if (logFilterSource) {
+      logFilterSource.onchange = function() {
+        currentLogFilters.source = logFilterSource.value;
+        renderVoyageLogList();
+      };
+    }
+    if (logFilterTime) {
+      logFilterTime.onchange = function() {
+        currentLogFilters.time = logFilterTime.value;
+        renderVoyageLogList();
+      };
+    }
     soundToggle.onclick = function() {
       gameSettings.sound = !gameSettings.sound;
       saveSettings();
@@ -3650,6 +4342,9 @@
     };
 
     WeatherSystem.on("start", function(ev) {
+      if (state === "playing" && currentLogId && logWeatherEventsSeen.indexOf(ev.type) === -1) {
+        logWeatherEventsSeen.push(ev.type);
+      }
       if (ReplayRecorder.isRecording()) {
         ReplayRecorder.recordEvent("weatherStart", {
           type: ev.type,
