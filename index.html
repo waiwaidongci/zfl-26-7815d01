@@ -1771,9 +1771,21 @@
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。你可以继续调整关卡或保存。");
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordFrame({
+              beamAngle: beamAngle,
+              beamWide: beamWide,
+              paused: false,
+              score: score,
+              arrivedCount: boats.length,
+              boats: boats
+            }, 1 / 30);
+            ReplayRecorder.recordEvent("levelEnd", { win: true, score: score });
+            lastReplayData = ReplayRecorder.stop(score, "win");
+          }
           const nextId = "builtin_" + (builtinIdx + 1);
           currentLevelId = nextId;
-          showWithReplay("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
+          showWithReplay("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel, lastReplayData);
           state = "between";
         } else {
           end(true, "本关得分：" + currentLevelScore + "。全部船只安全抵达，今晚的海图被你守住了。");
