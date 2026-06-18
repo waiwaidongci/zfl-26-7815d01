@@ -3272,6 +3272,22 @@
 
     let lastReplayData = null;
 
+    function completeCurrentVoyageLog(result, failReason, failReasonText) {
+      if (!currentLogId || playtestLevel) return;
+      const endTimestamp = Date.now();
+      const durationSec = performance.now() / 1000 - levelStartTime;
+      const currentLevelScore = score - levelScore;
+      VoyageLogStore.updateEntry(currentLogId, {
+        endTime: endTimestamp,
+        duration: durationSec,
+        result: result,
+        score: currentLevelScore,
+        failReason: result === "win" ? null : failReason,
+        failReasonText: result === "win" ? "" : failReasonText,
+        weatherEvents: logWeatherEventsSeen.slice()
+      });
+    }
+
     function resetLevel() {
       applySettings();
       SoundManager.startGame();
@@ -3485,19 +3501,7 @@
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 你可以继续调整关卡或保存。");
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
-          const endTimestamp = Date.now();
-          const durationSec = performance.now() / 1000 - levelStartTime;
-          if (currentLogId) {
-            VoyageLogStore.updateEntry(currentLogId, {
-              endTime: endTimestamp,
-              duration: durationSec,
-              result: "win",
-              score: currentLevelScore,
-              failReason: null,
-              failReasonText: "",
-              weatherEvents: logWeatherEventsSeen.slice()
-            });
-          }
+          completeCurrentVoyageLog("win", null, "");
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordFrame({
               beamAngle: beamAngle,
@@ -3540,21 +3544,13 @@
       state = "ended";
       updatePauseHint();
 
-      const endTimestamp = Date.now();
-      const durationSec = performance.now() / 1000 - levelStartTime;
       const currentLevelScore = score - levelScore;
 
-      if (currentLogId && !playtestLevel) {
-        VoyageLogStore.updateEntry(currentLogId, {
-          endTime: endTimestamp,
-          duration: durationSec,
-          result: win ? "win" : "lose",
-          score: currentLevelScore,
-          failReason: win ? null : currentLogFailReason,
-          failReasonText: win ? "" : currentLogFailText,
-          weatherEvents: logWeatherEventsSeen.slice()
-        });
-      }
+      completeCurrentVoyageLog(
+        win ? "win" : "lose",
+        win ? null : currentLogFailReason,
+        win ? "" : currentLogFailText
+      );
 
       if (ReplayRecorder.isRecording()) {
         ReplayRecorder.recordEvent("levelEnd", { win: win, score: score });
@@ -4107,6 +4103,9 @@
         if (state === "playing" || state === "paused" || state === "ended") {
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("restart", { scoreBefore: score });
+          }
+          if ((state === "playing" || state === "paused") && currentLogId && !playtestLevel) {
+            completeCurrentVoyageLog("lose", "restart", "玩家手动重开挑战。");
           }
           if (playtestLevel) {
             playtestLevel = LevelData.normalizeLevel(editorLevel);
