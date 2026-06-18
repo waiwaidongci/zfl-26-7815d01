@@ -439,6 +439,7 @@
 
     function end(win, text) {
       state = "ended";
+      updatePauseHint();
       if (win) {
         const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
         saveBest(totalBest);
