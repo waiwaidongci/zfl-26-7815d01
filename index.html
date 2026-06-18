@@ -265,6 +265,198 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
+    .achievements-stats-panel .section-title {
+      font-size: 15px;
+      color: #e7c46a;
+      font-weight: 700;
+      margin: 14px 0 8px;
+    }
+    .achievements-stats-panel .section-title:first-child {
+      margin-top: 0;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .stat-card {
+      background: #142f3a;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+    .stat-card .stat-icon {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+    .stat-card .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #eef6f2;
+    }
+    .stat-card .stat-label {
+      font-size: 11px;
+      color: #879aa0;
+      margin-top: 2px;
+    }
+    .achievement-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .achievement-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: #142f3a;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      transition: all .2s;
+    }
+    .achievement-item.unlocked {
+      border-color: #e7c46a;
+      background: #1a3947;
+    }
+    .achievement-item.locked {
+      opacity: .5;
+    }
+    .achievement-icon {
+      font-size: 28px;
+      min-width: 32px;
+      text-align: center;
+    }
+    .achievement-item.locked .achievement-icon {
+      filter: grayscale(1);
+    }
+    .achievement-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .achievement-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #eef6f2;
+    }
+    .achievement-item.locked .achievement-name {
+      color: #879aa0;
+    }
+    .achievement-desc {
+      font-size: 12px;
+      color: #879aa0;
+      margin-top: 2px;
+    }
+    .achievement-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: #24414b;
+      color: #879aa0;
+      white-space: nowrap;
+    }
+    .achievement-item.unlocked .achievement-status {
+      background: rgba(231, 196, 106, .2);
+      color: #e7c46a;
+    }
+    .achievement-progress {
+      margin-top: 6px;
+      height: 4px;
+      background: #0a1f27;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .achievement-progress-bar {
+      height: 100%;
+      background: #3d6a78;
+      border-radius: 2px;
+      transition: width .3s;
+    }
+    .achievement-item.unlocked .achievement-progress-bar {
+      background: #e7c46a;
+    }
+    .reset-section {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #24414b;
+    }
+    .reset-hint {
+      font-size: 12px;
+      color: #879aa0;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+    .achievement-toast-container {
+      position: absolute;
+      top: 60px;
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 100;
+      pointer-events: none;
+    }
+    .achievement-toast {
+      background: rgba(13, 29, 37, .95);
+      border: 1px solid #e7c46a;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+      animation: achievementSlideIn .4s ease-out;
+      min-width: 240px;
+    }
+    .achievement-toast.leaving {
+      animation: achievementSlideOut .3s ease-in forwards;
+    }
+    .achievement-toast-icon {
+      font-size: 32px;
+      animation: achievementBounce .6s ease-out .2s;
+    }
+    .achievement-toast-content {
+      flex: 1;
+    }
+    .achievement-toast-label {
+      font-size: 11px;
+      color: #e7c46a;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .achievement-toast-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #eef6f2;
+      margin-top: 2px;
+    }
+    @keyframes achievementSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(120px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    @keyframes achievementSlideOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(120px);
+      }
+    }
+    @keyframes achievementBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } }
   </style>
 </head>
@@ -278,6 +470,7 @@
         <button id="levelSelectBtn" class="secondary">选择关卡</button>
         <button id="editorBtn" class="secondary">关卡编辑器</button>
         <button id="pauseBtn" class="secondary">暂停</button>
+        <button id="achievementsBtn" class="secondary">成就与统计</button>
         <button id="settingsBtn" class="secondary">游戏设置</button>
         <h2>状态</h2>
         <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
@@ -321,6 +514,56 @@
         <p>从已解锁的关卡中选择，通关后自动解锁下一关。自定义关卡可随时编辑。</p>
         <div id="levelCards" class="level-select"></div>
         <button id="backToMenuBtn" class="secondary back-btn">返回主菜单</button>
+      </div>
+
+      <div id="achievementsPanel" class="hidden achievements-stats-panel">
+        <h1>成就与统计</h1>
+        <p>追踪你的航海成就，记录每一次光荣的护航。</p>
+        
+        <div class="section-title">游戏统计</div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🚢</div>
+            <div class="stat-value" id="statTotalEscorted">0</div>
+            <div class="stat-label">累计护送</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✨</div>
+            <div class="stat-value" id="statPerfectWins">0</div>
+            <div class="stat-label">完美通关</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔦</div>
+            <div class="stat-value" id="statNarrowWins">0</div>
+            <div class="stat-label">窄光束通关</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-value" id="statFastestTime">--</div>
+            <div class="stat-label">最快通关</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💔</div>
+            <div class="stat-value" id="statCurrentStreak">0</div>
+            <div class="stat-label">当前连败</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value" id="statMaxStreak">0</div>
+            <div class="stat-label">最大连败</div>
+          </div>
+        </div>
+
+        <div class="section-title">成就列表 <span style="float:right;font-size:13px;color:#879aa0;font-weight:normal;"><span id="achievementProgress">0/0</span></span></div>
+        <div class="achievement-list" id="achievementList"></div>
+
+        <div class="reset-section">
+          <div class="section-title" style="margin-top:0;">数据管理</div>
+          <p class="reset-hint">重置将清除所有成就与统计数据，但不会影响关卡最佳分和解锁进度。</p>
+          <button id="resetAchievementsBtn" class="danger">重置成就与统计</button>
+        </div>
+
+        <button id="backFromAchievementsBtn" class="secondary back-btn">返回主菜单</button>
       </div>
 
       <div id="editorPanel" class="hidden">
@@ -412,6 +655,7 @@
     <main class="game">
       <div class="canvas-wrapper">
         <canvas id="game" width="960" height="600"></canvas>
+        <div class="achievement-toast-container" id="achievementToastContainer"></div>
         <div class="weather-status" id="weatherStatus"></div>
         <div class="canvas-cursor-hint hidden" id="cursorHint"></div>
         <div class="replay-badge hidden" id="replayBadge">回 放 模 式</div>
@@ -684,6 +928,254 @@
         loadLevelBests,
         saveLevelBest,
         normalizeLevel
+      };
+    })();
+
+    // ===================== StatsStore 模块：统计数据存储层 =====================
+    const StatsStore = (function() {
+      const STATS_KEY = "zfl26Stats";
+
+      const defaultStats = {
+        totalEscorted: 0,
+        perfectWins: 0,
+        narrowBeamWins: 0,
+        fastestClearTime: null,
+        currentLossStreak: 0,
+        maxLossStreak: 0
+      };
+
+      function loadStats() {
+        try {
+          const stored = localStorage.getItem(STATS_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            return Object.assign({}, defaultStats, parsed);
+          }
+        } catch (e) {}
+        return Object.assign({}, defaultStats);
+      }
+
+      function saveStats(stats) {
+        localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+      }
+
+      function get(key) {
+        const stats = loadStats();
+        return stats[key];
+      }
+
+      function set(key, value) {
+        const stats = loadStats();
+        stats[key] = value;
+        saveStats(stats);
+        return value;
+      }
+
+      function increment(key, amount) {
+        const stats = loadStats();
+        stats[key] = (stats[key] || 0) + (amount || 1);
+        saveStats(stats);
+        return stats[key];
+      }
+
+      function recordBoatEscorted() {
+        return increment("totalEscorted", 1);
+      }
+
+      function recordWin(isPerfect, usedNarrowBeam, clearTime) {
+        const stats = loadStats();
+        if (isPerfect) {
+          stats.perfectWins++;
+        }
+        if (usedNarrowBeam) {
+          stats.narrowBeamWins++;
+        }
+        if (clearTime != null && (stats.fastestClearTime === null || clearTime < stats.fastestClearTime)) {
+          stats.fastestClearTime = clearTime;
+        }
+        stats.currentLossStreak = 0;
+        saveStats(stats);
+        return stats;
+      }
+
+      function recordLoss() {
+        const stats = loadStats();
+        stats.currentLossStreak++;
+        if (stats.currentLossStreak > stats.maxLossStreak) {
+          stats.maxLossStreak = stats.currentLossStreak;
+        }
+        saveStats(stats);
+        return stats;
+      }
+
+      function resetStats() {
+        saveStats(defaultStats);
+        return Object.assign({}, defaultStats);
+      }
+
+      function getAll() {
+        return loadStats();
+      }
+
+      return {
+        get,
+        set,
+        increment,
+        recordBoatEscorted,
+        recordWin,
+        recordLoss,
+        resetStats,
+        getAll
+      };
+    })();
+
+    // ===================== AchievementRules 模块：成就规则与解锁 =====================
+    const AchievementRules = (function() {
+      const ACHIEVEMENTS_KEY = "zfl26Achievements";
+
+      const achievements = [
+        {
+          id: "first_escort",
+          name: "初次护航",
+          description: "成功护送第一艘船抵达港湾",
+          icon: "🚢",
+          check: function(stats) { return stats.totalEscorted >= 1; }
+        },
+        {
+          id: "escort_10",
+          name: "老练领航员",
+          description: "累计护送 10 艘船抵达港湾",
+          icon: "⛵",
+          check: function(stats) { return stats.totalEscorted >= 10; }
+        },
+        {
+          id: "escort_50",
+          name: "海上引路人",
+          description: "累计护送 50 艘船抵达港湾",
+          icon: "🌊",
+          check: function(stats) { return stats.totalEscorted >= 50; }
+        },
+        {
+          id: "escort_100",
+          name: "灯塔守护人",
+          description: "累计护送 100 艘船抵达港湾",
+          icon: "🏆",
+          check: function(stats) { return stats.totalEscorted >= 100; }
+        },
+        {
+          id: "first_perfect",
+          name: "完美首航",
+          description: "第一次无失败通关",
+          icon: "✨",
+          check: function(stats) { return stats.perfectWins >= 1; }
+        },
+        {
+          id: "perfect_5",
+          name: "常胜将军",
+          description: "无失败通关 5 次",
+          icon: "💎",
+          check: function(stats) { return stats.perfectWins >= 5; }
+        },
+        {
+          id: "narrow_first",
+          name: "聚光之路",
+          description: "第一次使用窄光束通关",
+          icon: "🔦",
+          check: function(stats) { return stats.narrowBeamWins >= 1; }
+        },
+        {
+          id: "narrow_5",
+          name: "精准操控",
+          description: "使用窄光束通关 5 次",
+          icon: "🎯",
+          check: function(stats) { return stats.narrowBeamWins >= 5; }
+        },
+        {
+          id: "speed_demon",
+          name: "风驰电掣",
+          description: "创造最快通关记录",
+          icon: "⚡",
+          check: function(stats) { return stats.fastestClearTime !== null; }
+        },
+        {
+          id: "loser_3",
+          name: "越挫越勇",
+          description: "连续失败 3 次后仍继续挑战",
+          icon: "💪",
+          check: function(stats) { return stats.maxLossStreak >= 3; }
+        },
+        {
+          id: "loser_5",
+          name: "不屈不挠",
+          description: "连续失败 5 次后仍继续挑战",
+          icon: "🔥",
+          check: function(stats) { return stats.maxLossStreak >= 5; }
+        }
+      ];
+
+      function loadUnlocked() {
+        try {
+          const stored = localStorage.getItem(ACHIEVEMENTS_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {};
+      }
+
+      function saveUnlocked(unlocked) {
+        localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(unlocked));
+      }
+
+      function isUnlocked(achievementId) {
+        const unlocked = loadUnlocked();
+        return !!unlocked[achievementId];
+      }
+
+      function checkNewAchievements() {
+        const stats = StatsStore.getAll();
+        const unlocked = loadUnlocked();
+        const newlyUnlocked = [];
+
+        for (const ach of achievements) {
+          if (!unlocked[ach.id] && ach.check(stats)) {
+            unlocked[ach.id] = Date.now();
+            newlyUnlocked.push(Object.assign({}, ach, { unlockedAt: unlocked[ach.id] }));
+          }
+        }
+
+        if (newlyUnlocked.length > 0) {
+          saveUnlocked(unlocked);
+        }
+
+        return newlyUnlocked;
+      }
+
+      function getAllAchievements() {
+        const unlocked = loadUnlocked();
+        return achievements.map(function(ach) {
+          return Object.assign({}, ach, {
+            unlocked: !!unlocked[ach.id],
+            unlockedAt: unlocked[ach.id] || null
+          });
+        });
+      }
+
+      function getUnlockedCount() {
+        const unlocked = loadUnlocked();
+        return Object.keys(unlocked).length;
+      }
+
+      function resetAchievements() {
+        saveUnlocked({});
+        return {};
+      }
+
+      return {
+        achievements,
+        isUnlocked,
+        checkNewAchievements,
+        getAllAchievements,
+        getUnlockedCount,
+        resetAchievements
       };
     })();
 
@@ -1612,6 +2104,19 @@
     const modalPauseHintToggle = document.querySelector("#modalPauseHintToggle");
     const cursorHint = document.querySelector("#cursorHint");
     const backFromPlaytestBtn = document.querySelector("#backFromPlaytestBtn");
+    const achievementsBtn = document.querySelector("#achievementsBtn");
+    const achievementsPanel = document.querySelector("#achievementsPanel");
+    const backFromAchievementsBtn = document.querySelector("#backFromAchievementsBtn");
+    const achievementList = document.querySelector("#achievementList");
+    const achievementProgress = document.querySelector("#achievementProgress");
+    const achievementToastContainer = document.querySelector("#achievementToastContainer");
+    const resetAchievementsBtn = document.querySelector("#resetAchievementsBtn");
+    const statTotalEscorted = document.querySelector("#statTotalEscorted");
+    const statPerfectWins = document.querySelector("#statPerfectWins");
+    const statNarrowWins = document.querySelector("#statNarrowWins");
+    const statFastestTime = document.querySelector("#statFastestTime");
+    const statCurrentStreak = document.querySelector("#statCurrentStreak");
+    const statMaxStreak = document.querySelector("#statMaxStreak");
 
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
@@ -1652,6 +2157,9 @@
     let last = 0;
     const lighthouse = { x: 110, y: 300 };
     let playtestLevel = null;
+    let levelStartTime = 0;
+    let usedWideBeamThisLevel = false;
+    let hasBoatLostThisLevel = false;
 
     // ===================== 编辑器状态 =====================
     let editorLevel = LevelData.createEmptyCustomLevel();
@@ -1699,6 +2207,123 @@
 
     function updateGlobalBest() {
       bestText.textContent = LevelData.loadGlobalBest();
+    }
+
+    function fmtAchievementTime(sec) {
+      if (sec == null || sec <= 0) return "--";
+      const mins = Math.floor(sec / 60);
+      const secs = Math.floor(sec % 60);
+      const ms = Math.floor((sec % 1) * 10);
+      return mins + ":" + (secs < 10 ? "0" : "") + secs + "." + ms;
+    }
+
+    function getAchievementProgress(achievement, stats) {
+      switch (achievement.id) {
+        case "first_escort":
+        case "escort_10":
+        case "escort_50":
+        case "escort_100":
+          const escortTargets = { first_escort: 1, escort_10: 10, escort_50: 50, escort_100: 100 };
+          return Math.min(100, (stats.totalEscorted / escortTargets[achievement.id]) * 100);
+        case "first_perfect":
+        case "perfect_5":
+          const perfectTargets = { first_perfect: 1, perfect_5: 5 };
+          return Math.min(100, (stats.perfectWins / perfectTargets[achievement.id]) * 100);
+        case "narrow_first":
+        case "narrow_5":
+          const narrowTargets = { narrow_first: 1, narrow_5: 5 };
+          return Math.min(100, (stats.narrowBeamWins / narrowTargets[achievement.id]) * 100);
+        case "speed_demon":
+          return stats.fastestClearTime !== null ? 100 : 0;
+        case "loser_3":
+        case "loser_5":
+          const loserTargets = { loser_3: 3, loser_5: 5 };
+          return Math.min(100, (stats.maxLossStreak / loserTargets[achievement.id]) * 100);
+        default:
+          return 0;
+      }
+    }
+
+    function renderStats() {
+      const stats = StatsStore.getAll();
+      statTotalEscorted.textContent = stats.totalEscorted;
+      statPerfectWins.textContent = stats.perfectWins;
+      statNarrowWins.textContent = stats.narrowBeamWins;
+      statFastestTime.textContent = fmtAchievementTime(stats.fastestClearTime);
+      statCurrentStreak.textContent = stats.currentLossStreak;
+      statMaxStreak.textContent = stats.maxLossStreak;
+    }
+
+    function renderAchievements() {
+      const allAchievements = AchievementRules.getAllAchievements();
+      const stats = StatsStore.getAll();
+      const unlockedCount = AchievementRules.getUnlockedCount();
+      achievementProgress.textContent = unlockedCount + "/" + allAchievements.length;
+
+      achievementList.innerHTML = "";
+      allAchievements.forEach(function(ach) {
+        const item = document.createElement("div");
+        item.className = "achievement-item " + (ach.unlocked ? "unlocked" : "locked");
+        const progress = getAchievementProgress(ach, stats);
+
+        item.innerHTML =
+          '<div class="achievement-icon">' + ach.icon + '</div>' +
+          '<div class="achievement-info">' +
+            '<div class="achievement-name">' + ach.name + '</div>' +
+            '<div class="achievement-desc">' + ach.description + '</div>' +
+            '<div class="achievement-progress"><div class="achievement-progress-bar" style="width:' + progress + '%"></div></div>' +
+          '</div>' +
+          '<div class="achievement-status">' + (ach.unlocked ? "已解锁" : "未解锁") + '</div>';
+
+        achievementList.appendChild(item);
+      });
+    }
+
+    function showAchievementsPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      achievementsPanel.classList.remove("hidden");
+      renderStats();
+      renderAchievements();
+    }
+
+    function hideAchievementsPanel() {
+      achievementsPanel.classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+    }
+
+    function showAchievementToast(achievement) {
+      const toast = document.createElement("div");
+      toast.className = "achievement-toast";
+      toast.innerHTML =
+        '<div class="achievement-toast-icon">' + achievement.icon + '</div>' +
+        '<div class="achievement-toast-content">' +
+          '<div class="achievement-toast-label">成就解锁</div>' +
+          '<div class="achievement-toast-name">' + achievement.name + '</div>' +
+        '</div>';
+
+      achievementToastContainer.appendChild(toast);
+
+      setTimeout(function() {
+        toast.classList.add("leaving");
+        setTimeout(function() {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+          }
+        }, 300);
+      }, 3500);
+    }
+
+    function checkAndNotifyAchievements() {
+      const newAchievements = AchievementRules.checkNewAchievements();
+      newAchievements.forEach(function(ach, index) {
+        setTimeout(function() {
+          showAchievementToast(ach);
+        }, index * 800);
+      });
+      return newAchievements;
     }
 
     function getCurrentLevelData() {
@@ -1792,6 +2417,7 @@
       mainMenu.classList.add("hidden");
       settingsPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
       levelSelectPanel.classList.remove("hidden");
       renderLevelCards();
       state = "levelSelect";
@@ -1804,6 +2430,7 @@
       levelSelectPanel.classList.add("hidden");
       settingsPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
       state = "menu";
       playtestLevel = null;
       cursorHint.classList.add("hidden");
@@ -1819,6 +2446,7 @@
       mainMenu.classList.add("hidden");
       levelSelectPanel.classList.add("hidden");
       editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
       settingsPanel.classList.remove("hidden");
       applySettings();
     }
@@ -1871,6 +2499,7 @@
       mainMenu.classList.add("hidden");
       levelSelectPanel.classList.add("hidden");
       settingsPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
       editorPanel.classList.remove("hidden");
       state = "editor";
       editorSelected = null;
@@ -2063,6 +2692,9 @@
       });
       beamAngle = -0.1;
       beamWide = false;
+      levelStartTime = performance.now() / 1000;
+      usedWideBeamThisLevel = false;
+      hasBoatLostThisLevel = false;
       state = "playing";
       overlay.classList.add("hidden");
       updatePauseHint();
@@ -2163,7 +2795,12 @@
         if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
           const failReason = boat.y < 55 ? "top" : boat.y > 545 ? "bottom" : boat.lit <= 0 ? "unlit" : "rock";
           boat.lost = true;
+          hasBoatLostThisLevel = true;
           SoundManager.crash();
+          if (!playtestLevel) {
+            StatsStore.recordLoss();
+            checkAndNotifyAchievements();
+          }
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatLost", {
               index: boats.indexOf(boat),
@@ -2178,6 +2815,9 @@
           boat.arrived = true;
           SoundManager.boatArrived();
           score += Math.round(100 + boat.lit * 20);
+          if (!playtestLevel) {
+            StatsStore.recordBoatEscorted();
+          }
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatArrived", {
               index: boats.indexOf(boat),
@@ -2192,6 +2832,11 @@
         const lvlId = playtestLevel ? "__playtest__" : currentLevelId;
         if (!playtestLevel) {
           LevelData.saveLevelBest(lvlId, currentLevelScore);
+          const clearTime = performance.now() / 1000 - levelStartTime;
+          const isPerfect = !hasBoatLostThisLevel;
+          const usedNarrowBeam = !usedWideBeamThisLevel;
+          StatsStore.recordWin(isPerfect, usedNarrowBeam, clearTime);
+          checkAndNotifyAchievements();
         }
         const builtinIdx = LevelData.isBuiltinLevel(currentLevelId) ? parseInt(currentLevelId.split("_")[1]) : -1;
         if (builtinIdx >= 0 && !playtestLevel) {
@@ -2783,6 +3428,9 @@
       keys[event.key] = true;
       if (event.key === " ") {
         beamWide = !beamWide;
+        if (beamWide) {
+          usedWideBeamThisLevel = true;
+        }
         SoundManager.toggleBeam();
         if (ReplayRecorder.isRecording()) {
           ReplayRecorder.recordEvent("toggleBeam", { beamWide: beamWide });
@@ -2931,6 +3579,17 @@
     pauseBtn.onclick = togglePause;
     settingsBtn.onclick = showSettings;
     backFromSettingsBtn.onclick = hideSettings;
+    achievementsBtn.onclick = showAchievementsPanel;
+    backFromAchievementsBtn.onclick = hideAchievementsPanel;
+    resetAchievementsBtn.onclick = function() {
+      if (confirm("确定要重置所有成就与统计数据吗？\n\n此操作不会影响关卡最佳分和解锁进度。")) {
+        StatsStore.resetStats();
+        AchievementRules.resetAchievements();
+        renderStats();
+        renderAchievements();
+        alert("成就与统计数据已重置。");
+      }
+    };
     soundToggle.onclick = function() {
       gameSettings.sound = !gameSettings.sound;
       saveSettings();
