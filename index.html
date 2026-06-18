@@ -71,6 +71,32 @@
     .canvas-wrapper { position: relative; }
     .canvas-cursor-hint { position: absolute; bottom: 10px; left: 10px; background: rgba(13,29,37,.85); color: #e7c46a; font-size: 12px; padding: 6px 12px; border-radius: 6px; pointer-events: none; }
 
+    .pack-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .pack-actions button { margin: 0; }
+    .pack-modal { width: min(500px, calc(100% - 28px)); }
+    .pack-modal h2 { margin: 0 0 14px; font-size: 20px; }
+    .pack-modal .pack-info { background: #0a1f27; border-radius: 6px; padding: 12px; margin: 10px 0; }
+    .pack-modal .pack-info-row { display: grid; grid-template-columns: 80px 1fr; gap: 8px; padding: 4px 0; font-size: 13px; }
+    .pack-modal .pack-info-row .label { color: #879aa0; }
+    .pack-modal .pack-info-row .value { color: #eef6f2; }
+    .pack-modal textarea { width: 100%; background: #0a1f27; border: 1px solid #24414b; border-radius: 6px; padding: 8px 10px; color: #eef6f2; font-size: 13px; font-family: monospace; resize: vertical; min-height: 80px; }
+    .pack-modal input[type="text"] { margin: 6px 0; }
+    .pack-modal .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .pack-modal .btn-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .pack-modal .error-msg { color: #e2685d; font-size: 13px; margin: 8px 0; padding: 8px; background: rgba(226,104,93,.1); border-radius: 6px; border-left: 3px solid #e2685d; }
+    .pack-modal .success-msg { color: #7dd69b; font-size: 13px; margin: 8px 0; padding: 8px; background: rgba(125,214,155,.1); border-radius: 6px; border-left: 3px solid #7dd69b; }
+    .pack-modal .level-list { max-height: 200px; overflow-y: auto; background: #0a1f27; border-radius: 6px; padding: 8px; margin: 10px 0; }
+    .pack-modal .level-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #142f3a; font-size: 13px; }
+    .pack-modal .level-item:last-child { border-bottom: none; }
+    .pack-modal .level-item .level-name { color: #eef6f2; }
+    .pack-modal .level-item .level-best { color: #e7c46a; font-size: 12px; }
+    .pack-modal .duplicate-option { display: flex; align-items: center; gap: 8px; padding: 8px; background: #0a1f27; border-radius: 6px; margin: 6px 0; cursor: pointer; border: 1px solid transparent; }
+    .pack-modal .duplicate-option:hover { border-color: #24414b; }
+    .pack-modal .duplicate-option.selected { border-color: #e7c46a; background: #142f3a; }
+    .pack-modal .duplicate-option input { margin: 0; }
+    .pack-modal .duplicate-option .option-label { font-size: 14px; color: #eef6f2; }
+    .pack-modal .duplicate-option .option-desc { font-size: 12px; color: #879aa0; margin-top: 2px; }
+
     .replay-controls {
       position: absolute;
       bottom: 16px;
@@ -722,7 +748,11 @@
 
       <div id="levelSelectPanel" class="hidden">
         <h1>选择关卡</h1>
-        <p>从已解锁的关卡中选择，通关后自动解锁下一关。自定义关卡可随时编辑。</p>
+        <p>从已解锁的关卡中选择，通关后自动解锁下一关。自定义关卡可随时编辑，支持关卡包导入导出。</p>
+        <div class="pack-actions">
+          <button id="exportPackBtn" class="secondary">📤 导出关卡包</button>
+          <button id="importPackBtn" class="secondary">📥 导入关卡包</button>
+        </div>
         <div id="levelCards" class="level-select"></div>
         <button id="backToMenuBtn" class="secondary back-btn">返回主菜单</button>
       </div>
@@ -832,7 +862,7 @@
 
       <div id="editorPanel" class="hidden">
         <h1>关卡编辑器</h1>
-        <p>创建你的专属关卡。在画布上放置暗礁和雾区，调整船只和港湾参数。</p>
+        <p>创建你的专属关卡。在画布上放置暗礁和雾区，调整船只和港湾参数，支持导出分享。</p>
 
         <div class="editor-section">
           <div class="editor-section-title">关卡信息</div>
@@ -911,6 +941,7 @@
           </div>
           <button id="saveLevelBtn">保存关卡</button>
           <div id="saveStatus" class="editor-hint"></div>
+          <button id="exportCurrentLevelBtn" class="secondary">📤 导出当前关卡</button>
           <button id="backFromEditorBtn" class="secondary back-btn">返回主菜单</button>
         </div>
       </div>
@@ -976,6 +1007,123 @@
             <div id="modalPauseHintToggle" class="toggle on"></div>
           </div>
           <button id="closeSettingsBtn" class="secondary back-btn">关闭</button>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="packExportOverlay">
+        <div class="panel pack-modal">
+          <h2>导出关卡包</h2>
+          <p>将自定义关卡打包导出为文件，可分享到其他设备或游戏存档。</p>
+          <div class="editor-section">
+            <div class="editor-section-title">关卡包信息</div>
+            <div class="settings-row">
+              <span class="settings-label">关卡包名称</span>
+            </div>
+            <input type="text" id="exportPackName" placeholder="我的关卡包" maxlength="30">
+            <div class="settings-row" style="margin-top: 8px;">
+              <span class="settings-label">作者</span>
+            </div>
+            <input type="text" id="exportPackAuthor" placeholder="匿名玩家" maxlength="20">
+            <div class="settings-row" style="margin-top: 8px;">
+              <span class="settings-label">说明</span>
+            </div>
+            <input type="text" id="exportPackDesc" placeholder="可选的关卡包描述" maxlength="100">
+          </div>
+          <div class="editor-section">
+            <div class="editor-section-title">选择关卡 <span style="float:right;font-size:12px;color:#879aa0;font-weight:normal;" id="exportSelectedCount">0 个</span></div>
+            <div class="level-list" id="exportLevelList"></div>
+            <div class="editor-btn-row" style="margin-top: 8px;">
+              <button class="secondary" id="selectAllExportBtn">全选</button>
+              <button class="secondary" id="deselectAllExportBtn">全不选</button>
+            </div>
+          </div>
+          <div id="exportPackError" class="error-msg hidden"></div>
+          <div class="btn-row">
+            <button class="secondary" id="cancelExportBtn">取消</button>
+            <button id="confirmExportBtn">导出文件</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="packImportOverlay">
+        <div class="panel pack-modal">
+          <h2>导入关卡包</h2>
+          <p>粘贴关卡包数据或选择文件，导入自定义关卡及最佳分。</p>
+          <div class="editor-section">
+            <div class="editor-section-title">导入方式</div>
+            <div class="editor-btn-row">
+              <button class="secondary" id="importFromTextBtn">从文本粘贴</button>
+              <button class="secondary" id="importFromFileBtn">选择文件</button>
+            </div>
+            <input type="file" id="importFileInput" accept=".json,application/json" style="display:none;">
+          </div>
+          <div id="importTextSection" class="hidden">
+            <div class="editor-section">
+              <div class="editor-section-title">粘贴关卡包数据</div>
+              <textarea id="importTextarea" placeholder="在此粘贴关卡包 JSON 数据..."></textarea>
+              <button id="parseImportTextBtn" style="margin-top: 8px;">解析数据</button>
+            </div>
+          </div>
+          <div id="importPackInfo" class="hidden">
+            <div class="editor-section">
+              <div class="editor-section-title">关卡包信息</div>
+              <div class="pack-info">
+                <div class="pack-info-row">
+                  <span class="label">名称</span>
+                  <span class="value" id="importPackName">-</span>
+                </div>
+                <div class="pack-info-row">
+                  <span class="label">作者</span>
+                  <span class="value" id="importPackAuthor">-</span>
+                </div>
+                <div class="pack-info-row">
+                  <span class="label">说明</span>
+                  <span class="value" id="importPackDesc">-</span>
+                </div>
+                <div class="pack-info-row">
+                  <span class="label">关卡数</span>
+                  <span class="value" id="importPackLevelCount">-</span>
+                </div>
+                <div class="pack-info-row">
+                  <span class="label">格式版本</span>
+                  <span class="value" id="importPackVersion">-</span>
+                </div>
+              </div>
+            </div>
+            <div class="editor-section">
+              <div class="editor-section-title">重复关卡处理</div>
+              <div class="duplicate-option selected" data-duplicate="skip">
+                <input type="radio" name="duplicateOpt" value="skip" checked>
+                <div>
+                  <div class="option-label">跳过重复</div>
+                  <div class="option-desc">保留本地已有的同名或同 ID 关卡</div>
+                </div>
+              </div>
+              <div class="duplicate-option" data-duplicate="overwrite">
+                <input type="radio" name="duplicateOpt" value="overwrite">
+                <div>
+                  <div class="option-label">覆盖重复</div>
+                  <div class="option-desc">用导入的关卡数据和最佳分覆盖本地</div>
+                </div>
+              </div>
+              <div class="duplicate-option" data-duplicate="rename">
+                <input type="radio" name="duplicateOpt" value="rename">
+                <div>
+                  <div class="option-label">重命名导入</div>
+                  <div class="option-desc">为导入的重复关卡生成新 ID 并保留两者</div>
+                </div>
+              </div>
+            </div>
+            <div id="importDuplicateWarning" class="hidden" style="color:#e7c46a;font-size:13px;margin:8px 0;">
+              ⚠️ 检测到 <span id="importDuplicateCount">0</span> 个重复关卡
+            </div>
+          </div>
+          <div id="importPackError" class="error-msg hidden"></div>
+          <div id="importPackSuccess" class="success-msg hidden"></div>
+          <div class="btn-row">
+            <button class="secondary" id="cancelImportBtn">取消</button>
+            <button id="confirmImportBtn" disabled>确认导入</button>
+          </div>
         </div>
       </div>
     </main>
@@ -1182,6 +1330,8 @@
         getLevelIndex,
         isCustomLevel,
         isBuiltinLevel,
+        loadCustomLevels,
+        saveCustomLevels,
         saveCustomLevel,
         deleteCustomLevel,
         createEmptyCustomLevel,
@@ -1192,6 +1342,288 @@
         loadLevelBests,
         saveLevelBest,
         normalizeLevel
+      };
+    })();
+
+    // ===================== LevelPack 模块：关卡包导入导出 =====================
+    const LevelPack = (function() {
+      const PACK_FORMAT_VERSION = 1;
+      const GAME_VERSION = "1.0.0";
+
+      function createPack(packInfo, levels, levelBests) {
+        const pack = {
+          formatVersion: PACK_FORMAT_VERSION,
+          gameVersion: GAME_VERSION,
+          packName: packInfo.name || "未命名关卡包",
+          author: packInfo.author || "匿名玩家",
+          description: packInfo.description || "",
+          exportedAt: Date.now(),
+          levels: levels.map(function(lvl) {
+            return LevelData.normalizeLevel(lvl);
+          }),
+          levelBests: {}
+        };
+
+        if (levelBests) {
+          levels.forEach(function(lvl) {
+            if (levelBests[lvl.id]) {
+              pack.levelBests[lvl.id] = levelBests[lvl.id];
+            }
+          });
+        }
+
+        return pack;
+      }
+
+      function validatePack(pack) {
+        const errors = [];
+
+        if (!pack || typeof pack !== "object") {
+          return { valid: false, errors: ["关卡包数据格式错误"] };
+        }
+
+        if (pack.formatVersion === undefined) {
+          errors.push("缺少 formatVersion 字段，无法识别的关卡包格式");
+        } else if (typeof pack.formatVersion !== "number") {
+          errors.push("formatVersion 必须是数字");
+        } else if (pack.formatVersion > PACK_FORMAT_VERSION) {
+          errors.push("关卡包格式版本 v" + pack.formatVersion + " 过新，请更新游戏版本后再尝试导入");
+        } else if (pack.formatVersion < 1) {
+          errors.push("关卡包格式版本无效");
+        }
+
+        if (!pack.levels || !Array.isArray(pack.levels)) {
+          errors.push("缺少 levels 字段或格式错误");
+        } else if (pack.levels.length === 0) {
+          errors.push("关卡包中没有任何关卡");
+        } else {
+          pack.levels.forEach(function(lvl, idx) {
+            const levelErrors = validateLevel(lvl, idx);
+            errors.push.apply(errors, levelErrors);
+          });
+        }
+
+        if (pack.levelBests && typeof pack.levelBests !== "object") {
+          errors.push("levelBests 字段格式错误");
+        }
+
+        return {
+          valid: errors.length === 0,
+          errors: errors
+        };
+      }
+
+      function validateLevel(level, index) {
+        const errors = [];
+        const prefix = "第 " + (index + 1) + " 个关卡：";
+
+        if (!level || typeof level !== "object") {
+          errors.push(prefix + "数据格式错误");
+          return errors;
+        }
+
+        if (!level.name || typeof level.name !== "string") {
+          errors.push(prefix + "缺少关卡名称");
+        }
+
+        if (level.boats === undefined || typeof level.boats !== "number" || level.boats < 1 || level.boats > 20) {
+          errors.push(prefix + "船只数量无效（1-20）");
+        }
+
+        if (level.rocks && !Array.isArray(level.rocks)) {
+          errors.push(prefix + "rocks 字段格式错误");
+        } else if (level.rocks) {
+          level.rocks.forEach(function(r, i) {
+            if (!r || typeof r.x !== "number" || typeof r.y !== "number" || typeof r.r !== "number") {
+              errors.push(prefix + "第 " + (i + 1) + " 个暗礁数据无效");
+            }
+          });
+        }
+
+        if (level.fog && !Array.isArray(level.fog)) {
+          errors.push(prefix + "fog 字段格式错误");
+        } else if (level.fog) {
+          level.fog.forEach(function(f, i) {
+            if (!f || typeof f.x !== "number" || typeof f.y !== "number" || typeof f.r !== "number") {
+              errors.push(prefix + "第 " + (i + 1) + " 个雾区数据无效");
+            }
+          });
+        }
+
+        if (level.harbor && typeof level.harbor !== "object") {
+          errors.push(prefix + "harbor 字段格式错误");
+        }
+
+        return errors;
+      }
+
+      function findDuplicates(packLevels) {
+        const existingCustoms = LevelData.loadCustomLevels();
+        const duplicates = [];
+
+        packLevels.forEach(function(packLvl) {
+          const found = existingCustoms.find(function(existing) {
+            if (packLvl.id && existing.id === packLvl.id) return true;
+            if (packLvl.name && existing.name === packLvl.name) return true;
+            return false;
+          });
+          if (found) {
+            duplicates.push({
+              packLevel: packLvl,
+              existingLevel: found
+            });
+          }
+        });
+
+        return duplicates;
+      }
+
+      function importPack(pack, duplicateStrategy) {
+        const validation = validatePack(pack);
+        if (!validation.valid) {
+          return {
+            success: false,
+            message: "关卡包验证失败",
+            errors: validation.errors
+          };
+        }
+
+        const strategy = duplicateStrategy || "skip";
+        const importedLevels = [];
+        const skippedLevels = [];
+        const overwrittenLevels = [];
+        const renamedLevels = [];
+
+        const existingCustoms = LevelData.loadCustomLevels();
+        const existingBests = LevelData.loadLevelBests();
+        const newBests = Object.assign({}, existingBests);
+
+        pack.levels.forEach(function(packLvl) {
+          const normalized = LevelData.normalizeLevel(packLvl);
+          const dupIdx = existingCustoms.findIndex(function(existing) {
+            if (normalized.id && existing.id === normalized.id) return true;
+            if (normalized.name && existing.name === normalized.name) return true;
+            return false;
+          });
+
+          if (dupIdx >= 0) {
+            const existingId = existingCustoms[dupIdx].id;
+
+            if (strategy === "skip") {
+              skippedLevels.push(normalized.name);
+              return;
+            } else if (strategy === "overwrite") {
+              normalized.id = existingId;
+              existingCustoms[dupIdx] = normalized;
+              overwrittenLevels.push(normalized.name);
+
+              if (pack.levelBests && pack.levelBests[packLvl.id]) {
+                newBests[existingId] = Math.max(
+                  Number(newBests[existingId] || 0),
+                  Number(pack.levelBests[packLvl.id])
+                );
+              }
+            } else if (strategy === "rename") {
+              const newId = "custom_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+              normalized.id = newId;
+              normalized.name = normalized.name + " (导入)";
+              existingCustoms.push(normalized);
+              renamedLevels.push(normalized.name);
+
+              if (pack.levelBests && pack.levelBests[packLvl.id]) {
+                newBests[newId] = Number(pack.levelBests[packLvl.id]);
+              }
+            }
+          } else {
+            if (!normalized.id || !LevelData.isCustomLevel(normalized.id)) {
+              normalized.id = "custom_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+            }
+            existingCustoms.push(normalized);
+            importedLevels.push(normalized.name);
+
+            if (pack.levelBests && pack.levelBests[packLvl.id]) {
+              newBests[normalized.id] = Number(pack.levelBests[packLvl.id]);
+            }
+          }
+        });
+
+        localStorage.setItem("zfl26CustomLevels", JSON.stringify(existingCustoms));
+        localStorage.setItem("zfl26LevelBests", JSON.stringify(newBests));
+
+        return {
+          success: true,
+          imported: importedLevels,
+          skipped: skippedLevels,
+          overwritten: overwrittenLevels,
+          renamed: renamedLevels,
+          totalImported: importedLevels.length + overwrittenLevels.length + renamedLevels.length
+        };
+      }
+
+      function exportPackToFile(pack) {
+        const jsonStr = JSON.stringify(pack, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = (pack.packName || "关卡包") + ".zfl26pack.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function parsePackFromText(text) {
+        try {
+          const pack = JSON.parse(text);
+          const validation = validatePack(pack);
+          if (!validation.valid) {
+            return {
+              success: false,
+              errors: validation.errors
+            };
+          }
+          return {
+            success: true,
+            pack: pack
+          };
+        } catch (e) {
+          return {
+            success: false,
+            errors: ["JSON 解析失败：" + e.message]
+          };
+        }
+      }
+
+      function readPackFromFile(file) {
+        return new Promise(function(resolve, reject) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const text = e.target.result;
+            const result = parsePackFromText(text);
+            if (result.success) {
+              resolve(result.pack);
+            } else {
+              reject(result.errors.join("; "));
+            }
+          };
+          reader.onerror = function() {
+            reject("文件读取失败");
+          };
+          reader.readAsText(file);
+        });
+      }
+
+      return {
+        PACK_FORMAT_VERSION: PACK_FORMAT_VERSION,
+        GAME_VERSION: GAME_VERSION,
+        createPack: createPack,
+        validatePack: validatePack,
+        findDuplicates: findDuplicates,
+        importPack: importPack,
+        exportPackToFile: exportPackToFile,
+        parsePackFromText: parsePackFromText,
+        readPackFromFile: readPackFromFile
       };
     })();
 
@@ -2550,6 +2982,42 @@
     const saveLevelBtn = document.querySelector("#saveLevelBtn");
     const saveStatus = document.querySelector("#saveStatus");
     const backFromEditorBtn = document.querySelector("#backFromEditorBtn");
+    const exportCurrentLevelBtn = document.querySelector("#exportCurrentLevelBtn");
+
+    // ===================== 关卡包导入导出 DOM 引用 =====================
+    const exportPackBtn = document.querySelector("#exportPackBtn");
+    const importPackBtn = document.querySelector("#importPackBtn");
+    const packExportOverlay = document.querySelector("#packExportOverlay");
+    const packImportOverlay = document.querySelector("#packImportOverlay");
+    const exportPackName = document.querySelector("#exportPackName");
+    const exportPackAuthor = document.querySelector("#exportPackAuthor");
+    const exportPackDesc = document.querySelector("#exportPackDesc");
+    const exportLevelList = document.querySelector("#exportLevelList");
+    const exportSelectedCount = document.querySelector("#exportSelectedCount");
+    const selectAllExportBtn = document.querySelector("#selectAllExportBtn");
+    const deselectAllExportBtn = document.querySelector("#deselectAllExportBtn");
+    const confirmExportBtn = document.querySelector("#confirmExportBtn");
+    const cancelExportBtn = document.querySelector("#cancelExportBtn");
+    const exportPackError = document.querySelector("#exportPackError");
+
+    const importFromTextBtn = document.querySelector("#importFromTextBtn");
+    const importFromFileBtn = document.querySelector("#importFromFileBtn");
+    const importFileInput = document.querySelector("#importFileInput");
+    const importTextSection = document.querySelector("#importTextSection");
+    const importTextarea = document.querySelector("#importTextarea");
+    const parseImportTextBtn = document.querySelector("#parseImportTextBtn");
+    const importPackInfo = document.querySelector("#importPackInfo");
+    const importPackName = document.querySelector("#importPackName");
+    const importPackAuthor = document.querySelector("#importPackAuthor");
+    const importPackDesc = document.querySelector("#importPackDesc");
+    const importPackLevelCount = document.querySelector("#importPackLevelCount");
+    const importPackVersion = document.querySelector("#importPackVersion");
+    const importDuplicateWarning = document.querySelector("#importDuplicateWarning");
+    const importDuplicateCount = document.querySelector("#importDuplicateCount");
+    const confirmImportBtn = document.querySelector("#confirmImportBtn");
+    const cancelImportBtn = document.querySelector("#cancelImportBtn");
+    const importPackError = document.querySelector("#importPackError");
+    const importPackSuccess = document.querySelector("#importPackSuccess");
 
     // ===================== 游戏状态 =====================
     let state = "menu";
@@ -4233,6 +4701,309 @@
       setTimeout(function() {
         saveStatus.textContent = "";
       }, 3000);
+    });
+
+    let exportSelectedLevelIds = [];
+    let currentImportPack = null;
+    let currentDuplicateStrategy = "skip";
+
+    function showExportPackOverlay(preselectedLevelId) {
+      exportPackName.value = "";
+      exportPackAuthor.value = "";
+      exportPackDesc.value = "";
+      exportPackError.classList.add("hidden");
+
+      const customLevels = LevelData.loadCustomLevels();
+      const levelBests = LevelData.loadLevelBests();
+
+      if (preselectedLevelId) {
+        exportSelectedLevelIds = [preselectedLevelId];
+        const lvl = customLevels.find(function(l) { return l.id === preselectedLevelId; });
+        if (lvl) {
+          exportPackName.value = lvl.name + " 关卡";
+        }
+      } else {
+        exportSelectedLevelIds = customLevels.map(function(l) { return l.id; });
+      }
+
+      renderExportLevelList(customLevels, levelBests);
+      packExportOverlay.classList.remove("hidden");
+    }
+
+    function renderExportLevelList(customLevels, levelBests) {
+      exportLevelList.innerHTML = "";
+
+      if (customLevels.length === 0) {
+        exportLevelList.innerHTML = '<div style="text-align:center;color:#879aa0;padding:20px;">还没有自定义关卡</div>';
+        exportSelectedCount.textContent = "0 个";
+        confirmExportBtn.disabled = true;
+        return;
+      }
+
+      customLevels.forEach(function(lvl) {
+        const item = document.createElement("div");
+        item.className = "level-item";
+        item.style.cursor = "pointer";
+        const isSelected = exportSelectedLevelIds.indexOf(lvl.id) >= 0;
+        const best = levelBests[lvl.id] || 0;
+        item.innerHTML =
+          '<span style="display:flex;align-items:center;gap:8px;">' +
+            '<input type="checkbox" ' + (isSelected ? "checked" : "") + ' data-level="' + lvl.id + '" style="margin:0;">' +
+            '<span class="level-name">' + lvl.name + '</span>' +
+          '</span>' +
+          '<span class="level-best">' + (best > 0 ? best + " 分" : "无记录") + '</span>';
+        item.onclick = function(e) {
+          if (e.target.tagName !== "INPUT") {
+            const cb = item.querySelector('input[type="checkbox"]');
+            cb.checked = !cb.checked;
+          }
+          toggleExportLevelSelection(lvl.id);
+        };
+        exportLevelList.appendChild(item);
+      });
+
+      exportSelectedCount.textContent = exportSelectedLevelIds.length + " 个";
+      confirmExportBtn.disabled = exportSelectedLevelIds.length === 0;
+    }
+
+    function toggleExportLevelSelection(levelId) {
+      const idx = exportSelectedLevelIds.indexOf(levelId);
+      if (idx >= 0) {
+        exportSelectedLevelIds.splice(idx, 1);
+      } else {
+        exportSelectedLevelIds.push(levelId);
+      }
+      const customLevels = LevelData.loadCustomLevels();
+      const levelBests = LevelData.loadLevelBests();
+      renderExportLevelList(customLevels, levelBests);
+    }
+
+    function hideExportPackOverlay() {
+      packExportOverlay.classList.add("hidden");
+      exportSelectedLevelIds = [];
+      currentImportPack = null;
+    }
+
+    function showImportPackOverlay() {
+      importTextSection.classList.add("hidden");
+      importPackInfo.classList.add("hidden");
+      importPackError.classList.add("hidden");
+      importPackSuccess.classList.add("hidden");
+      importTextarea.value = "";
+      confirmImportBtn.disabled = true;
+      currentImportPack = null;
+      currentDuplicateStrategy = "skip";
+      document.querySelectorAll(".duplicate-option").forEach(function(opt) {
+        opt.classList.toggle("selected", opt.getAttribute("data-duplicate") === "skip");
+      });
+      document.querySelector('input[name="duplicateOpt"][value="skip"]').checked = true;
+      packImportOverlay.classList.remove("hidden");
+    }
+
+    function hideImportPackOverlay() {
+      packImportOverlay.classList.add("hidden");
+      currentImportPack = null;
+    }
+
+    function updateImportPackInfo(pack) {
+      importPackName.textContent = pack.packName || "-";
+      importPackAuthor.textContent = pack.author || "-";
+      importPackDesc.textContent = pack.description || "-";
+      importPackLevelCount.textContent = (pack.levels ? pack.levels.length : 0) + " 个";
+      importPackVersion.textContent = "v" + (pack.formatVersion || "?");
+
+      const duplicates = LevelPack.findDuplicates(pack.levels || []);
+      if (duplicates.length > 0) {
+        importDuplicateWarning.classList.remove("hidden");
+        importDuplicateCount.textContent = duplicates.length;
+      } else {
+        importDuplicateWarning.classList.add("hidden");
+      }
+
+      importPackInfo.classList.remove("hidden");
+      confirmImportBtn.disabled = false;
+    }
+
+    function handleImportParseResult(result) {
+      if (!result.success) {
+        importPackError.textContent = result.errors.join("；");
+        importPackError.classList.remove("hidden");
+        importPackInfo.classList.add("hidden");
+        importPackSuccess.classList.add("hidden");
+        confirmImportBtn.disabled = true;
+        return;
+      }
+
+      currentImportPack = result.pack;
+      importPackError.classList.add("hidden");
+      importPackSuccess.classList.add("hidden");
+      updateImportPackInfo(result.pack);
+    }
+
+    function performImport() {
+      if (!currentImportPack) return;
+
+      const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy);
+
+      if (!result.success) {
+        importPackError.textContent = result.message + "：" + (result.errors || []).join("；");
+        importPackError.classList.remove("hidden");
+        importPackSuccess.classList.add("hidden");
+        return;
+      }
+
+      let successMsg = "成功导入 " + result.totalImported + " 个关卡";
+      if (result.imported.length > 0) {
+        successMsg += "\n• 新增：" + result.imported.join("、");
+      }
+      if (result.overwritten.length > 0) {
+        successMsg += "\n• 覆盖：" + result.overwritten.join("、");
+      }
+      if (result.renamed.length > 0) {
+        successMsg += "\n• 重命名：" + result.renamed.join("、");
+      }
+      if (result.skipped.length > 0) {
+        successMsg += "\n• 跳过：" + result.skipped.join("、");
+      }
+
+      importPackSuccess.textContent = successMsg;
+      importPackSuccess.classList.remove("hidden");
+      importPackError.classList.add("hidden");
+
+      updateGlobalBest();
+      renderLevelCards();
+
+      setTimeout(function() {
+        hideImportPackOverlay();
+      }, 2000);
+    }
+
+    exportPackBtn.addEventListener("click", function() {
+      showExportPackOverlay();
+    });
+
+    importPackBtn.addEventListener("click", function() {
+      showImportPackOverlay();
+    });
+
+    exportCurrentLevelBtn.addEventListener("click", function() {
+      if (editorLevel && editorLevel.id && LevelData.isCustomLevel(editorLevel.id)) {
+        showExportPackOverlay(editorLevel.id);
+      } else {
+        const toSave = LevelData.normalizeLevel(editorLevel);
+        const saved = LevelData.saveCustomLevel(toSave);
+        editorLevel = saved;
+        showExportPackOverlay(saved.id);
+      }
+    });
+
+    cancelExportBtn.addEventListener("click", function() {
+      hideExportPackOverlay();
+    });
+
+    selectAllExportBtn.addEventListener("click", function() {
+      const customLevels = LevelData.loadCustomLevels();
+      exportSelectedLevelIds = customLevels.map(function(l) { return l.id; });
+      const levelBests = LevelData.loadLevelBests();
+      renderExportLevelList(customLevels, levelBests);
+    });
+
+    deselectAllExportBtn.addEventListener("click", function() {
+      exportSelectedLevelIds = [];
+      const customLevels = LevelData.loadCustomLevels();
+      const levelBests = LevelData.loadLevelBests();
+      renderExportLevelList(customLevels, levelBests);
+    });
+
+    confirmExportBtn.addEventListener("click", function() {
+      if (exportSelectedLevelIds.length === 0) {
+        exportPackError.textContent = "请至少选择一个关卡";
+        exportPackError.classList.remove("hidden");
+        return;
+      }
+
+      const customLevels = LevelData.loadCustomLevels();
+      const selectedLevels = customLevels.filter(function(l) {
+        return exportSelectedLevelIds.indexOf(l.id) >= 0;
+      });
+      const levelBests = LevelData.loadLevelBests();
+
+      const packInfo = {
+        name: exportPackName.value || "我的关卡包",
+        author: exportPackAuthor.value || "匿名玩家",
+        description: exportPackDesc.value || ""
+      };
+
+      const pack = LevelPack.createPack(packInfo, selectedLevels, levelBests);
+      LevelPack.exportPackToFile(pack);
+      hideExportPackOverlay();
+    });
+
+    packExportOverlay.addEventListener("click", function(e) {
+      if (e.target === packExportOverlay) {
+        hideExportPackOverlay();
+      }
+    });
+
+    cancelImportBtn.addEventListener("click", function() {
+      hideImportPackOverlay();
+    });
+
+    importFromTextBtn.addEventListener("click", function() {
+      importTextSection.classList.remove("hidden");
+    });
+
+    importFromFileBtn.addEventListener("click", function() {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      LevelPack.readPackFromFile(file).then(function(pack) {
+        handleImportParseResult({ success: true, pack: pack });
+      }).catch(function(err) {
+        importPackError.textContent = err;
+        importPackError.classList.remove("hidden");
+        importPackInfo.classList.add("hidden");
+        confirmImportBtn.disabled = true;
+      });
+
+      importFileInput.value = "";
+    });
+
+    parseImportTextBtn.addEventListener("click", function() {
+      const text = importTextarea.value.trim();
+      if (!text) {
+        importPackError.textContent = "请粘贴关卡包数据";
+        importPackError.classList.remove("hidden");
+        return;
+      }
+      const result = LevelPack.parsePackFromText(text);
+      handleImportParseResult(result);
+    });
+
+    confirmImportBtn.addEventListener("click", function() {
+      performImport();
+    });
+
+    packImportOverlay.addEventListener("click", function(e) {
+      if (e.target === packImportOverlay) {
+        hideImportPackOverlay();
+      }
+    });
+
+    document.querySelectorAll(".duplicate-option").forEach(function(opt) {
+      opt.addEventListener("click", function() {
+        currentDuplicateStrategy = opt.getAttribute("data-duplicate");
+        document.querySelectorAll(".duplicate-option").forEach(function(o) {
+          o.classList.remove("selected");
+        });
+        opt.classList.add("selected");
+        const radio = opt.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+      });
     });
 
     updateGlobalBest();
