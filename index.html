@@ -201,6 +201,69 @@
     }
     .replay-event-marker.arrive { background: #7dd69b; }
     .replay-event-marker.pause { background: #87d4e5; }
+    .replay-event-marker.weather { background: #e7c46a; height: 14px; top: -4px; }
+
+    .weather-status {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .weather-badge {
+      background: rgba(13, 29, 37, .9);
+      border: 1px solid #385c65;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      color: #eef6f2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.3);
+      animation: weatherFadeIn .4s ease-out;
+    }
+    .weather-badge .weather-icon {
+      font-size: 16px;
+    }
+    .weather-badge .weather-name {
+      font-weight: 700;
+      color: #e7c46a;
+    }
+    .weather-badge .weather-desc {
+      color: #a8bbc0;
+      font-size: 11px;
+    }
+    .weather-badge.sea-breeze { border-color: #5ab4c7; }
+    .weather-badge.sea-breeze .weather-name { color: #87d4e5; }
+    .weather-badge.dense-fog { border-color: #7a8a8f; }
+    .weather-badge.dense-fog .weather-name { color: #c9d7d7; }
+    .weather-badge.lighthouse-flash { border-color: #e7c46a; }
+    .weather-badge.lighthouse-flash .weather-name { color: #f5e7a2; }
+    .weather-progress {
+      height: 3px;
+      background: rgba(255,255,255,.1);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .weather-progress-bar {
+      height: 100%;
+      background: #e7c46a;
+      border-radius: 2px;
+      transition: width .1s linear;
+    }
+    .weather-badge.sea-breeze .weather-progress-bar { background: #87d4e5; }
+    .weather-badge.dense-fog .weather-progress-bar { background: #c9d7d7; }
+    .weather-badge.lighthouse-flash .weather-progress-bar { background: #f5e7a2; }
+
+    @keyframes weatherFadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
 
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } }
   </style>
@@ -349,6 +412,7 @@
     <main class="game">
       <div class="canvas-wrapper">
         <canvas id="game" width="960" height="600"></canvas>
+        <div class="weather-status" id="weatherStatus"></div>
         <div class="canvas-cursor-hint hidden" id="cursorHint"></div>
         <div class="replay-badge hidden" id="replayBadge">回 放 模 式</div>
         <div class="replay-controls hidden" id="replayControls">
@@ -425,7 +489,12 @@
           boatSpread: 330,
           rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}],
           fog: [{x:560,y:250,r:90}],
-          harbor: { x: 900, top: 70, bottom: 530 }
+          harbor: { x: 900, top: 70, bottom: 530 },
+          weather: {
+            seaBreeze: { enabled: true, minDuration: 8, maxDuration: 14, minCooldown: 20, maxCooldown: 35, driftMultiplier: 1.6, speedMultiplier: 1.1 },
+            denseFog: { enabled: false },
+            lighthouseFlash: { enabled: false }
+          }
         },
         {
           id: "builtin_1",
@@ -435,7 +504,12 @@
           boatSpread: 330,
           rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}],
           fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}],
-          harbor: { x: 900, top: 70, bottom: 530 }
+          harbor: { x: 900, top: 70, bottom: 530 },
+          weather: {
+            seaBreeze: { enabled: true, minDuration: 8, maxDuration: 16, minCooldown: 18, maxCooldown: 30, driftMultiplier: 1.9, speedMultiplier: 1.12 },
+            denseFog: { enabled: true, minDuration: 10, maxDuration: 18, minCooldown: 22, maxCooldown: 40, beamRangeMultiplier: 0.65, fogOpacity: 0.4 },
+            lighthouseFlash: { enabled: false }
+          }
         },
         {
           id: "builtin_2",
@@ -445,7 +519,12 @@
           boatSpread: 330,
           rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}],
           fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}],
-          harbor: { x: 900, top: 70, bottom: 530 }
+          harbor: { x: 900, top: 70, bottom: 530 },
+          weather: {
+            seaBreeze: { enabled: true, minDuration: 10, maxDuration: 20, minCooldown: 12, maxCooldown: 25, driftMultiplier: 2.2, speedMultiplier: 1.2 },
+            denseFog: { enabled: true, minDuration: 12, maxDuration: 22, minCooldown: 18, maxCooldown: 35, beamRangeMultiplier: 0.55, fogOpacity: 0.55 },
+            lighthouseFlash: { enabled: true, minDuration: 5, maxDuration: 10, minCooldown: 15, maxCooldown: 28, jitterAmount: 0.08, flickerIntensity: 0.4 }
+          }
         }
       ];
 
@@ -521,7 +600,12 @@
           boatSpread: 330,
           rocks: [],
           fog: [],
-          harbor: { x: 900, top: 70, bottom: 530 }
+          harbor: { x: 900, top: 70, bottom: 530 },
+          weather: {
+            seaBreeze: { enabled: false },
+            denseFog: { enabled: false },
+            lighthouseFlash: { enabled: false }
+          }
         };
       }
 
@@ -573,7 +657,12 @@
             x: level.harbor.x != null ? level.harbor.x : 900,
             top: level.harbor.top != null ? level.harbor.top : 70,
             bottom: level.harbor.bottom != null ? level.harbor.bottom : 530
-          } : { x: 900, top: 70, bottom: 530 }
+          } : { x: 900, top: 70, bottom: 530 },
+          weather: level.weather ? JSON.parse(JSON.stringify(level.weather)) : {
+            seaBreeze: { enabled: false },
+            denseFog: { enabled: false },
+            lighthouseFlash: { enabled: false }
+          }
         };
       }
 
@@ -706,6 +795,305 @@
         }.bind(this));
       }
     };
+
+    // ===================== WeatherSystem：动态天气事件系统 =====================
+    // 独立负责：天气事件的配置、触发、状态管理和效果输出
+    // 三种天气：海风（影响船只漂移）、浓雾扩散（降低可视范围）、灯塔闪烁（光束不稳定）
+    // 通过 getModifiers() 向游戏逻辑提供当前天气的累积影响
+    const WeatherSystem = (function() {
+      const WEATHER_TYPES = {
+        seaBreeze: {
+          id: "seaBreeze",
+          name: "海风",
+          icon: "🌬️",
+          desc: "船只漂移加剧",
+          cssClass: "sea-breeze",
+          defaultConfig: {
+            enabled: true,
+            minDuration: 8,
+            maxDuration: 18,
+            minCooldown: 15,
+            maxCooldown: 30,
+            driftMultiplier: 2.0,
+            speedMultiplier: 1.15
+          }
+        },
+        denseFog: {
+          id: "denseFog",
+          name: "浓雾扩散",
+          icon: "🌫️",
+          desc: "光束射程缩短",
+          cssClass: "dense-fog",
+          defaultConfig: {
+            enabled: true,
+            minDuration: 10,
+            maxDuration: 22,
+            minCooldown: 20,
+            maxCooldown: 40,
+            beamRangeMultiplier: 0.55,
+            fogOpacity: 0.5
+          }
+        },
+        lighthouseFlash: {
+          id: "lighthouseFlash",
+          name: "灯塔闪烁",
+          icon: "⚡",
+          desc: "光束角度抖动",
+          cssClass: "lighthouse-flash",
+          defaultConfig: {
+            enabled: true,
+            minDuration: 5,
+            maxDuration: 12,
+            minCooldown: 18,
+            maxCooldown: 35,
+            jitterAmount: 0.08,
+            flickerIntensity: 0.4
+          }
+        }
+      };
+
+      let activeEvents = [];
+      let cooldowns = {};
+      let config = {};
+      let enabled = true;
+      let listeners = {};
+      let jitterOffset = 0;
+      let jitterTarget = 0;
+      let jitterTimer = 0;
+
+      function init(levelWeatherConfig) {
+        activeEvents = [];
+        cooldowns = {};
+        jitterOffset = 0;
+        jitterTarget = 0;
+        jitterTimer = 0;
+        config = {};
+
+        const levelCfg = levelWeatherConfig || {};
+        for (const type in WEATHER_TYPES) {
+          const wt = WEATHER_TYPES[type];
+          const lvlCfg = levelCfg[type] || {};
+          config[type] = Object.assign({}, wt.defaultConfig, lvlCfg);
+          cooldowns[type] = config[type].minCooldown + Math.random() * (config[type].maxCooldown - config[type].minCooldown);
+        }
+      }
+
+      function setEnabled(v) {
+        enabled = v;
+        if (!enabled) {
+          activeEvents = [];
+          emit("changed", getActiveEvents());
+        }
+      }
+
+      function isEnabled() {
+        return enabled;
+      }
+
+      function startEvent(type) {
+        if (!enabled) return null;
+        const wt = WEATHER_TYPES[type];
+        if (!wt || !config[type] || !config[type].enabled) return null;
+        if (activeEvents.find(e => e.type === type)) return null;
+
+        const duration = config[type].minDuration + Math.random() * (config[type].maxDuration - config[type].minDuration);
+        const event = {
+          type: type,
+          duration: duration,
+          elapsed: 0,
+          intensity: 0,
+          phase: "in"
+        };
+        activeEvents.push(event);
+        cooldowns[type] = null;
+
+        emit("start", { type: type, event: event });
+        emit("changed", getActiveEvents());
+        return event;
+      }
+
+      function endEvent(type) {
+        const idx = activeEvents.findIndex(e => e.type === type);
+        if (idx < 0) return;
+        const event = activeEvents[idx];
+        event.phase = "out";
+        event.elapsed = event.duration;
+
+        emit("end", { type: type, event: event });
+      }
+
+      function update(dt) {
+        if (!enabled) return;
+
+        for (let i = activeEvents.length - 1; i >= 0; i--) {
+          const ev = activeEvents[i];
+          ev.elapsed += dt;
+
+          const fadeInTime = 1.5;
+          const fadeOutTime = 1.5;
+
+          if (ev.phase === "in") {
+            if (ev.elapsed < fadeInTime) {
+              ev.intensity = ev.elapsed / fadeInTime;
+            } else if (ev.elapsed < ev.duration - fadeOutTime) {
+              ev.intensity = 1;
+            } else {
+              ev.phase = "out";
+            }
+          }
+
+          if (ev.phase === "out") {
+            const timeLeft = ev.duration - ev.elapsed;
+            ev.intensity = Math.max(0, timeLeft / fadeOutTime);
+          }
+
+          if (ev.elapsed >= ev.duration) {
+            const type = ev.type;
+            activeEvents.splice(i, 1);
+            cooldowns[type] = config[type].minCooldown + Math.random() * (config[type].maxCooldown - config[type].minCooldown);
+            emit("changed", getActiveEvents());
+          }
+        }
+
+        for (const type in cooldowns) {
+          if (cooldowns[type] != null && config[type] && config[type].enabled) {
+            cooldowns[type] -= dt;
+            if (cooldowns[type] <= 0) {
+              startEvent(type);
+            }
+          }
+        }
+
+        if (isActive("lighthouseFlash")) {
+          const flash = getEvent("lighthouseFlash");
+          const intensity = flash ? flash.intensity : 0;
+          jitterTimer -= dt;
+          if (jitterTimer <= 0) {
+            const amount = config.lighthouseFlash.jitterAmount * intensity;
+            jitterTarget = (Math.random() * 2 - 1) * amount;
+            jitterTimer = 0.08 + Math.random() * 0.12;
+          }
+          jitterOffset += (jitterTarget - jitterOffset) * Math.min(1, dt * 15);
+        } else {
+          jitterOffset *= Math.max(0, 1 - dt * 8);
+        }
+      }
+
+      function isActive(type) {
+        return activeEvents.some(e => e.type === type && e.intensity > 0);
+      }
+
+      function getEvent(type) {
+        return activeEvents.find(e => e.type === type);
+      }
+
+      function getActiveEvents() {
+        return activeEvents.map(e => ({
+          type: e.type,
+          name: WEATHER_TYPES[e.type].name,
+          icon: WEATHER_TYPES[e.type].icon,
+          desc: WEATHER_TYPES[e.type].desc,
+          cssClass: WEATHER_TYPES[e.type].cssClass,
+          intensity: e.intensity,
+          duration: e.duration,
+          elapsed: e.elapsed,
+          remaining: Math.max(0, e.duration - e.elapsed),
+          phase: e.phase
+        }));
+      }
+
+      function getModifiers() {
+        let driftMult = 1;
+        let speedMult = 1;
+        let beamRangeMult = 1;
+        let beamJitter = 0;
+        let beamFlicker = 0;
+        let fogOpacity = 0;
+
+        for (const ev of activeEvents) {
+          const intensity = ev.intensity;
+          const cfg = config[ev.type];
+          if (!cfg) continue;
+
+          if (ev.type === "seaBreeze") {
+            driftMult += (cfg.driftMultiplier - 1) * intensity;
+            speedMult += (cfg.speedMultiplier - 1) * intensity;
+          } else if (ev.type === "denseFog") {
+            beamRangeMult -= (1 - cfg.beamRangeMultiplier) * intensity;
+            fogOpacity += cfg.fogOpacity * intensity;
+          } else if (ev.type === "lighthouseFlash") {
+            beamJitter = jitterOffset;
+            beamFlicker = cfg.flickerIntensity * intensity;
+          }
+        }
+
+        return {
+          driftMultiplier: driftMult,
+          speedMultiplier: speedMult,
+          beamRangeMultiplier: beamRangeMult,
+          beamJitter: beamJitter,
+          beamFlicker: beamFlicker,
+          fogOpacity: fogOpacity,
+          hasWeather: activeEvents.length > 0
+        };
+      }
+
+      function getConfig() {
+        return config;
+      }
+
+      function getWeatherTypes() {
+        return WEATHER_TYPES;
+      }
+
+      function on(event, cb) {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(cb);
+      }
+
+      function off(event, cb) {
+        if (!listeners[event]) return;
+        const i = listeners[event].indexOf(cb);
+        if (i >= 0) listeners[event].splice(i, 1);
+      }
+
+      function emit(event, data) {
+        if (!listeners[event]) return;
+        listeners[event].forEach(function(cb) {
+          try { cb(data); } catch (e) { console.error(e); }
+        });
+      }
+
+      function reset() {
+        activeEvents = [];
+        jitterOffset = 0;
+        jitterTarget = 0;
+        for (const type in config) {
+          if (config[type] && config[type].enabled) {
+            cooldowns[type] = config[type].minCooldown + Math.random() * (config[type].maxCooldown - config[type].minCooldown);
+          }
+        }
+        emit("changed", getActiveEvents());
+      }
+
+      return {
+        init: init,
+        update: update,
+        reset: reset,
+        startEvent: startEvent,
+        endEvent: endEvent,
+        isActive: isActive,
+        getEvent: getEvent,
+        getActiveEvents: getActiveEvents,
+        getModifiers: getModifiers,
+        getConfig: getConfig,
+        getWeatherTypes: getWeatherTypes,
+        setEnabled: setEnabled,
+        isEnabled: isEnabled,
+        on: on,
+        off: off
+      };
+    })();
 
     // ===================== ReplayRecorder：回放记录器 =====================
     // 独立负责：记录帧数据（光束角度、宽窄、游戏关键状态）和事件
@@ -1123,11 +1511,14 @@
           let cls = "";
           if (ev.type === "boatArrived") cls = "arrive";
           else if (ev.type === "pause" || ev.type === "resume") cls = "pause";
-          else if (ev.type !== "boatLost") return;
+          else if (ev.type === "weatherStart") cls = "weather";
+          else if (ev.type !== "boatLost" && ev.type !== "weatherEnd") return;
           const marker = document.createElement("div");
           marker.className = "replay-event-marker " + cls;
           marker.style.left = ((ev.t / duration) * 100) + "%";
-          marker.title = ev.type + " @" + fmtTime(ev.t);
+          let title = ev.type;
+          if (ev.data && ev.data.type) title += " (" + ev.data.type + ")";
+          marker.title = title + " @" + fmtTime(ev.t);
           slider.appendChild(marker);
         });
       }
@@ -1361,8 +1752,16 @@
         const displayIdx = isBuiltin ? (parseInt(lvl.id.split("_")[1]) + 1) : (idx - builtinCount + 1);
         const prefix = isBuiltin ? "第" + displayIdx + "关：" : "自定义" + displayIdx + "：";
 
+        let weatherIcons = "";
+        if (lvl.weather) {
+          if (lvl.weather.seaBreeze && lvl.weather.seaBreeze.enabled) weatherIcons += "🌬️";
+          if (lvl.weather.denseFog && lvl.weather.denseFog.enabled) weatherIcons += "🌫️";
+          if (lvl.weather.lighthouseFlash && lvl.weather.lighthouseFlash.enabled) weatherIcons += "⚡";
+        }
+        const weatherLabel = weatherIcons ? '<span style="float:right;font-size:14px;" title="天气事件">' + weatherIcons + '</span>' : '';
+
         card.innerHTML =
-          '<div class="level-header"><h3 style="margin:0;">' + prefix + lvl.name + customTag + lockIcon + '</h3>' + editBtnHtml + '</div>' +
+          '<div class="level-header"><h3 style="margin:0;">' + prefix + lvl.name + customTag + lockIcon + weatherLabel + '</h3>' + editBtnHtml + '</div>' +
           '<div class="level-stats" style="margin-top:8px;">' +
             '<span>船只</span><b>' + lvl.boats + ' 艘</b>' +
             '<span>暗礁</span><b>' + lvl.rocks.length + ' 个</b>' +
@@ -1669,6 +2068,9 @@
       updatePauseHint();
       updateHud();
 
+      WeatherSystem.init(data.weather);
+      updateWeatherUI();
+
       if (!playtestLevel) {
         ReplayRecorder.start(data, currentLevelId, {
           beamAngle: beamAngle,
@@ -1684,9 +2086,12 @@
       const dx = boat.x - lighthouse.x;
       const dy = boat.y - lighthouse.y;
       const angle = Math.atan2(dy, dx);
-      let diff = Math.atan2(Math.sin(angle - beamAngle), Math.cos(angle - beamAngle));
+      const weatherMods = WeatherSystem.getModifiers();
+      const effectiveBeamAngle = beamAngle + weatherMods.beamJitter;
+      let diff = Math.atan2(Math.sin(angle - effectiveBeamAngle), Math.cos(angle - effectiveBeamAngle));
       const width = beamWide ? 0.42 : 0.22;
-      return Math.abs(diff) < width && Math.hypot(dx, dy) < 760;
+      const range = 760 * weatherMods.beamRangeMultiplier;
+      return Math.abs(diff) < width && Math.hypot(dx, dy) < range;
     }
 
     function hitRock(boat) {
@@ -1704,6 +2109,11 @@
       if (state !== "playing") return;
       if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
       if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
+
+      WeatherSystem.update(dt);
+      updateWeatherUI();
+
+      const weatherMods = WeatherSystem.getModifiers();
       const data = getCurrentLevelData();
       const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
 
@@ -1718,8 +2128,10 @@
         const lit = inBeam(boat);
         boat.lit += lit ? dt * 1.8 : -dt;
         boat.lit = Math.max(0, Math.min(4, boat.lit));
-        boat.x += boat.speed * dt;
-        boat.y += Math.sin(boat.x / 60) * boat.drift * dt + (lit ? 0 : boat.drift * dt * .6);
+        const effectiveSpeed = boat.speed * weatherMods.speedMultiplier;
+        const effectiveDrift = boat.drift * weatherMods.driftMultiplier;
+        boat.x += effectiveSpeed * dt;
+        boat.y += Math.sin(boat.x / 60) * effectiveDrift * dt + (lit ? 0 : effectiveDrift * dt * .6);
         if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
           boat.lost = true;
           SoundManager.crash();
@@ -1959,10 +2371,43 @@
       arrivedText.textContent = boats.filter(boat => boat.arrived).length + " / " + boats.length;
     }
 
+    function updateWeatherUI() {
+      const container = document.getElementById("weatherStatus");
+      if (!container) return;
+
+      if (state !== "playing" && state !== "paused") {
+        container.innerHTML = "";
+        return;
+      }
+
+      const events = WeatherSystem.getActiveEvents();
+      if (events.length === 0) {
+        container.innerHTML = "";
+        return;
+      }
+
+      let html = "";
+      for (const ev of events) {
+        const progress = ev.duration > 0 ? (ev.elapsed / ev.duration) * 100 : 0;
+        const remainingSec = Math.ceil(ev.remaining);
+        html +=
+          '<div class="weather-badge ' + ev.cssClass + '">' +
+            '<span class="weather-icon">' + ev.icon + '</span>' +
+            '<div style="flex:1;min-width:0;">' +
+              '<div class="weather-name">' + ev.name + '</div>' +
+              '<div class="weather-desc">' + ev.desc + ' · 剩余 ' + remainingSec + 's</div>' +
+              '<div class="weather-progress"><div class="weather-progress-bar" style="width:' + progress + '%"></div></div>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+    }
+
     // ===================== 绘制 =====================
     function drawGameScene(drawBoats) {
       const data = getCurrentLevelData();
       const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
+      const weatherMods = WeatherSystem.getModifiers();
 
       ctx.clearRect(0, 0, 960, 600);
       const sea = ctx.createLinearGradient(0, 0, 960, 600);
@@ -1973,6 +2418,21 @@
       ctx.strokeStyle = "rgba(140,190,190,.12)";
       for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
 
+      if (weatherMods.driftMultiplier > 1.01) {
+        const windIntensity = (weatherMods.driftMultiplier - 1) * 2;
+        ctx.strokeStyle = "rgba(180, 220, 230, " + (0.08 * windIntensity) + ")";
+        ctx.lineWidth = 1;
+        const time = Date.now() / 1000;
+        for (let i = 0; i < 15; i++) {
+          const y = (i * 43 + time * 30 * windIntensity) % 600;
+          const x = ((i * 73) % 960 + time * 80 * windIntensity) % 960;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + 20 + windIntensity * 15, y + 2);
+          ctx.stroke();
+        }
+      }
+
       for (const fog of data.fog) {
         const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
         g.addColorStop(0, "rgba(180,190,180,.26)");
@@ -1980,6 +2440,17 @@
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
       }
+
+      if (weatherMods.fogOpacity > 0.01) {
+        const fogAlpha = weatherMods.fogOpacity * 0.6;
+        const fogGrad = ctx.createRadialGradient(480, 300, 100, 480, 300, 600);
+        fogGrad.addColorStop(0, "rgba(200, 210, 210, 0)");
+        fogGrad.addColorStop(0.5, "rgba(180, 190, 190, " + (fogAlpha * 0.5) + ")");
+        fogGrad.addColorStop(1, "rgba(160, 170, 175, " + fogAlpha + ")");
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 0, 960, 600);
+      }
+
       for (const rock of data.rocks) {
         ctx.fillStyle = "#273a3a";
         ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
@@ -1993,19 +2464,35 @@
       ctx.fillRect(harbor.x - 20, harbor.top, 20, harborH);
 
       if (drawBoats !== false) {
+        const effectiveBeamAngle = beamAngle + weatherMods.beamJitter;
+        const beamAlpha = 0.24 * (1 - weatherMods.beamFlicker * 0.5);
+        const beamRange = 780 * weatherMods.beamRangeMultiplier;
+
         ctx.save();
         ctx.translate(lighthouse.x, lighthouse.y);
-        ctx.rotate(beamAngle);
-        ctx.fillStyle = "rgba(247,220,125,.24)";
+        ctx.rotate(effectiveBeamAngle);
+        ctx.fillStyle = "rgba(247,220,125," + beamAlpha + ")";
         ctx.beginPath();
         const w = beamWide ? 0.42 : 0.22;
         ctx.moveTo(0, 0);
-        ctx.arc(0, 0, 780, -w, w);
+        ctx.arc(0, 0, beamRange, -w, w);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
-        ctx.fillStyle = "#e7c46a";
+
+        const lighthouseIntensity = 1 - weatherMods.beamFlicker * 0.3;
+        ctx.fillStyle = "rgba(231, 196, 106, " + lighthouseIntensity + ")";
         ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
+        if (weatherMods.beamFlicker > 0.01) {
+          const glowSize = 25 + weatherMods.beamFlicker * 20;
+          const glowAlpha = 0.3 + weatherMods.beamFlicker * 0.4;
+          const glow = ctx.createRadialGradient(lighthouse.x, lighthouse.y, 5, lighthouse.x, lighthouse.y, glowSize);
+          glow.addColorStop(0, "rgba(255, 240, 180, " + glowAlpha + ")");
+          glow.addColorStop(1, "rgba(255, 240, 180, 0)");
+          ctx.fillStyle = glow;
+          ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, glowSize, 0, Math.PI * 2); ctx.fill();
+        }
 
         for (const boat of boats) {
           ctx.save();
@@ -2472,6 +2959,23 @@
         resetLevel();
       }
     };
+
+    WeatherSystem.on("start", function(ev) {
+      if (ReplayRecorder.isRecording()) {
+        ReplayRecorder.recordEvent("weatherStart", {
+          type: ev.type,
+          duration: ev.event.duration
+        });
+      }
+    });
+    WeatherSystem.on("end", function(ev) {
+      if (ReplayRecorder.isRecording()) {
+        ReplayRecorder.recordEvent("weatherEnd", {
+          type: ev.type
+        });
+      }
+    });
+
     applySettings();
     requestAnimationFrame(loop);
   </script>
