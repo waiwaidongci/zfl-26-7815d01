@@ -71,7 +71,138 @@
     .canvas-wrapper { position: relative; }
     .canvas-cursor-hint { position: absolute; bottom: 10px; left: 10px; background: rgba(13,29,37,.85); color: #e7c46a; font-size: 12px; padding: 6px 12px; border-radius: 6px; pointer-events: none; }
 
-    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } }
+    .replay-controls {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 29, 37, .95);
+      border: 1px solid #385c65;
+      border-radius: 10px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+      pointer-events: auto;
+      min-width: 480px;
+    }
+    .replay-btn {
+      width: auto;
+      min-width: 38px;
+      height: 38px;
+      border: 0;
+      border-radius: 8px;
+      background: #24414b;
+      color: #eef6f2;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0 10px;
+      margin: 0;
+      transition: all .15s;
+    }
+    .replay-btn:hover:not(:disabled) { background: #3d6a78; }
+    .replay-btn.primary { background: #e7c46a; color: #15212a; }
+    .replay-btn.primary:hover:not(:disabled) { background: #f0d487; }
+    .replay-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .replay-progress {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .replay-time {
+      font-size: 12px;
+      color: #a8bbc0;
+      font-variant-numeric: tabular-nums;
+      min-width: 48px;
+      text-align: center;
+    }
+    .replay-slider {
+      flex: 1;
+      height: 6px;
+      background: #142f3a;
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+      overflow: visible;
+    }
+    .replay-slider-filled {
+      height: 100%;
+      background: #e7c46a;
+      border-radius: 3px;
+      width: 0%;
+      transition: width .05s linear;
+    }
+    .replay-slider-thumb {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      background: #e7c46a;
+      border-radius: 50%;
+      left: 0%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .4);
+      transition: left .05s linear;
+    }
+    .replay-speed {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: #142f3a;
+      border-radius: 6px;
+      padding: 2px;
+    }
+    .replay-speed-btn {
+      width: auto;
+      height: 30px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #a8bbc0;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 8px;
+      margin: 0;
+    }
+    .replay-speed-btn.active {
+      background: #e7c46a;
+      color: #15212a;
+    }
+    .replay-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(231, 196, 106, .95);
+      color: #15212a;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 6px;
+      z-index: 15;
+      pointer-events: none;
+      letter-spacing: .5px;
+    }
+    .replay-event-marker {
+      position: absolute;
+      top: -3px;
+      width: 3px;
+      height: 12px;
+      background: #e2685d;
+      border-radius: 2px;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .replay-event-marker.arrive { background: #7dd69b; }
+    .replay-event-marker.pause { background: #87d4e5; }
+
+    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } }
   </style>
 </head>
 <body>
@@ -219,6 +350,27 @@
       <div class="canvas-wrapper">
         <canvas id="game" width="960" height="600"></canvas>
         <div class="canvas-cursor-hint hidden" id="cursorHint"></div>
+        <div class="replay-badge hidden" id="replayBadge">回 放 模 式</div>
+        <div class="replay-controls hidden" id="replayControls">
+          <button class="replay-btn" id="replayBackBtn" title="后退5秒">⏪</button>
+          <button class="replay-btn primary" id="replayPlayBtn" title="播放/暂停">▶</button>
+          <button class="replay-btn" id="replayFwdBtn" title="前进5秒">⏩</button>
+          <div class="replay-progress">
+            <span class="replay-time" id="replayCurTime">0:00</span>
+            <div class="replay-slider" id="replaySlider">
+              <div class="replay-slider-filled" id="replaySliderFilled"></div>
+              <div class="replay-slider-thumb" id="replaySliderThumb"></div>
+            </div>
+            <span class="replay-time" id="replayDurTime">0:00</span>
+          </div>
+          <div class="replay-speed">
+            <button class="replay-speed-btn" data-speed="0.5">0.5x</button>
+            <button class="replay-speed-btn active" data-speed="1">1x</button>
+            <button class="replay-speed-btn" data-speed="2">2x</button>
+            <button class="replay-speed-btn" data-speed="4">4x</button>
+          </div>
+          <button class="replay-btn danger" id="replayExitBtn" title="退出回放" style="background:#8a3b3b;color:#eef6f2;">✕</button>
+        </div>
       </div>
       <button class="game-settings-btn" id="gameSettingsBtn" title="游戏设置">⚙</button>
       <button class="game-settings-btn" id="backFromPlaytestBtn" title="返回编辑器" style="top: 60px; display: none;">✕</button>
@@ -554,6 +706,479 @@
         }.bind(this));
       }
     };
+
+    // ===================== ReplayRecorder：回放记录器 =====================
+    // 独立负责：记录帧数据（光束角度、宽窄、游戏关键状态）和事件
+    // 与游戏更新逻辑完全解耦，只通过 recordFrame() / recordEvent() 两个接口接收数据
+    const ReplayRecorder = (function() {
+      let recording = false;
+      let startTime = 0;
+      let lastFrameTime = 0;
+      let frames = [];
+      let events = [];
+      let meta = null;
+      const FRAME_INTERVAL = 1 / 30;
+      let accumulator = 0;
+
+      function start(levelData, levelId, initialSnapshot) {
+        recording = true;
+        startTime = performance.now();
+        lastFrameTime = startTime;
+        accumulator = 0;
+        frames = [];
+        events = [];
+        meta = {
+          version: 1,
+          levelId: levelId,
+          levelData: JSON.parse(JSON.stringify(levelData)),
+          created: Date.now(),
+          finalScore: 0,
+          outcome: null,
+          duration: 0
+        };
+        frames.push({
+          t: 0,
+          beamAngle: initialSnapshot.beamAngle,
+          beamWide: initialSnapshot.beamWide,
+          paused: false,
+          score: initialSnapshot.score,
+          arrivedCount: 0,
+          boats: cloneBoats(initialSnapshot.boats)
+        });
+      }
+
+      function cloneBoats(boatArr) {
+        return boatArr.map(function(b) {
+          return {
+            x: b.x, y: b.y, speed: b.speed, drift: b.drift,
+            lit: b.lit, arrived: b.arrived, lost: b.lost, harborX: b.harborX
+          };
+        });
+      }
+
+      function recordFrame(currentState, dt) {
+        if (!recording) return;
+        accumulator += dt;
+        while (accumulator >= FRAME_INTERVAL) {
+          accumulator -= FRAME_INTERVAL;
+          const frameT = (performance.now() - startTime) / 1000;
+          frames.push({
+            t: frameT,
+            beamAngle: currentState.beamAngle,
+            beamWide: currentState.beamWide,
+            paused: currentState.paused,
+            score: currentState.score,
+            arrivedCount: currentState.arrivedCount,
+            boats: cloneBoats(currentState.boats)
+          });
+        }
+      }
+
+      function recordEvent(type, data) {
+        if (!recording) return;
+        events.push({
+          t: (performance.now() - startTime) / 1000,
+          type: type,
+          data: data || null
+        });
+      }
+
+      function stop(finalScore, outcome) {
+        if (!recording) return null;
+        recording = false;
+        const endTime = (performance.now() - startTime) / 1000;
+        meta.finalScore = finalScore;
+        meta.outcome = outcome;
+        meta.duration = endTime;
+        return {
+          meta: meta,
+          frames: frames,
+          events: events
+        };
+      }
+
+      function isRecording() {
+        return recording;
+      }
+
+      function getElapsed() {
+        if (!recording) return 0;
+        return (performance.now() - startTime) / 1000;
+      }
+
+      return {
+        start: start,
+        recordFrame: recordFrame,
+        recordEvent: recordEvent,
+        stop: stop,
+        isRecording: isRecording,
+        getElapsed: getElapsed
+      };
+    })();
+
+    // ===================== ReplayPlayer：回放播放器 =====================
+    // 独立负责：加载回放数据、控制播放进度、按时间输出当前帧状态
+    // 不操作真实游戏状态，不触碰得分/存档逻辑，只通过 getCurrentRenderState() 提供渲染数据
+    const ReplayPlayer = (function() {
+      let replayData = null;
+      let playing = false;
+      let currentTime = 0;
+      let speed = 1;
+      let lastTick = 0;
+      let listeners = {};
+
+      function load(data) {
+        if (!data || !data.frames || data.frames.length === 0) return false;
+        replayData = data;
+        currentTime = 0;
+        playing = false;
+        speed = 1;
+        emit("loaded", data);
+        emit("timeUpdate", currentTime);
+        return true;
+      }
+
+      function play() {
+        if (!replayData) return;
+        if (currentTime >= replayData.meta.duration) {
+          currentTime = 0;
+        }
+        playing = true;
+        lastTick = performance.now();
+        emit("play");
+      }
+
+      function pause() {
+        playing = false;
+        emit("pause");
+      }
+
+      function toggle() {
+        if (playing) pause(); else play();
+      }
+
+      function seek(time) {
+        if (!replayData) return;
+        currentTime = Math.max(0, Math.min(replayData.meta.duration, time));
+        emit("timeUpdate", currentTime);
+        emit("seek", currentTime);
+      }
+
+      function stepForward(seconds) {
+        seek(currentTime + seconds);
+      }
+
+      function stepBackward(seconds) {
+        seek(currentTime - seconds);
+      }
+
+      function setSpeed(s) {
+        speed = s;
+        emit("speedChange", speed);
+      }
+
+      function getSpeed() {
+        return speed;
+      }
+
+      function isPlaying() {
+        return playing;
+      }
+
+      function isLoaded() {
+        return replayData !== null;
+      }
+
+      function getDuration() {
+        return replayData ? replayData.meta.duration : 0;
+      }
+
+      function getCurrentTime() {
+        return currentTime;
+      }
+
+      function getMeta() {
+        return replayData ? replayData.meta : null;
+      }
+
+      function getEvents() {
+        return replayData ? replayData.events : [];
+      }
+
+      function findFrameIndex(time) {
+        if (!replayData) return -1;
+        const fs = replayData.frames;
+        let lo = 0, hi = fs.length - 1;
+        if (time <= fs[0].t) return 0;
+        if (time >= fs[hi].t) return hi;
+        while (lo < hi - 1) {
+          const mid = (lo + hi) >> 1;
+          if (fs[mid].t <= time) lo = mid; else hi = mid;
+        }
+        return lo;
+      }
+
+      function interpolateFrame(f1, f2, t) {
+        const alpha = (t - f1.t) / Math.max(0.0001, f2.t - f1.t);
+        const a = Math.min(1, Math.max(0, alpha));
+        const boats = [];
+        for (let i = 0; i < f1.boats.length; i++) {
+          const b1 = f1.boats[i];
+          const b2 = f2.boats[i];
+          boats.push({
+            x: b1.x + (b2.x - b1.x) * a,
+            y: b1.y + (b2.y - b1.y) * a,
+            speed: b1.speed + (b2.speed - b1.speed) * a,
+            drift: b1.drift + (b2.drift - b1.drift) * a,
+            lit: b1.lit + (b2.lit - b1.lit) * a,
+            arrived: b2.arrived,
+            lost: b2.lost,
+            harborX: b1.harborX
+          });
+        }
+        return {
+          t: t,
+          beamAngle: f1.beamAngle + (f2.beamAngle - f1.beamAngle) * a,
+          beamWide: a < 0.5 ? f1.beamWide : f2.beamWide,
+          paused: f2.paused,
+          score: f2.score,
+          arrivedCount: f2.arrivedCount,
+          boats: boats
+        };
+      }
+
+      function getCurrentRenderState() {
+        if (!replayData) return null;
+        const fs = replayData.frames;
+        const idx = findFrameIndex(currentTime);
+        if (idx < 0) return null;
+        if (idx >= fs.length - 1) return fs[fs.length - 1];
+        return interpolateFrame(fs[idx], fs[idx + 1], currentTime);
+      }
+
+      function tick() {
+        if (!playing || !replayData) return;
+        const now = performance.now();
+        const realDt = (now - lastTick) / 1000;
+        lastTick = now;
+        currentTime += realDt * speed;
+        if (currentTime >= replayData.meta.duration) {
+          currentTime = replayData.meta.duration;
+          playing = false;
+          emit("timeUpdate", currentTime);
+          emit("ended");
+          emit("pause");
+          return;
+        }
+        emit("timeUpdate", currentTime);
+      }
+
+      function on(event, cb) {
+        if (!listeners[event]) listeners[event] = [];
+        listeners[event].push(cb);
+      }
+
+      function off(event, cb) {
+        if (!listeners[event]) return;
+        const i = listeners[event].indexOf(cb);
+        if (i >= 0) listeners[event].splice(i, 1);
+      }
+
+      function emit(event, data) {
+        if (!listeners[event]) return;
+        listeners[event].forEach(function(cb) {
+          try { cb(data); } catch (e) { console.error(e); }
+        });
+      }
+
+      function reset() {
+        replayData = null;
+        playing = false;
+        currentTime = 0;
+        speed = 1;
+        listeners = {};
+      }
+
+      return {
+        load: load,
+        play: play,
+        pause: pause,
+        toggle: toggle,
+        seek: seek,
+        stepForward: stepForward,
+        stepBackward: stepBackward,
+        setSpeed: setSpeed,
+        getSpeed: getSpeed,
+        isPlaying: isPlaying,
+        isLoaded: isLoaded,
+        getDuration: getDuration,
+        getCurrentTime: getCurrentTime,
+        getMeta: getMeta,
+        getEvents: getEvents,
+        getCurrentRenderState: getCurrentRenderState,
+        tick: tick,
+        on: on,
+        off: off,
+        reset: reset
+      };
+    })();
+
+    // ===================== ReplayController：回放UI控制器 =====================
+    // 独立负责：连接 ReplayPlayer 和 DOM 界面，处理用户交互
+    // 不直接操作游戏逻辑，只协调播放状态与UI显示
+    const ReplayController = (function() {
+      let initialized = false;
+      let lastReplayData = null;
+      let onExitCallback = null;
+
+      function fmtTime(sec) {
+        sec = Math.max(0, sec || 0);
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ":" + (s < 10 ? "0" : "") + s;
+      }
+
+      function init() {
+        if (initialized) return;
+        initialized = true;
+
+        const playBtn = document.getElementById("replayPlayBtn");
+        const backBtn = document.getElementById("replayBackBtn");
+        const fwdBtn = document.getElementById("replayFwdBtn");
+        const exitBtn = document.getElementById("replayExitBtn");
+        const slider = document.getElementById("replaySlider");
+        const speedBtns = document.querySelectorAll(".replay-speed-btn");
+
+        playBtn.addEventListener("click", function() {
+          ReplayPlayer.toggle();
+        });
+        backBtn.addEventListener("click", function() {
+          ReplayPlayer.stepBackward(5);
+        });
+        fwdBtn.addEventListener("click", function() {
+          ReplayPlayer.stepForward(5);
+        });
+        exitBtn.addEventListener("click", function() {
+          exitReplay();
+        });
+
+        let draggingSlider = false;
+        function sliderSeek(e) {
+          const rect = slider.getBoundingClientRect();
+          const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+          const ratio = Math.max(0, Math.min(1, x / rect.width));
+          ReplayPlayer.seek(ratio * ReplayPlayer.getDuration());
+        }
+        slider.addEventListener("mousedown", function(e) {
+          draggingSlider = true;
+          sliderSeek(e);
+        });
+        slider.addEventListener("touchstart", function(e) {
+          draggingSlider = true;
+          sliderSeek(e);
+        }, { passive: true });
+        window.addEventListener("mousemove", function(e) {
+          if (draggingSlider) sliderSeek(e);
+        });
+        window.addEventListener("touchmove", function(e) {
+          if (draggingSlider) sliderSeek(e);
+        }, { passive: true });
+        window.addEventListener("mouseup", function() { draggingSlider = false; });
+        window.addEventListener("touchend", function() { draggingSlider = false; });
+
+        speedBtns.forEach(function(btn) {
+          btn.addEventListener("click", function() {
+            const s = parseFloat(btn.getAttribute("data-speed"));
+            ReplayPlayer.setSpeed(s);
+            speedBtns.forEach(function(b) { b.classList.toggle("active", b === btn); });
+          });
+        });
+
+        ReplayPlayer.on("play", function() {
+          playBtn.textContent = "⏸";
+          playBtn.title = "暂停";
+        });
+        ReplayPlayer.on("pause", function() {
+          playBtn.textContent = "▶";
+          playBtn.title = "播放";
+        });
+        ReplayPlayer.on("ended", function() {
+          playBtn.textContent = "↺";
+          playBtn.title = "重新播放";
+        });
+        ReplayPlayer.on("timeUpdate", function(t) {
+          updateProgressUI(t);
+        });
+        ReplayPlayer.on("loaded", function(data) {
+          document.getElementById("replayDurTime").textContent = fmtTime(data.meta.duration);
+          buildEventMarkers(data.events, data.meta.duration);
+        });
+      }
+
+      function buildEventMarkers(events, duration) {
+        const slider = document.getElementById("replaySlider");
+        slider.querySelectorAll(".replay-event-marker").forEach(function(el) { el.remove(); });
+        if (!duration) return;
+        events.forEach(function(ev) {
+          let cls = "";
+          if (ev.type === "boatArrived") cls = "arrive";
+          else if (ev.type === "pause" || ev.type === "resume") cls = "pause";
+          else if (ev.type !== "boatLost") return;
+          const marker = document.createElement("div");
+          marker.className = "replay-event-marker " + cls;
+          marker.style.left = ((ev.t / duration) * 100) + "%";
+          marker.title = ev.type + " @" + fmtTime(ev.t);
+          slider.appendChild(marker);
+        });
+      }
+
+      function updateProgressUI(t) {
+        const dur = ReplayPlayer.getDuration();
+        const ratio = dur > 0 ? (t / dur) * 100 : 0;
+        document.getElementById("replaySliderFilled").style.width = ratio + "%";
+        document.getElementById("replaySliderThumb").style.left = ratio + "%";
+        document.getElementById("replayCurTime").textContent = fmtTime(t);
+      }
+
+      function enterReplay(replayData, exitCallback) {
+        init();
+        lastReplayData = replayData;
+        onExitCallback = exitCallback || null;
+
+        if (!ReplayPlayer.load(replayData)) {
+          alert("回放数据加载失败");
+          return false;
+        }
+
+        document.getElementById("replayBadge").classList.remove("hidden");
+        document.getElementById("replayControls").classList.remove("hidden");
+        updateProgressUI(0);
+        return true;
+      }
+
+      function exitReplay() {
+        ReplayPlayer.pause();
+        ReplayPlayer.reset();
+        document.getElementById("replayBadge").classList.add("hidden");
+        document.getElementById("replayControls").classList.add("hidden");
+        if (onExitCallback) {
+          const cb = onExitCallback;
+          onExitCallback = null;
+          cb();
+        }
+      }
+
+      function isInReplay() {
+        return !document.getElementById("replayControls").classList.contains("hidden");
+      }
+
+      return {
+        init: init,
+        enterReplay: enterReplay,
+        exitReplay: exitReplay,
+        isInReplay: isInReplay
+      };
+    })();
 
     // ===================== DOM 引用 =====================
     const canvas = document.querySelector("#game");
@@ -1013,6 +1638,8 @@
       resetLevel();
     }
 
+    let lastReplayData = null;
+
     function resetLevel() {
       applySettings();
       SoundManager.startGame();
@@ -1041,6 +1668,16 @@
       overlay.classList.add("hidden");
       updatePauseHint();
       updateHud();
+
+      if (!playtestLevel) {
+        ReplayRecorder.start(data, currentLevelId, {
+          beamAngle: beamAngle,
+          beamWide: beamWide,
+          score: score,
+          boats: boats
+        });
+        ReplayRecorder.recordEvent("levelStart", { levelId: currentLevelId });
+      }
     }
 
     function inBeam(boat) {
@@ -1058,11 +1695,23 @@
     }
 
     function update(dt) {
+      if (ReplayController.isInReplay()) {
+        ReplayPlayer.tick();
+        const rs = ReplayPlayer.getCurrentRenderState();
+        if (rs) updateHudForReplay(rs);
+        return;
+      }
       if (state !== "playing") return;
       if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
       if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
       const data = getCurrentLevelData();
       const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
+
+      let arrivedBefore, lostBefore;
+      for (let i = 0; i < boats.length; i++) {
+        boats[i]._prevArrived = boats[i].arrived;
+        boats[i]._prevLost = boats[i].lost;
+      }
 
       for (const boat of boats) {
         if (boat.arrived || boat.lost) continue;
@@ -1074,6 +1723,13 @@
         if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
           boat.lost = true;
           SoundManager.crash();
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordEvent("boatLost", {
+              index: boats.indexOf(boat),
+              reason: boat.y < 55 ? "top" : boat.y > 545 ? "bottom" : boat.lit <= 0 ? "unlit" : "rock",
+              x: boat.x, y: boat.y
+            });
+          }
           end(false, "有船只迷航或触礁，守望失败。");
           return;
         }
@@ -1081,6 +1737,13 @@
           boat.arrived = true;
           SoundManager.boatArrived();
           score += Math.round(100 + boat.lit * 20);
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordEvent("boatArrived", {
+              index: boats.indexOf(boat),
+              bonus: Math.round(100 + boat.lit * 20),
+              x: boat.x, y: boat.y
+            });
+          }
         }
       }
       if (boats.every(boat => boat.arrived)) {
@@ -1101,46 +1764,172 @@
         updateGlobalBest();
         SoundManager.victory();
 
+        if (ReplayRecorder.isRecording()) {
+          ReplayRecorder.recordEvent("allArrived", { count: boats.length });
+        }
+
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。你可以继续调整关卡或保存。");
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
           const nextId = "builtin_" + (builtinIdx + 1);
           currentLevelId = nextId;
-          show("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
+          showWithReplay("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
           state = "between";
         } else {
           end(true, "本关得分：" + currentLevelScore + "。全部船只安全抵达，今晚的海图被你守住了。");
         }
       }
+
+      if (ReplayRecorder.isRecording()) {
+        ReplayRecorder.recordFrame({
+          beamAngle: beamAngle,
+          beamWide: beamWide,
+          paused: state === "paused",
+          score: score,
+          arrivedCount: boats.filter(function(b) { return b.arrived; }).length,
+          boats: boats
+        }, dt);
+      }
+
       updateHud();
     }
 
     function end(win, text) {
       state = "ended";
       updatePauseHint();
+
+      if (ReplayRecorder.isRecording()) {
+        ReplayRecorder.recordEvent("levelEnd", { win: win, score: score });
+        lastReplayData = ReplayRecorder.stop(score, win ? "win" : "lose");
+      }
+
       if (win && !playtestLevel) {
         const totalBest = Math.max(LevelData.loadGlobalBest(), score);
         LevelData.saveGlobalBest(totalBest);
       }
       updateGlobalBest();
-      const btnLabel = playtestLevel ? "返回编辑器" : "重开";
-      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, btnLabel, function() {
-        if (playtestLevel) {
+
+      if (playtestLevel) {
+        show("守望" + (win ? "成功" : "失败"), text + " 最终得分：" + score, "返回编辑器", function() {
           showEditorPanel();
-        } else {
+        });
+      } else {
+        showWithReplay(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, "重开", function() {
           currentLevelId = "builtin_0";
           score = 0;
           resetLevel();
-        }
-      });
+        }, lastReplayData);
+      }
     }
 
     function show(title, text, button, action) {
       overlayTitle.textContent = title;
       overlayText.textContent = text;
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
       overlayBtn.textContent = button;
       overlayBtn.onclick = action;
+      overlayBtn.style.display = "";
       overlay.classList.remove("hidden");
+    }
+
+    function showWithReplay(title, text, button, action, replayData) {
+      overlayTitle.textContent = title;
+      overlayText.textContent = text;
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+      overlayBtn.textContent = button;
+      overlayBtn.onclick = action;
+      overlayBtn.style.display = "";
+
+      if (replayData && replayData.frames && replayData.frames.length > 1) {
+        const replayBtn = document.createElement("button");
+        replayBtn.className = "extra-overlay-btn secondary";
+        replayBtn.textContent = "🎬 查看本局回放";
+        replayBtn.style.marginTop = "10px";
+        replayBtn.onclick = function() {
+          startReplayMode(replayData);
+        };
+        btnParent.appendChild(replayBtn);
+
+        const shareBtn = document.createElement("button");
+        shareBtn.className = "extra-overlay-btn secondary";
+        shareBtn.textContent = "📋 复制回放数据（供分享扩展）";
+        shareBtn.style.marginTop = "8px";
+        shareBtn.onclick = function() {
+          try {
+            const jsonStr = JSON.stringify(replayData);
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(jsonStr).then(function() {
+                shareBtn.textContent = "✓ 已复制到剪贴板（" + Math.round(jsonStr.length / 1024) + " KB）";
+                setTimeout(function() {
+                  shareBtn.textContent = "📋 复制回放数据（供分享扩展）";
+                }, 2500);
+              }).catch(function() {
+                prompt("复制下方回放数据用于分享：", jsonStr.substring(0, 50000));
+              });
+            } else {
+              prompt("复制下方回放数据用于分享：", jsonStr.substring(0, 50000));
+            }
+          } catch (e) {
+            alert("回放数据过大，无法复制：" + e.message);
+          }
+        };
+        btnParent.appendChild(shareBtn);
+      }
+      overlay.classList.remove("hidden");
+    }
+
+    let savedGameStateForReplay = null;
+
+    function startReplayMode(replayData) {
+      savedGameStateForReplay = {
+        state: state,
+        score: score,
+        levelScore: levelScore,
+        currentLevelId: currentLevelId,
+        overlayWasHidden: overlay.classList.contains("hidden")
+      };
+      overlay.classList.add("hidden");
+
+      const entered = ReplayController.enterReplay(replayData, function() {
+        if (savedGameStateForReplay) {
+          state = savedGameStateForReplay.state;
+          score = savedGameStateForReplay.score;
+          levelScore = savedGameStateForReplay.levelScore;
+          currentLevelId = savedGameStateForReplay.currentLevelId;
+          updatePauseHint();
+          updateHud();
+          if (!savedGameStateForReplay.overlayWasHidden) {
+            overlay.classList.remove("hidden");
+          }
+          savedGameStateForReplay = null;
+        }
+        updateGlobalBest();
+      });
+
+      if (entered) {
+        state = "replay";
+        updatePauseHint();
+        setTimeout(function() {
+          ReplayPlayer.play();
+        }, 100);
+      }
+    }
+
+    function updateHudForReplay(renderState) {
+      const meta = ReplayPlayer.getMeta();
+      const lvlIdx = meta ? LevelData.getLevelIndex(meta.levelId) : -1;
+      const builtinCount = LevelData.getBuiltinCount();
+      if (lvlIdx >= 0) {
+        levelText.textContent = "回放 " + (lvlIdx + 1) + " / " + LevelData.getAllLevels().length;
+      } else {
+        levelText.textContent = "回放模式";
+      }
+      scoreText.textContent = renderState.score;
+      arrivedText.textContent = renderState.arrivedCount + " / " + renderState.boats.length;
     }
 
     function updateHud() {
@@ -1306,6 +2095,8 @@
     function draw() {
       if (state === "editor") {
         drawEditorScene();
+      } else if (ReplayController.isInReplay()) {
+        drawReplayScene();
       } else {
         drawGameScene(true);
         if (state === "paused") {
@@ -1318,6 +2109,84 @@
       }
     }
 
+    function drawReplayScene() {
+      const renderState = ReplayPlayer.getCurrentRenderState();
+      if (!renderState) {
+        drawGameScene(false);
+        return;
+      }
+      const meta = ReplayPlayer.getMeta();
+      const levelData = meta ? meta.levelData : getCurrentLevelData();
+
+      const harbor = levelData.harbor || { x: 900, top: 70, bottom: 530 };
+
+      ctx.clearRect(0, 0, 960, 600);
+      const sea = ctx.createLinearGradient(0, 0, 960, 600);
+      sea.addColorStop(0, "#08222f");
+      sea.addColorStop(1, "#061017");
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, 0, 960, 600);
+      ctx.strokeStyle = "rgba(140,190,190,.12)";
+      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+
+      for (const fog of levelData.fog) {
+        const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
+        g.addColorStop(0, "rgba(180,190,180,.26)");
+        g.addColorStop(1, "rgba(180,190,180,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
+      }
+      for (const rock of levelData.rocks) {
+        ctx.fillStyle = "#273a3a";
+        ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#516a62"; ctx.stroke();
+      }
+
+      ctx.fillStyle = "#87d4e5";
+      const harborH = harbor.bottom - harbor.top;
+      ctx.fillRect(harbor.x, harbor.top, Math.min(28, 960 - harbor.x), harborH);
+      ctx.fillStyle = "rgba(135, 212, 229, .3)";
+      ctx.fillRect(harbor.x - 20, harbor.top, 20, harborH);
+
+      ctx.save();
+      ctx.translate(lighthouse.x, lighthouse.y);
+      ctx.rotate(renderState.beamAngle);
+      ctx.fillStyle = "rgba(247,220,125,.24)";
+      ctx.beginPath();
+      const w = renderState.beamWide ? 0.42 : 0.22;
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, 780, -w, w);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = "#e7c46a";
+      ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
+      for (const boat of renderState.boats) {
+        const dx = boat.x - lighthouse.x;
+        const dy = boat.y - lighthouse.y;
+        const ang = Math.atan2(dy, dx);
+        let diff = Math.atan2(Math.sin(ang - renderState.beamAngle), Math.cos(ang - renderState.beamAngle));
+        const bw = renderState.beamWide ? 0.42 : 0.22;
+        const boatInBeam = Math.abs(diff) < bw && Math.hypot(dx, dy) < 760;
+
+        ctx.save();
+        ctx.translate(boat.x, boat.y);
+        ctx.fillStyle = boat.arrived ? "#7dd69b" : boatInBeam ? "#f5e7a2" : "#c7d7d7";
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
+        ctx.restore();
+      }
+
+      if (!ReplayPlayer.isPlaying() && ReplayPlayer.getCurrentTime() > 0 && ReplayPlayer.getCurrentTime() < ReplayPlayer.getDuration() - 0.05) {
+        ctx.fillStyle = "rgba(0,0,0,.35)";
+        ctx.fillRect(0, 560, 960, 40);
+        ctx.fillStyle = "#e7c46a";
+        ctx.font = "16px Arial";
+        ctx.fillText("⏸  已暂停 - 拖动进度条或点击播放继续", 20, 586);
+      }
+    }
+
     function loop(ts) {
       const dt = Math.min(0.033, (ts - last) / 1000 || 0);
       last = ts;
@@ -1327,22 +2196,54 @@
     }
 
     function togglePause() {
+      if (ReplayController.isInReplay()) {
+        ReplayPlayer.toggle();
+        return;
+      }
       if (state === "playing") {
         gameSettings = loadSettings();
         applySettings();
         state = "paused";
         updatePauseHint();
+        if (ReplayRecorder.isRecording()) {
+          ReplayRecorder.recordEvent("pause", {});
+        }
       } else if (state === "paused") {
         gameSettings = loadSettings();
         applySettings();
         state = "playing";
         updatePauseHint();
+        if (ReplayRecorder.isRecording()) {
+          ReplayRecorder.recordEvent("resume", {});
+        }
       }
     }
 
     window.addEventListener("keydown", event => {
       SoundManager.unlock();
       const settingsOpen = !settingsOverlay.classList.contains("hidden");
+
+      if (ReplayController.isInReplay()) {
+        if (event.key === "Escape") {
+          ReplayController.exitReplay();
+          return;
+        }
+        if (event.key === " ") {
+          event.preventDefault();
+          ReplayPlayer.toggle();
+          return;
+        }
+        const k = event.key.toLowerCase();
+        if (k === "p") {
+          ReplayPlayer.toggle();
+          return;
+        }
+        if (k === "arrowleft" || k === "arrowright" || k === "r") {
+          return;
+        }
+        return;
+      }
+
       if (event.key === "Escape") {
         if (settingsOpen) {
           closeGameSettings();
@@ -1355,10 +2256,16 @@
       if (event.key === " ") {
         beamWide = !beamWide;
         SoundManager.toggleBeam();
+        if (ReplayRecorder.isRecording()) {
+          ReplayRecorder.recordEvent("toggleBeam", { beamWide: beamWide });
+        }
       }
       if (event.key.toLowerCase() === "p") togglePause();
       if (event.key.toLowerCase() === "r") {
         if (state === "playing" || state === "paused" || state === "ended") {
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordEvent("restart", { scoreBefore: score });
+          }
           if (playtestLevel) {
             playtestLevel = LevelData.normalizeLevel(editorLevel);
           }
