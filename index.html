@@ -1517,11 +1517,8 @@
               existingCustoms[dupIdx] = normalized;
               overwrittenLevels.push(normalized.name);
 
-              if (pack.levelBests && pack.levelBests[packLvl.id]) {
-                newBests[existingId] = Math.max(
-                  Number(newBests[existingId] || 0),
-                  Number(pack.levelBests[packLvl.id])
-                );
+              if (pack.levelBests && Object.prototype.hasOwnProperty.call(pack.levelBests, packLvl.id)) {
+                newBests[existingId] = Number(pack.levelBests[packLvl.id]);
               }
             } else if (strategy === "rename") {
               const newId = "custom_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
