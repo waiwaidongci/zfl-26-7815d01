@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>夜间灯塔守望</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, "PingFang SC", sans-serif; background: #08151c; color: #eef6f2; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 300px 1fr; }
+    aside { padding: 20px; background: #10222b; border-right: 1px solid #24414b; }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    h2 { margin: 18px 0 8px; font-size: 17px; }
+    p { color: #a8bbc0; line-height: 1.55; }
+    button { width: 100%; border: 0; border-radius: 8px; padding: 11px 12px; margin: 6px 0; background: #e7c46a; color: #15212a; font-weight: 800; cursor: pointer; }
+    button.secondary { background: #24414b; color: #eef6f2; }
+    .stat { display: grid; grid-template-columns: 1fr auto; gap: 6px; padding: 8px 0; border-bottom: 1px solid #24414b; color: #c9d7d7; }
+    .game { position: relative; display: grid; place-items: center; padding: 18px; }
+    canvas { width: min(100%, 900px); max-height: calc(100vh - 36px); aspect-ratio: 16 / 10; border: 1px solid #315762; border-radius: 8px; background: #0a2735; }
+    .overlay { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+    .panel { width: min(430px, calc(100% - 28px)); background: rgba(13, 29, 37, .94); border: 1px solid #385c65; border-radius: 8px; padding: 22px; pointer-events: auto; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+    .hidden { display: none; }
+    .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .key { padding: 8px; background: #142f3a; border-radius: 6px; color: #c9d7d7; }
+    @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; } canvas { max-height: 62vh; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <h1>夜间灯塔守望</h1>
+      <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
+      <button id="startBtn">开始第1关</button>
+      <button id="pauseBtn" class="secondary">暂停</button>
+      <h2>状态</h2>
+      <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
+      <div class="stat"><span>得分</span><b id="scoreText">0</b></div>
+      <div class="stat"><span>抵达</span><b id="arrivedText">0</b></div>
+      <div class="stat"><span>最佳</span><b id="bestText">0</b></div>
+      <h2>操作</h2>
+      <div class="keys">
+        <div class="key">← / → 旋转光束</div>
+        <div class="key">空格 切换宽度</div>
+        <div class="key">P 暂停</div>
+        <div class="key">R 重开本关</div>
+      </div>
+    </aside>
+    <main class="game">
+      <canvas id="game" width="960" height="600"></canvas>
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <h2 id="overlayTitle">夜间灯塔守望</h2>
+          <p id="overlayText">照亮航道，护送全部船只抵达右侧港湾。</p>
+          <button id="overlayBtn">开始游戏</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    const canvas = document.querySelector("#game");
+    const ctx = canvas.getContext("2d");
+    const overlay = document.querySelector("#overlay");
+    const overlayTitle = document.querySelector("#overlayTitle");
+    const overlayText = document.querySelector("#overlayText");
+    const overlayBtn = document.querySelector("#overlayBtn");
+    const startBtn = document.querySelector("#startBtn");
+    const pauseBtn = document.querySelector("#pauseBtn");
+    const levelText = document.querySelector("#levelText");
+    const scoreText = document.querySelector("#scoreText");
+    const arrivedText = document.querySelector("#arrivedText");
+    const bestText = document.querySelector("#bestText");
+
+    const levels = [
+      { boats: 3, rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}], fog: [{x:560,y:250,r:90}] },
+      { boats: 4, rocks: [{x:330,y:170,r:28},{x:520,y:320,r:36},{x:720,y:220,r:30}], fog: [{x:480,y:430,r:100},{x:680,y:160,r:75}] },
+      { boats: 5, rocks: [{x:300,y:260,r:32},{x:480,y:160,r:30},{x:650,y:350,r:38},{x:790,y:250,r:25}], fog: [{x:430,y:420,r:95},{x:650,y:180,r:95},{x:760,y:430,r:70}] }
+    ];
+    let state = "menu";
+    let level = 0;
+    let score = 0;
+    let beamAngle = -0.15;
+    let beamWide = false;
+    let boats = [];
+    let keys = {};
+    let last = 0;
+    const lighthouse = { x: 110, y: 300 };
+    bestText.textContent = localStorage.getItem("zfl26Best") || "0";
+
+    function resetLevel() {
+      const data = levels[level];
+      boats = Array.from({ length: data.boats }, (_, i) => ({
+        x: 40 - i * 42,
+        y: 130 + i * (330 / Math.max(1, data.boats - 1)),
+        speed: 26 + level * 8 + i * 3,
+        drift: (i % 2 ? 1 : -1) * (12 + level * 3),
+        lit: 3.2,
+        arrived: false,
+        lost: false
+      }));
+      beamAngle = -0.1;
+      beamWide = false;
+      state = "playing";
+      overlay.classList.add("hidden");
+      updateHud();
+    }
+
+    function inBeam(boat) {
+      const dx = boat.x - lighthouse.x;
+      const dy = boat.y - lighthouse.y;
+      const angle = Math.atan2(dy, dx);
+      let diff = Math.atan2(Math.sin(angle - beamAngle), Math.cos(angle - beamAngle));
+      const width = beamWide ? 0.42 : 0.22;
+      return Math.abs(diff) < width && Math.hypot(dx, dy) < 760;
+    }
+
+    function hitRock(boat) {
+      return levels[level].rocks.some(rock => Math.hypot(boat.x - rock.x, boat.y - rock.y) < rock.r + 9);
+    }
+
+    function update(dt) {
+      if (state !== "playing") return;
+      if (keys.ArrowLeft) beamAngle -= dt * 1.6;
+      if (keys.ArrowRight) beamAngle += dt * 1.6;
+      for (const boat of boats) {
+        if (boat.arrived || boat.lost) continue;
+        const lit = inBeam(boat);
+        boat.lit += lit ? dt * 1.8 : -dt;
+        boat.lit = Math.max(0, Math.min(4, boat.lit));
+        boat.x += boat.speed * dt;
+        boat.y += Math.sin(boat.x / 60) * boat.drift * dt + (lit ? 0 : boat.drift * dt * .6);
+        if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
+          boat.lost = true;
+          end(false, "有船只迷航或触礁，守望失败。");
+          return;
+        }
+        if (boat.x > 900) {
+          boat.arrived = true;
+          score += Math.round(100 + boat.lit * 20);
+        }
+      }
+      if (boats.every(boat => boat.arrived)) {
+        if (level < levels.length - 1) {
+          level += 1;
+          show("第" + level + "关完成", "港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
+          state = "between";
+        } else {
+          end(true, "全部船只安全抵达，今晚的海图被你守住了。");
+        }
+      }
+      updateHud();
+    }
+
+    function end(win, text) {
+      state = "ended";
+      const best = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
+      localStorage.setItem("zfl26Best", best);
+      bestText.textContent = best;
+      show(win ? "守望成功" : "守望失败", text + " 最终得分：" + score, "重开", () => { level = 0; score = 0; resetLevel(); });
+    }
+
+    function show(title, text, button, action) {
+      overlayTitle.textContent = title;
+      overlayText.textContent = text;
+      overlayBtn.textContent = button;
+      overlayBtn.onclick = action;
+      overlay.classList.remove("hidden");
+    }
+
+    function updateHud() {
+      levelText.textContent = (level + 1) + " / 3";
+      scoreText.textContent = score;
+      arrivedText.textContent = boats.filter(boat => boat.arrived).length + " / " + boats.length;
+    }
+
+    function draw() {
+      const data = levels[level];
+      ctx.clearRect(0, 0, 960, 600);
+      const sea = ctx.createLinearGradient(0, 0, 960, 600);
+      sea.addColorStop(0, "#08222f");
+      sea.addColorStop(1, "#061017");
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, 0, 960, 600);
+      ctx.strokeStyle = "rgba(140,190,190,.12)";
+      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      for (const fog of data.fog) {
+        const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
+        g.addColorStop(0, "rgba(180,190,180,.26)");
+        g.addColorStop(1, "rgba(180,190,180,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
+      }
+      for (const rock of data.rocks) {
+        ctx.fillStyle = "#273a3a";
+        ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#516a62"; ctx.stroke();
+      }
+      ctx.save();
+      ctx.translate(lighthouse.x, lighthouse.y);
+      ctx.rotate(beamAngle);
+      ctx.fillStyle = "rgba(247,220,125,.24)";
+      ctx.beginPath();
+      const w = beamWide ? 0.42 : 0.22;
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, 780, -w, w);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = "#e7c46a";
+      ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#87d4e5";
+      ctx.fillRect(900, 70, 28, 460);
+      for (const boat of boats) {
+        ctx.save();
+        ctx.translate(boat.x, boat.y);
+        ctx.fillStyle = boat.arrived ? "#7dd69b" : inBeam(boat) ? "#f5e7a2" : "#c7d7d7";
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
+        ctx.restore();
+      }
+      if (state === "paused") {
+        ctx.fillStyle = "rgba(0,0,0,.45)";
+        ctx.fillRect(0,0,960,600);
+        ctx.fillStyle = "#fff";
+        ctx.font = "34px Arial";
+        ctx.fillText("已暂停", 420, 300);
+      }
+    }
+
+    function loop(ts) {
+      const dt = Math.min(0.033, (ts - last) / 1000 || 0);
+      last = ts;
+      update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+    function togglePause() {
+      if (state === "playing") state = "paused";
+      else if (state === "paused") state = "playing";
+    }
+    window.addEventListener("keydown", event => {
+      keys[event.key] = true;
+      if (event.key === " ") beamWide = !beamWide;
+      if (event.key.toLowerCase() === "p") togglePause();
+      if (event.key.toLowerCase() === "r") resetLevel();
+    });
+    window.addEventListener("keyup", event => keys[event.key] = false);
+    startBtn.onclick = () => { level = 0; score = 0; resetLevel(); };
+    pauseBtn.onclick = togglePause;
+    overlayBtn.onclick = () => { level = 0; score = 0; resetLevel(); };
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
