@@ -35,6 +35,21 @@
     .level-best .no-record { color: #6b8086; }
     .lock-icon { float: right; font-size: 14px; }
     .back-btn { margin-top: 12px; }
+    .settings-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #24414b; }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-label { font-size: 14px; color: #c9d7d7; }
+    .settings-value { font-size: 13px; color: #e7c46a; min-width: 32px; text-align: right; }
+    input[type="range"] { width: 100%; accent-color: #e7c46a; margin-top: 4px; }
+    .toggle { position: relative; width: 44px; height: 24px; background: #24414b; border-radius: 12px; cursor: pointer; transition: background .2s; }
+    .toggle.on { background: #e7c46a; }
+    .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; background: #eef6f2; border-radius: 50%; transition: transform .2s; }
+    .toggle.on::after { transform: translateX(20px); }
+    .pause-hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(13,29,37,.75); color: #a8bbc0; font-size: 13px; padding: 6px 16px; border-radius: 6px; pointer-events: none; }
+    .game-settings-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(13,29,37,.75); color: #eef6f2; font-size: 18px; cursor: pointer; display: grid; place-items: center; transition: background .2s; z-index: 5; }
+    .game-settings-btn:hover { background: rgba(13,29,37,.9); }
+    .settings-panel-modal { width: min(380px, calc(100% - 28px)); }
+    .settings-panel-modal h2 { margin: 0 0 14px; font-size: 20px; }
+    .settings-panel-modal input[type="range"] { margin-bottom: 8px; }
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; } canvas { max-height: 62vh; } }
   </style>
 </head>
@@ -47,6 +62,7 @@
         <button id="startBtn">开始第1关</button>
         <button id="levelSelectBtn" class="secondary">选择关卡</button>
         <button id="pauseBtn" class="secondary">暂停</button>
+        <button id="settingsBtn" class="secondary">游戏设置</button>
         <h2>状态</h2>
         <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
         <div class="stat"><span>得分</span><b id="scoreText">0</b></div>
@@ -60,6 +76,28 @@
           <div class="key">R 重开本关</div>
         </div>
       </div>
+      <div id="settingsPanel" class="hidden">
+        <h1>游戏设置</h1>
+        <div class="settings-row">
+          <span class="settings-label">音效</span>
+          <div id="soundToggle" class="toggle on"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">画面亮度</span>
+          <span id="brightnessValue" class="settings-value">100%</span>
+        </div>
+        <input type="range" id="brightnessRange" min="30" max="100" value="100">
+        <div class="settings-row">
+          <span class="settings-label">光束旋转灵敏度</span>
+          <span id="sensitivityValue" class="settings-value">1.0x</span>
+        </div>
+        <input type="range" id="sensitivityRange" min="3" max="30" value="10">
+        <div class="settings-row">
+          <span class="settings-label">暂停键提示</span>
+          <div id="pauseHintToggle" class="toggle on"></div>
+        </div>
+        <button id="backFromSettingsBtn" class="secondary back-btn">返回</button>
+      </div>
       <div id="levelSelectPanel" class="hidden">
         <h1>选择关卡</h1>
         <p>从已解锁的关卡中选择，通关后自动解锁下一关。</p>
@@ -69,11 +107,37 @@
     </aside>
     <main class="game">
       <canvas id="game" width="960" height="600"></canvas>
+      <button class="game-settings-btn" id="gameSettingsBtn" title="游戏设置">⚙</button>
+      <div class="pause-hint hidden" id="pauseHint">按 P 暂停游戏</div>
       <div class="overlay" id="overlay">
         <div class="panel">
           <h2 id="overlayTitle">夜间灯塔守望</h2>
           <p id="overlayText">照亮航道，护送全部船只抵达右侧港湾。</p>
           <button id="overlayBtn">开始游戏</button>
+        </div>
+      </div>
+      <div class="overlay hidden" id="settingsOverlay">
+        <div class="panel settings-panel-modal">
+          <h2>游戏设置</h2>
+          <div class="settings-row">
+            <span class="settings-label">音效</span>
+            <div id="modalSoundToggle" class="toggle on"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">画面亮度</span>
+            <span id="modalBrightnessValue" class="settings-value">100%</span>
+          </div>
+          <input type="range" id="modalBrightnessRange" min="30" max="100" value="100">
+          <div class="settings-row">
+            <span class="settings-label">光束旋转灵敏度</span>
+            <span id="modalSensitivityValue" class="settings-value">1.0x</span>
+          </div>
+          <input type="range" id="modalSensitivityRange" min="3" max="30" value="10">
+          <div class="settings-row">
+            <span class="settings-label">暂停键提示</span>
+            <div id="modalPauseHintToggle" class="toggle on"></div>
+          </div>
+          <button id="closeSettingsBtn" class="secondary back-btn">关闭</button>
         </div>
       </div>
     </main>
@@ -96,6 +160,25 @@
     const mainMenu = document.querySelector("#mainMenu");
     const levelSelectPanel = document.querySelector("#levelSelectPanel");
     const levelCards = document.querySelector("#levelCards");
+    const settingsBtn = document.querySelector("#settingsBtn");
+    const settingsPanel = document.querySelector("#settingsPanel");
+    const backFromSettingsBtn = document.querySelector("#backFromSettingsBtn");
+    const soundToggle = document.querySelector("#soundToggle");
+    const brightnessRange = document.querySelector("#brightnessRange");
+    const brightnessValue = document.querySelector("#brightnessValue");
+    const sensitivityRange = document.querySelector("#sensitivityRange");
+    const sensitivityValue = document.querySelector("#sensitivityValue");
+    const pauseHintToggle = document.querySelector("#pauseHintToggle");
+    const pauseHintEl = document.querySelector("#pauseHint");
+    const gameSettingsBtn = document.querySelector("#gameSettingsBtn");
+    const settingsOverlay = document.querySelector("#settingsOverlay");
+    const closeSettingsBtn = document.querySelector("#closeSettingsBtn");
+    const modalSoundToggle = document.querySelector("#modalSoundToggle");
+    const modalBrightnessRange = document.querySelector("#modalBrightnessRange");
+    const modalBrightnessValue = document.querySelector("#modalBrightnessValue");
+    const modalSensitivityRange = document.querySelector("#modalSensitivityRange");
+    const modalSensitivityValue = document.querySelector("#modalSensitivityValue");
+    const modalPauseHintToggle = document.querySelector("#modalPauseHintToggle");
 
     const levels = [
       { name: "初夜启航", boats: 3, rocks: [{x:420,y:210,r:34},{x:610,y:390,r:30}], fog: [{x:560,y:250,r:90}] },
@@ -126,6 +209,41 @@
         levelBests = {};
       }
       return { unlocked, best, levelBests };
+    }
+
+    function loadSettings() {
+      try {
+        const stored = localStorage.getItem("zfl26Settings");
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+      return { sound: true, brightness: 100, sensitivity: 1.0, pauseHint: true };
+    }
+
+    function saveSettings() {
+      localStorage.setItem("zfl26Settings", JSON.stringify(gameSettings));
+    }
+
+    let gameSettings = loadSettings();
+
+    function applySettings() {
+      soundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
+      brightnessRange.value = gameSettings.brightness;
+      brightnessValue.textContent = gameSettings.brightness + "%";
+      sensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
+      sensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
+      pauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      modalSoundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
+      modalBrightnessRange.value = gameSettings.brightness;
+      modalBrightnessValue.textContent = gameSettings.brightness + "%";
+      modalSensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
+      modalSensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
+      modalPauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      updatePauseHint();
+      canvas.style.filter = "brightness(" + (gameSettings.brightness / 100) + ")";
+    }
+
+    function updatePauseHint() {
+      pauseHintEl.classList.toggle("hidden", !gameSettings.pauseHint || state !== "playing");
     }
 
     function saveUnlocked(unlocked) {
@@ -188,6 +306,7 @@
 
     function showLevelSelect() {
       mainMenu.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
       levelSelectPanel.classList.remove("hidden");
       renderLevelCards();
       state = "levelSelect";
@@ -196,8 +315,40 @@
     function showMainMenu() {
       mainMenu.classList.remove("hidden");
       levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
       state = "menu";
       show("夜间灯塔守望", "照亮航道，护送全部船只抵达右侧港湾。", "开始游戏", function() { level = 0; score = 0; resetLevel(); });
+    }
+
+    function showSettings() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.remove("hidden");
+      applySettings();
+    }
+
+    function hideSettings() {
+      settingsPanel.classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+    }
+
+    let prevState = "menu";
+    function openGameSettings() {
+      if (state === "playing" || state === "paused") {
+        prevState = state;
+        state = "paused";
+        updatePauseHint();
+      }
+      applySettings();
+      settingsOverlay.classList.remove("hidden");
+    }
+
+    function closeGameSettings() {
+      settingsOverlay.classList.add("hidden");
+      if (prevState === "playing") {
+        state = "playing";
+        updatePauseHint();
+      }
     }
 
     function startFromLevel(levelIndex) {
@@ -209,6 +360,7 @@
     }
 
     function resetLevel() {
+      applySettings();
       const data = levels[level];
       levelScore = score;
       boats = Array.from({ length: data.boats }, function(_, i) {
@@ -226,6 +378,7 @@
       beamWide = false;
       state = "playing";
       overlay.classList.add("hidden");
+      updatePauseHint();
       updateHud();
     }
 
@@ -244,8 +397,8 @@
 
     function update(dt) {
       if (state !== "playing") return;
-      if (keys.ArrowLeft) beamAngle -= dt * 1.6;
-      if (keys.ArrowRight) beamAngle += dt * 1.6;
+      if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
+      if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
       for (const boat of boats) {
         if (boat.arrived || boat.lost) continue;
         const lit = inBeam(boat);
@@ -370,10 +523,27 @@
       requestAnimationFrame(loop);
     }
     function togglePause() {
-      if (state === "playing") state = "paused";
-      else if (state === "paused") state = "playing";
+      if (state === "playing") {
+        gameSettings = loadSettings();
+        applySettings();
+        state = "paused";
+        updatePauseHint();
+      } else if (state === "paused") {
+        gameSettings = loadSettings();
+        applySettings();
+        state = "playing";
+        updatePauseHint();
+      }
     }
     window.addEventListener("keydown", event => {
+      const settingsOpen = !settingsOverlay.classList.contains("hidden");
+      if (event.key === "Escape") {
+        if (settingsOpen) {
+          closeGameSettings();
+        }
+        return;
+      }
+      if (settingsOpen) return;
       keys[event.key] = true;
       if (event.key === " ") beamWide = !beamWide;
       if (event.key.toLowerCase() === "p") togglePause();
@@ -385,7 +555,57 @@
     levelSelectBtn.onclick = showLevelSelect;
     backToMenuBtn.onclick = showMainMenu;
     pauseBtn.onclick = togglePause;
+    settingsBtn.onclick = showSettings;
+    backFromSettingsBtn.onclick = hideSettings;
+    soundToggle.onclick = function() {
+      gameSettings.sound = !gameSettings.sound;
+      saveSettings();
+      applySettings();
+    };
+    brightnessRange.oninput = function() {
+      gameSettings.brightness = Number(brightnessRange.value);
+      saveSettings();
+      applySettings();
+    };
+    sensitivityRange.oninput = function() {
+      gameSettings.sensitivity = Number(sensitivityRange.value) / 10;
+      saveSettings();
+      applySettings();
+    };
+    pauseHintToggle.onclick = function() {
+      gameSettings.pauseHint = !gameSettings.pauseHint;
+      saveSettings();
+      applySettings();
+    };
+    gameSettingsBtn.onclick = openGameSettings;
+    closeSettingsBtn.onclick = closeGameSettings;
+    modalSoundToggle.onclick = function() {
+      gameSettings.sound = !gameSettings.sound;
+      saveSettings();
+      applySettings();
+    };
+    modalBrightnessRange.oninput = function() {
+      gameSettings.brightness = Number(modalBrightnessRange.value);
+      saveSettings();
+      applySettings();
+    };
+    modalSensitivityRange.oninput = function() {
+      gameSettings.sensitivity = Number(modalSensitivityRange.value) / 10;
+      saveSettings();
+      applySettings();
+    };
+    modalPauseHintToggle.onclick = function() {
+      gameSettings.pauseHint = !gameSettings.pauseHint;
+      saveSettings();
+      applySettings();
+    };
+    settingsOverlay.addEventListener("click", function(e) {
+      if (e.target === settingsOverlay) {
+        closeGameSettings();
+      }
+    });
     overlayBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
+    applySettings();
     requestAnimationFrame(loop);
   </script>
 </body>
