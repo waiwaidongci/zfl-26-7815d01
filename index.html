@@ -143,6 +143,114 @@
     </main>
   </div>
   <script>
+    const SoundManager = {
+      audioContext: null,
+      enabled: true,
+      initialized: false,
+
+      init: function() {
+        if (this.initialized) return;
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.audioContext = new AudioContextClass();
+            this.initialized = true;
+          }
+        } catch (e) {
+          this.initialized = false;
+        }
+      },
+
+      unlock: function() {
+        if (!this.audioContext) {
+          this.init();
+        }
+        if (this.audioContext && this.audioContext.state === "suspended") {
+          this.audioContext.resume().catch(function() {});
+        }
+      },
+
+      setEnabled: function(enabled) {
+        this.enabled = enabled;
+      },
+
+      playTone: function(frequency, duration, type, volume, startTimeOffset) {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.audioContext) return;
+        try {
+          const ctx = this.audioContext;
+          const now = ctx.currentTime + (startTimeOffset || 0);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type || "sine";
+          osc.frequency.setValueAtTime(frequency, now);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(volume || 0.3, now + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.02);
+        } catch (e) {}
+      },
+
+      startGame: function() {
+        this.playTone(440, 0.12, "sine", 0.25, 0);
+        this.playTone(554, 0.12, "sine", 0.25, 0.1);
+        this.playTone(659, 0.18, "sine", 0.3, 0.2);
+      },
+
+      toggleBeam: function() {
+        this.playTone(880, 0.06, "square", 0.15, 0);
+        this.playTone(1100, 0.05, "square", 0.12, 0.04);
+      },
+
+      boatArrived: function() {
+        this.playTone(784, 0.08, "triangle", 0.25, 0);
+        this.playTone(988, 0.08, "triangle", 0.25, 0.07);
+        this.playTone(1175, 0.12, "triangle", 0.28, 0.14);
+      },
+
+      crash: function() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.audioContext) return;
+        try {
+          const ctx = this.audioContext;
+          const now = ctx.currentTime;
+          const bufferSize = ctx.sampleRate * 0.4;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+          }
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = "lowpass";
+          filter.frequency.setValueAtTime(800, now);
+          filter.frequency.exponentialRampToValueAtTime(120, now + 0.35);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+          noise.stop(now + 0.4);
+          this.playTone(110, 0.3, "sawtooth", 0.35, 0);
+        } catch (e) {}
+      },
+
+      victory: function() {
+        const notes = [523, 659, 784, 659, 784, 1047];
+        notes.forEach(function(freq, i) {
+          this.playTone(freq, 0.18, "triangle", 0.28, i * 0.12);
+        }.bind(this));
+      }
+    };
+
     const canvas = document.querySelector("#game");
     const ctx = canvas.getContext("2d");
     const overlay = document.querySelector("#overlay");
@@ -226,6 +334,7 @@
     let gameSettings = loadSettings();
 
     function applySettings() {
+      SoundManager.setEnabled(gameSettings.sound);
       soundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
       brightnessRange.value = gameSettings.brightness;
       brightnessValue.textContent = gameSettings.brightness + "%";
@@ -361,6 +470,7 @@
 
     function resetLevel() {
       applySettings();
+      SoundManager.startGame();
       const data = levels[level];
       levelScore = score;
       boats = Array.from({ length: data.boats }, function(_, i) {
@@ -408,11 +518,13 @@
         boat.y += Math.sin(boat.x / 60) * boat.drift * dt + (lit ? 0 : boat.drift * dt * .6);
         if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
           boat.lost = true;
+          SoundManager.crash();
           end(false, "有船只迷航或触礁，守望失败。");
           return;
         }
         if (boat.x > 900) {
           boat.arrived = true;
+          SoundManager.boatArrived();
           score += Math.round(100 + boat.lit * 20);
         }
       }
@@ -426,6 +538,7 @@
         const totalBest = Math.max(Number(localStorage.getItem("zfl26Best") || 0), score);
         saveBest(totalBest);
         updateGlobalBest();
+        SoundManager.victory();
         if (level < levels.length - 1) {
           level += 1;
           show("第" + (level) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel);
@@ -537,6 +650,7 @@
       }
     }
     window.addEventListener("keydown", event => {
+      SoundManager.unlock();
       const settingsOpen = !settingsOverlay.classList.contains("hidden");
       if (event.key === "Escape") {
         if (settingsOpen) {
@@ -546,11 +660,18 @@
       }
       if (settingsOpen) return;
       keys[event.key] = true;
-      if (event.key === " ") beamWide = !beamWide;
+      if (event.key === " ") {
+        beamWide = !beamWide;
+        SoundManager.toggleBeam();
+      }
       if (event.key.toLowerCase() === "p") togglePause();
       if (event.key.toLowerCase() === "r") resetLevel();
     });
     window.addEventListener("keyup", event => keys[event.key] = false);
+
+    ["click", "touchstart", "pointerdown"].forEach(function(evt) {
+      document.addEventListener(evt, function() { SoundManager.unlock(); }, { once: false, passive: true });
+    });
     updateGlobalBest();
     startBtn.onclick = function() { level = 0; score = 0; resetLevel(); };
     levelSelectBtn.onclick = showLevelSelect;
