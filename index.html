@@ -2817,6 +2817,7 @@
           score += Math.round(100 + boat.lit * 20);
           if (!playtestLevel) {
             StatsStore.recordBoatEscorted();
+            checkAndNotifyAchievements();
           }
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatArrived", {
