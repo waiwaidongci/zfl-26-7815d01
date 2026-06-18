@@ -2099,6 +2099,34 @@
       return data.rocks.some(rock => Math.hypot(boat.x - rock.x, boat.y - rock.y) < rock.r + 9);
     }
 
+    function describeActiveWeatherImpact() {
+      const events = WeatherSystem.getActiveEvents();
+      if (!events.length) {
+        return "当前没有天气事件影响。";
+      }
+      const effects = events.map(function(ev) {
+        if (ev.type === "seaBreeze") return "海风会加剧船只漂移";
+        if (ev.type === "denseFog") return "浓雾会缩短可视光束射程";
+        if (ev.type === "lighthouseFlash") return "灯塔闪烁会让光束角度不稳定";
+        return ev.name + "正在影响航行";
+      });
+      return "当前天气：" + effects.join("，") + "。";
+    }
+
+    function describeScoreRule() {
+      return "计分规则：每艘抵达船只获得100基础分加光照奖励，天气只影响航行条件，不改变计分公式。";
+    }
+
+    function describeFailure(reason) {
+      const reasonText = {
+        top: "船只偏离上侧安全航道。",
+        bottom: "船只偏离下侧安全航道。",
+        unlit: "船只离开光束太久而迷航。",
+        rock: "船只撞上暗礁。"
+      }[reason] || "有船只迷航或触礁。";
+      return reasonText + " " + describeActiveWeatherImpact() + " " + describeScoreRule();
+    }
+
     function update(dt) {
       if (ReplayController.isInReplay()) {
         ReplayPlayer.tick();
@@ -2133,16 +2161,17 @@
         boat.x += effectiveSpeed * dt;
         boat.y += Math.sin(boat.x / 60) * effectiveDrift * dt + (lit ? 0 : effectiveDrift * dt * .6);
         if (boat.y < 55 || boat.y > 545 || boat.lit <= 0 || hitRock(boat)) {
+          const failReason = boat.y < 55 ? "top" : boat.y > 545 ? "bottom" : boat.lit <= 0 ? "unlit" : "rock";
           boat.lost = true;
           SoundManager.crash();
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatLost", {
               index: boats.indexOf(boat),
-              reason: boat.y < 55 ? "top" : boat.y > 545 ? "bottom" : boat.lit <= 0 ? "unlit" : "rock",
+              reason: failReason,
               x: boat.x, y: boat.y
             });
           }
-          end(false, "有船只迷航或触礁，守望失败。");
+          end(false, describeFailure(failReason));
           return;
         }
         if (boat.x > harbor.x) {
@@ -2181,7 +2210,7 @@
         }
 
         if (playtestLevel) {
-          end(true, "试玩通关！本关得分：" + currentLevelScore + "。你可以继续调整关卡或保存。");
+          end(true, "试玩通关！本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 你可以继续调整关卡或保存。");
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordFrame({
@@ -2197,10 +2226,10 @@
           }
           const nextId = "builtin_" + (builtinIdx + 1);
           currentLevelId = nextId;
-          showWithReplay("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel, lastReplayData);
+          showWithReplay("第" + (builtinIdx + 1) + "关完成", "本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 港湾又亮起一盏灯。准备进入下一关。", "继续", resetLevel, lastReplayData);
           state = "between";
         } else {
-          end(true, "本关得分：" + currentLevelScore + "。全部船只安全抵达，今晚的海图被你守住了。");
+          end(true, "本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 全部船只安全抵达，今晚的海图被你守住了。");
         }
       }
 
