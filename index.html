@@ -1088,6 +1088,27 @@
           <span class="settings-label">暂停键提示</span>
           <div id="pauseHintToggle" class="toggle on"></div>
         </div>
+        <h2 style="margin-top:20px;font-size:15px;color:#e7c46a;">可访问性</h2>
+        <div class="settings-row">
+          <span class="settings-label">旋转方向反转</span>
+          <div id="invertRotationToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">降低闪烁效果</span>
+          <div id="reduceFlickerToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">高对比度海面</span>
+          <div id="highContrastSeaToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">暂停时静音</span>
+          <div id="muteOnPauseToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">回放自动暂停</span>
+          <div id="replayAutoPauseToggle" class="toggle"></div>
+        </div>
         <button id="backFromSettingsBtn" class="secondary back-btn">返回</button>
       </div>
 
@@ -1669,6 +1690,27 @@
           <div class="settings-row">
             <span class="settings-label">暂停键提示</span>
             <div id="modalPauseHintToggle" class="toggle on"></div>
+          </div>
+          <h2 style="margin-top:16px;font-size:15px;color:#e7c46a;">可访问性</h2>
+          <div class="settings-row">
+            <span class="settings-label">旋转方向反转</span>
+            <div id="modalInvertRotationToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">降低闪烁效果</span>
+            <div id="modalReduceFlickerToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">高对比度海面</span>
+            <div id="modalHighContrastSeaToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">暂停时静音</span>
+            <div id="modalMuteOnPauseToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">回放自动暂停</span>
+            <div id="modalReplayAutoPauseToggle" class="toggle"></div>
           </div>
           <button id="closeSettingsBtn" class="secondary back-btn">关闭</button>
         </div>
@@ -3726,6 +3768,11 @@
           speedMult *= campaignBoatSpeedMultiplier;
         }
 
+        if (typeof gameSettings !== "undefined" && gameSettings.reduceFlicker) {
+          beamJitter *= 0.25;
+          beamFlicker *= 0.2;
+        }
+
         return {
           driftMultiplier: driftMult,
           speedMultiplier: speedMult,
@@ -4377,6 +4424,16 @@
     const modalSensitivityRange = document.querySelector("#modalSensitivityRange");
     const modalSensitivityValue = document.querySelector("#modalSensitivityValue");
     const modalPauseHintToggle = document.querySelector("#modalPauseHintToggle");
+    const invertRotationToggle = document.querySelector("#invertRotationToggle");
+    const reduceFlickerToggle = document.querySelector("#reduceFlickerToggle");
+    const highContrastSeaToggle = document.querySelector("#highContrastSeaToggle");
+    const muteOnPauseToggle = document.querySelector("#muteOnPauseToggle");
+    const replayAutoPauseToggle = document.querySelector("#replayAutoPauseToggle");
+    const modalInvertRotationToggle = document.querySelector("#modalInvertRotationToggle");
+    const modalReduceFlickerToggle = document.querySelector("#modalReduceFlickerToggle");
+    const modalHighContrastSeaToggle = document.querySelector("#modalHighContrastSeaToggle");
+    const modalMuteOnPauseToggle = document.querySelector("#modalMuteOnPauseToggle");
+    const modalReplayAutoPauseToggle = document.querySelector("#modalReplayAutoPauseToggle");
     const cursorHint = document.querySelector("#cursorHint");
     const backFromPlaytestBtn = document.querySelector("#backFromPlaytestBtn");
     const achievementsBtn = document.querySelector("#achievementsBtn");
@@ -4566,12 +4623,30 @@
     let editorDragOffset = { x: 0, y: 0 };
 
     // ===================== 设置 =====================
+    function getDefaultSettings() {
+      return {
+        sound: true,
+        brightness: 100,
+        sensitivity: 1.0,
+        pauseHint: true,
+        invertRotation: false,
+        reduceFlicker: false,
+        highContrastSea: false,
+        muteOnPause: false,
+        replayAutoPause: false
+      };
+    }
+
     function loadSettings() {
+      const defaults = getDefaultSettings();
       try {
         const stored = localStorage.getItem("zfl26Settings");
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return Object.assign({}, defaults, parsed);
+        }
       } catch (e) {}
-      return { sound: true, brightness: 100, sensitivity: 1.0, pauseHint: true };
+      return defaults;
     }
 
     function saveSettings() {
@@ -4581,19 +4656,33 @@
     let gameSettings = loadSettings();
 
     function applySettings() {
-      SoundManager.setEnabled(gameSettings.sound);
+      let soundEnabled = gameSettings.sound;
+      if (gameSettings.muteOnPause && state === "paused") {
+        soundEnabled = false;
+      }
+      SoundManager.setEnabled(soundEnabled);
       soundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
       brightnessRange.value = gameSettings.brightness;
       brightnessValue.textContent = gameSettings.brightness + "%";
       sensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
       sensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
       pauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      invertRotationToggle.className = "toggle" + (gameSettings.invertRotation ? " on" : "");
+      reduceFlickerToggle.className = "toggle" + (gameSettings.reduceFlicker ? " on" : "");
+      highContrastSeaToggle.className = "toggle" + (gameSettings.highContrastSea ? " on" : "");
+      muteOnPauseToggle.className = "toggle" + (gameSettings.muteOnPause ? " on" : "");
+      replayAutoPauseToggle.className = "toggle" + (gameSettings.replayAutoPause ? " on" : "");
       modalSoundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
       modalBrightnessRange.value = gameSettings.brightness;
       modalBrightnessValue.textContent = gameSettings.brightness + "%";
       modalSensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
       modalSensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
       modalPauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      modalInvertRotationToggle.className = "toggle" + (gameSettings.invertRotation ? " on" : "");
+      modalReduceFlickerToggle.className = "toggle" + (gameSettings.reduceFlicker ? " on" : "");
+      modalHighContrastSeaToggle.className = "toggle" + (gameSettings.highContrastSea ? " on" : "");
+      modalMuteOnPauseToggle.className = "toggle" + (gameSettings.muteOnPause ? " on" : "");
+      modalReplayAutoPauseToggle.className = "toggle" + (gameSettings.replayAutoPause ? " on" : "");
       updatePauseHint();
       canvas.style.filter = "brightness(" + (gameSettings.brightness / 100) + ")";
     }
@@ -6384,6 +6473,7 @@
       if (prevState === "playing") {
         state = "playing";
         updatePauseHint();
+        SoundManager.setEnabled(gameSettings.sound);
       }
     }
 
@@ -6794,8 +6884,9 @@
         return;
       }
       if (state !== "playing") return;
-      if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
-      if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
+      const rotDir = gameSettings.invertRotation ? -1 : 1;
+      if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity * rotDir;
+      if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity * rotDir;
 
       WeatherSystem.update(dt);
       updateWeatherUI();
@@ -7142,9 +7233,11 @@
       if (entered) {
         state = "replay";
         updatePauseHint();
-        setTimeout(function() {
-          ReplayPlayer.play();
-        }, 100);
+        if (!gameSettings.replayAutoPause) {
+          setTimeout(function() {
+            ReplayPlayer.play();
+          }, 100);
+        }
       }
     }
 
@@ -7209,19 +7302,29 @@
     }
 
     // ===================== 绘制 =====================
+    function fillSeaBackground(gridOpacity) {
+      ctx.clearRect(0, 0, 960, 600);
+      const sea = ctx.createLinearGradient(0, 0, 960, 600);
+      if (gameSettings.highContrastSea) {
+        sea.addColorStop(0, "#051a24");
+        sea.addColorStop(1, "#02070a");
+      } else {
+        sea.addColorStop(0, "#08222f");
+        sea.addColorStop(1, "#061017");
+      }
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, 0, 960, 600);
+      const gridAlpha = gridOpacity != null ? gridOpacity : (gameSettings.highContrastSea ? 0.22 : 0.12);
+      ctx.strokeStyle = "rgba(140,190,190," + gridAlpha + ")";
+      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+    }
+
     function drawGameScene(drawBoats) {
       const data = getCurrentLevelData();
       const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
       const weatherMods = WeatherSystem.getModifiers();
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-      ctx.strokeStyle = "rgba(140,190,190,.12)";
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      fillSeaBackground();
 
       if (weatherMods.driftMultiplier > 1.01) {
         const windIntensity = (weatherMods.driftMultiplier - 1) * 2;
@@ -7319,16 +7422,10 @@
       const startY = data.boatStartY != null ? data.boatStartY : 130;
       const spread = data.boatSpread != null ? data.boatSpread : 330;
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-
-      ctx.strokeStyle = "rgba(140,190,190,.08)";
+      fillSeaBackground(gameSettings.highContrastSea ? 0.15 : 0.08);
       ctx.lineWidth = 1;
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      const hGridAlpha = gameSettings.highContrastSea ? 0.15 : 0.08;
+      ctx.strokeStyle = "rgba(140,190,190," + hGridAlpha + ")";
       for (let y = 0; y < 600; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(960, y); ctx.stroke(); }
 
       for (let i = 0; i < data.boats; i++) {
@@ -7487,6 +7584,11 @@
         }
       }
 
+      if (gameSettings.reduceFlicker) {
+        beamJitter *= 0.25;
+        beamFlicker *= 0.2;
+      }
+
       return { driftMultiplier: driftMult, speedMultiplier: speedMult, beamRangeMultiplier: beamRangeMult, beamJitter: beamJitter, beamFlicker: beamFlicker, fogOpacity: fogOpacity, hasWeather: hasWeather };
     }
 
@@ -7505,14 +7607,7 @@
 
       const harbor = levelData.harbor || { x: 900, top: 70, bottom: 530 };
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-      ctx.strokeStyle = "rgba(140,190,190,.12)";
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      fillSeaBackground();
 
       if (wm.driftMultiplier > 1.01) {
         const windIntensity = (wm.driftMultiplier - 1) * 2;
@@ -7641,17 +7736,17 @@
         return;
       }
       if (state === "playing") {
+        state = "paused";
         gameSettings = loadSettings();
         applySettings();
-        state = "paused";
         updatePauseHint();
         if (ReplayRecorder.isRecording()) {
           ReplayRecorder.recordEvent("pause", {});
         }
       } else if (state === "paused") {
+        state = "playing";
         gameSettings = loadSettings();
         applySettings();
-        state = "playing";
         updatePauseHint();
         if (ReplayRecorder.isRecording()) {
           ReplayRecorder.recordEvent("resume", {});
@@ -8549,6 +8644,31 @@
       saveSettings();
       applySettings();
     };
+    invertRotationToggle.onclick = function() {
+      gameSettings.invertRotation = !gameSettings.invertRotation;
+      saveSettings();
+      applySettings();
+    };
+    reduceFlickerToggle.onclick = function() {
+      gameSettings.reduceFlicker = !gameSettings.reduceFlicker;
+      saveSettings();
+      applySettings();
+    };
+    highContrastSeaToggle.onclick = function() {
+      gameSettings.highContrastSea = !gameSettings.highContrastSea;
+      saveSettings();
+      applySettings();
+    };
+    muteOnPauseToggle.onclick = function() {
+      gameSettings.muteOnPause = !gameSettings.muteOnPause;
+      saveSettings();
+      applySettings();
+    };
+    replayAutoPauseToggle.onclick = function() {
+      gameSettings.replayAutoPause = !gameSettings.replayAutoPause;
+      saveSettings();
+      applySettings();
+    };
     gameSettingsBtn.onclick = openGameSettings;
     closeSettingsBtn.onclick = closeGameSettings;
     modalSoundToggle.onclick = function() {
@@ -8568,6 +8688,31 @@
     };
     modalPauseHintToggle.onclick = function() {
       gameSettings.pauseHint = !gameSettings.pauseHint;
+      saveSettings();
+      applySettings();
+    };
+    modalInvertRotationToggle.onclick = function() {
+      gameSettings.invertRotation = !gameSettings.invertRotation;
+      saveSettings();
+      applySettings();
+    };
+    modalReduceFlickerToggle.onclick = function() {
+      gameSettings.reduceFlicker = !gameSettings.reduceFlicker;
+      saveSettings();
+      applySettings();
+    };
+    modalHighContrastSeaToggle.onclick = function() {
+      gameSettings.highContrastSea = !gameSettings.highContrastSea;
+      saveSettings();
+      applySettings();
+    };
+    modalMuteOnPauseToggle.onclick = function() {
+      gameSettings.muteOnPause = !gameSettings.muteOnPause;
+      saveSettings();
+      applySettings();
+    };
+    modalReplayAutoPauseToggle.onclick = function() {
+      gameSettings.replayAutoPause = !gameSettings.replayAutoPause;
       saveSettings();
       applySettings();
     };
