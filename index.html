@@ -10478,22 +10478,75 @@
       if (bestText) bestText.textContent = LevelData.loadGlobalBest();
     }
 
-    function countExportProfileCategories() {
+    function showErrorMsg(errorEl, message) {
+      errorEl.textContent = message;
+      errorEl.classList.remove("hidden");
+    }
+
+    function hideErrorMsg(errorEl) {
+      errorEl.classList.add("hidden");
+    }
+
+    function showSuccessMsg(successEl, message) {
+      successEl.textContent = message;
+      successEl.classList.remove("hidden");
+    }
+
+    function hideSuccessMsg(successEl) {
+      successEl.classList.add("hidden");
+    }
+
+    function countProfileDataCategories(data) {
       const counts = {};
-      const data = ProfileStore.createProfile("", ProfileStore.CATEGORY_ORDER).data;
+      if (!data) return counts;
       if (data.customLevels) counts.customLevels = data.customLevels.length;
       if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
-      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length + (data.builtinUnlocked ? 1 : 0);
-      if (data.campaignProgress) {
-        const cp = data.campaignProgress;
-        counts.campaignProgress = Object.keys(cp.chapterProgress || {}).length + (cp.currentChapterId ? 1 : 0);
-      }
+      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
+      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
       if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
       if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
       if (data.stats) counts.stats = Object.keys(data.stats).length;
       if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
       if (data.replays) counts.replays = Object.keys(data.replays).length;
       if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      return counts;
+    }
+
+    function handleFileImport(fileInput, readFileFn, onSuccess, onError, errorEl, successEl) {
+      const file = fileInput.files[0];
+      if (!file) return;
+      if (errorEl) hideErrorMsg(errorEl);
+      if (successEl) hideSuccessMsg(successEl);
+      readFileFn(file).then(onSuccess).catch(function(err) {
+        if (errorEl) showErrorMsg(errorEl, err);
+        if (onError) onError(err);
+      });
+      fileInput.value = "";
+    }
+
+    function handleTextImport(textareaEl, parseTextFn, emptyMsg, onSuccess, errorEl, successEl) {
+      const text = textareaEl.value.trim();
+      if (!text) {
+        if (errorEl) showErrorMsg(errorEl, emptyMsg);
+        return false;
+      }
+      if (errorEl) hideErrorMsg(errorEl);
+      if (successEl) hideSuccessMsg(successEl);
+      const result = parseTextFn(text);
+      if (!result.success) {
+        if (errorEl) showErrorMsg(errorEl, result.errors.join("；"));
+        return false;
+      }
+      onSuccess(result);
+      return true;
+    }
+
+    function countExportProfileCategories() {
+      const data = ProfileStore.createProfile("", ProfileStore.CATEGORY_ORDER).data;
+      const counts = countProfileDataCategories(data);
+      if (data.levelBests && data.builtinUnlocked) {
+        counts.levelBests = (counts.levelBests || 0) + 1;
+      }
       return counts;
     }
 
@@ -10552,17 +10605,7 @@
         profileImportSelectedCategories.push(catKey);
       }
       const data = currentImportProfile ? currentImportProfile.data : {};
-      const counts = {};
-      if (data.customLevels) counts.customLevels = data.customLevels.length;
-      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
-      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
-      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
-      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
-      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
-      if (data.stats) counts.stats = Object.keys(data.stats).length;
-      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
-      if (data.replays) counts.replays = Object.keys(data.replays).length;
-      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      const counts = countProfileDataCategories(data);
       renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
       updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
       profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
@@ -10681,17 +10724,7 @@
       const availableCats = profile.categories || ProfileStore.CATEGORY_ORDER.filter(function(k) { return data[k] != null; });
       profileImportCategoryCount.textContent = availableCats.length + " 类";
       profileImportSelectedCategories = availableCats.slice();
-      const counts = {};
-      if (data.customLevels) counts.customLevels = data.customLevels.length;
-      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
-      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
-      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
-      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
-      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
-      if (data.stats) counts.stats = Object.keys(data.stats).length;
-      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
-      if (data.replays) counts.replays = Object.keys(data.replays).length;
-      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      const counts = countProfileDataCategories(data);
       renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts, true);
       updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
       profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
@@ -10902,35 +10935,32 @@
 
     function handleImportParseResult(result) {
       if (!result.success) {
-        importPackError.textContent = result.errors.join("；");
-        importPackError.classList.remove("hidden");
+        showErrorMsg(importPackError, result.errors.join("；"));
         importPackInfo.classList.add("hidden");
-        importPackSuccess.classList.add("hidden");
+        hideSuccessMsg(importPackSuccess);
         confirmImportBtn.disabled = true;
         return;
       }
 
       currentImportPack = result.pack;
-      importPackError.classList.add("hidden");
-      importPackSuccess.classList.add("hidden");
+      hideErrorMsg(importPackError);
+      hideSuccessMsg(importPackSuccess);
       updateImportPackInfo(result.pack);
     }
 
     function performImport() {
       if (!currentImportPack) return;
       if (importSelectedLevelIndices.length === 0) {
-        importPackError.textContent = "请至少选择一个关卡";
-        importPackError.classList.remove("hidden");
-        importPackSuccess.classList.add("hidden");
+        showErrorMsg(importPackError, "请至少选择一个关卡");
+        hideSuccessMsg(importPackSuccess);
         return;
       }
 
       const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy, importSelectedLevelIndices);
 
       if (!result.success) {
-        importPackError.textContent = result.message + "：" + (result.errors || []).join("；");
-        importPackError.classList.remove("hidden");
-        importPackSuccess.classList.add("hidden");
+        showErrorMsg(importPackError, result.message + "：" + (result.errors || []).join("；"));
+        hideSuccessMsg(importPackSuccess);
         return;
       }
 
@@ -10948,9 +10978,8 @@
         successMsg += "\n• 跳过：" + result.skipped.join("、");
       }
 
-      importPackSuccess.textContent = successMsg;
-      importPackSuccess.classList.remove("hidden");
-      importPackError.classList.add("hidden");
+      showSuccessMsg(importPackSuccess, successMsg);
+      hideErrorMsg(importPackError);
 
       updateGlobalBest();
       renderLevelCards();
@@ -11003,8 +11032,7 @@
 
     confirmExportBtn.addEventListener("click", function() {
       if (exportSelectedLevelIds.length === 0) {
-        exportPackError.textContent = "请至少选择一个关卡";
-        exportPackError.classList.remove("hidden");
+        showErrorMsg(exportPackError, "请至少选择一个关卡");
         return;
       }
 
@@ -11058,30 +11086,25 @@
     });
 
     importFileInput.addEventListener("change", function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      LevelPack.readPackFromFile(file).then(function(pack) {
-        handleImportParseResult({ success: true, pack: pack });
-      }).catch(function(err) {
-        importPackError.textContent = err;
-        importPackError.classList.remove("hidden");
-        importPackInfo.classList.add("hidden");
-        confirmImportBtn.disabled = true;
-      });
-
-      importFileInput.value = "";
+      handleFileImport(
+        importFileInput,
+        LevelPack.readPackFromFile,
+        function(pack) { handleImportParseResult({ success: true, pack: pack }); },
+        null,
+        importPackError,
+        importPackSuccess
+      );
     });
 
     parseImportTextBtn.addEventListener("click", function() {
-      const text = importTextarea.value.trim();
-      if (!text) {
-        importPackError.textContent = "请粘贴关卡包数据";
-        importPackError.classList.remove("hidden");
-        return;
-      }
-      const result = LevelPack.parsePackFromText(text);
-      handleImportParseResult(result);
+      handleTextImport(
+        importTextarea,
+        LevelPack.parsePackFromText,
+        "请粘贴关卡包数据",
+        function(result) { handleImportParseResult(result); },
+        importPackError,
+        importPackSuccess
+      );
     });
 
     confirmImportBtn.addEventListener("click", function() {
@@ -11136,11 +11159,10 @@
 
     profileConfirmExportBtn.addEventListener("click", function() {
       if (profileExportSelectedCategories.length === 0) {
-        profileExportError.textContent = "请至少选择一类数据";
-        profileExportError.classList.remove("hidden");
+        showErrorMsg(profileExportError, "请至少选择一类数据");
         return;
       }
-      profileExportError.classList.add("hidden");
+      hideErrorMsg(profileExportError);
       const playerName = profileExportName.value.trim();
       const profile = ProfileStore.createProfile(playerName, profileExportSelectedCategories);
       ProfileStore.exportProfileToFile(profile);
@@ -11166,50 +11188,32 @@
     });
 
     profileImportFileInput.addEventListener("change", function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      profileImportError.classList.add("hidden");
-      ProfileStore.readProfileFromFile(file).then(function(profile) {
-        handleProfileParsed(profile);
-      }).catch(function(err) {
-        profileImportError.textContent = err;
-        profileImportError.classList.remove("hidden");
-      });
-      profileImportFileInput.value = "";
+      handleFileImport(
+        profileImportFileInput,
+        ProfileStore.readProfileFromFile,
+        function(profile) { handleProfileParsed(profile); },
+        null,
+        profileImportError,
+        profileImportSuccess
+      );
     });
 
     profileParseImportTextBtn.addEventListener("click", function() {
-      const text = profileImportTextarea.value.trim();
-      if (!text) {
-        profileImportError.textContent = "请粘贴玩家档案数据";
-        profileImportError.classList.remove("hidden");
-        return;
-      }
-      profileImportError.classList.add("hidden");
-      const result = ProfileStore.parseProfileFromText(text);
-      if (!result.success) {
-        profileImportError.textContent = result.errors.join("; ");
-        profileImportError.classList.remove("hidden");
-        return;
-      }
-      handleProfileParsed(result.profile);
+      handleTextImport(
+        profileImportTextarea,
+        ProfileStore.parseProfileFromText,
+        "请粘贴玩家档案数据",
+        function(result) { handleProfileParsed(result.profile); },
+        profileImportError,
+        profileImportSuccess
+      );
     });
 
     profileSelectAllImportBtn.addEventListener("click", function() {
       if (!currentImportProfile) return;
       const data = currentImportProfile.data || {};
       profileImportSelectedCategories = ProfileStore.CATEGORY_ORDER.filter(function(k) { return data[k] != null; });
-      const counts = {};
-      if (data.customLevels) counts.customLevels = data.customLevels.length;
-      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
-      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
-      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
-      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
-      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
-      if (data.stats) counts.stats = Object.keys(data.stats).length;
-      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
-      if (data.replays) counts.replays = Object.keys(data.replays).length;
-      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      const counts = countProfileDataCategories(data);
       renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
       updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
       profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
@@ -11219,17 +11223,7 @@
     profileDeselectAllImportBtn.addEventListener("click", function() {
       profileImportSelectedCategories = [];
       const data = currentImportProfile ? currentImportProfile.data : {};
-      const counts = {};
-      if (data && data.customLevels) counts.customLevels = data.customLevels.length;
-      if (data && data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
-      if (data && data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
-      if (data && data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
-      if (data && data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
-      if (data && data.achievements) counts.achievements = Object.keys(data.achievements).length;
-      if (data && data.stats) counts.stats = Object.keys(data.stats).length;
-      if (data && data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
-      if (data && data.replays) counts.replays = Object.keys(data.replays).length;
-      if (data && data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      const counts = countProfileDataCategories(data);
       renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
       updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
       profileConfirmImportBtn.disabled = true;
@@ -11238,17 +11232,15 @@
 
     profileConfirmImportBtn.addEventListener("click", function() {
       if (!currentImportProfile || profileImportSelectedCategories.length === 0) {
-        profileImportError.textContent = "请选择要导入的数据类别";
-        profileImportError.classList.remove("hidden");
+        showErrorMsg(profileImportError, "请选择要导入的数据类别");
         return;
       }
-      profileImportError.classList.add("hidden");
-      profileImportSuccess.classList.add("hidden");
+      hideErrorMsg(profileImportError);
+      hideSuccessMsg(profileImportSuccess);
 
       const result = ProfileStore.importProfile(currentImportProfile, profileImportSelectedCategories);
       if (!result.success) {
-        profileImportError.textContent = result.errors.join("; ");
-        profileImportError.classList.remove("hidden");
+        showErrorMsg(profileImportError, result.errors.join("; "));
         return;
       }
 
@@ -11269,8 +11261,7 @@
       AchievementRules.checkNewAchievements();
       refreshAllPanels();
 
-      profileImportSuccess.textContent = msg;
-      profileImportSuccess.classList.remove("hidden");
+      showSuccessMsg(profileImportSuccess, msg);
       profileConfirmImportBtn.disabled = true;
 
       setTimeout(function() {
