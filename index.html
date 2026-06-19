@@ -64,6 +64,15 @@
     .editor-section:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
     .editor-section-title { font-size: 14px; color: #e7c46a; font-weight: 700; margin-bottom: 8px; }
     .editor-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .weather-cfg-group { margin: 6px 0; border: 1px solid #24414b; border-radius: 6px; overflow: hidden; }
+    .weather-cfg-header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; background: #0a1f27; transition: background .15s; }
+    .weather-cfg-header:hover { background: #0f2a33; }
+    .weather-cfg-header .settings-label { font-size: 13px; font-weight: 600; }
+    .weather-cfg-params { padding: 6px 10px 10px; border-top: 1px solid #1a3540; }
+    .weather-cfg-params .settings-row { padding: 4px 0; }
+    .weather-cfg-params .settings-label { font-size: 12px; }
+    .weather-cfg-params .settings-value { font-size: 12px; }
+    .weather-cfg-params input[type="range"] { margin-top: 2px; margin-bottom: 2px; }
     .custom-tag { display: inline-block; background: #3d6a78; color: #eef6f2; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
     .edit-btn { display: inline-block; background: #24414b; color: #e7c46a; font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; float: right; margin-top: 2px; }
     .edit-btn:hover { background: #3d6a78; }
@@ -997,6 +1006,73 @@
         </div>
 
         <div class="editor-section">
+          <div class="editor-section-title">天气事件配置</div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherSeaBreezeHeader">
+              <span class="settings-label">🌬️ 海风 — 船只漂移加剧</span>
+              <div class="toggle" id="weatherSeaBreezeToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherSeaBreezeParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="sbMinDurVal" class="settings-value">8s</span></div>
+              <input type="range" id="sbMinDurRange" min="3" max="25" value="8">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="sbMaxDurVal" class="settings-value">18s</span></div>
+              <input type="range" id="sbMaxDurRange" min="5" max="45" value="18">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="sbMinCoolVal" class="settings-value">15s</span></div>
+              <input type="range" id="sbMinCoolRange" min="5" max="60" value="15">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="sbMaxCoolVal" class="settings-value">30s</span></div>
+              <input type="range" id="sbMaxCoolRange" min="10" max="90" value="30">
+              <div class="settings-row"><span class="settings-label">漂移强度</span><span id="sbDriftVal" class="settings-value">2.0</span></div>
+              <input type="range" id="sbDriftRange" min="10" max="40" value="20">
+              <div class="settings-row"><span class="settings-label">速度加成</span><span id="sbSpeedVal" class="settings-value">1.15</span></div>
+              <input type="range" id="sbSpeedRange" min="100" max="200" value="115" step="5">
+            </div>
+          </div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherDenseFogHeader">
+              <span class="settings-label">🌫️ 浓雾 — 光束射程缩短</span>
+              <div class="toggle" id="weatherDenseFogToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherDenseFogParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="dfMinDurVal" class="settings-value">10s</span></div>
+              <input type="range" id="dfMinDurRange" min="3" max="25" value="10">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="dfMaxDurVal" class="settings-value">22s</span></div>
+              <input type="range" id="dfMaxDurRange" min="5" max="45" value="22">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="dfMinCoolVal" class="settings-value">20s</span></div>
+              <input type="range" id="dfMinCoolRange" min="5" max="60" value="20">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="dfMaxCoolVal" class="settings-value">40s</span></div>
+              <input type="range" id="dfMaxCoolRange" min="10" max="90" value="40">
+              <div class="settings-row"><span class="settings-label">射程缩减</span><span id="dfRangeVal" class="settings-value">0.55</span></div>
+              <input type="range" id="dfRangeRange" min="20" max="90" value="55">
+              <div class="settings-row"><span class="settings-label">雾气浓度</span><span id="dfOpacityVal" class="settings-value">0.50</span></div>
+              <input type="range" id="dfOpacityRange" min="10" max="80" value="50">
+            </div>
+          </div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherLighthouseFlashHeader">
+              <span class="settings-label">⚡ 灯塔闪烁 — 光束角度抖动</span>
+              <div class="toggle" id="weatherLighthouseFlashToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherLighthouseFlashParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="lfMinDurVal" class="settings-value">5s</span></div>
+              <input type="range" id="lfMinDurRange" min="2" max="20" value="5">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="lfMaxDurVal" class="settings-value">12s</span></div>
+              <input type="range" id="lfMaxDurRange" min="4" max="35" value="12">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="lfMinCoolVal" class="settings-value">18s</span></div>
+              <input type="range" id="lfMinCoolRange" min="5" max="60" value="18">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="lfMaxCoolVal" class="settings-value">35s</span></div>
+              <input type="range" id="lfMaxCoolRange" min="10" max="90" value="35">
+              <div class="settings-row"><span class="settings-label">抖动幅度</span><span id="lfJitterVal" class="settings-value">0.08</span></div>
+              <input type="range" id="lfJitterRange" min="2" max="20" value="8">
+              <div class="settings-row"><span class="settings-label">闪烁强度</span><span id="lfFlickerVal" class="settings-value">0.40</span></div>
+              <input type="range" id="lfFlickerRange" min="10" max="80" value="40">
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-section">
           <div class="editor-section-title">选中元素</div>
           <div id="selectedInfo" class="editor-hint">未选中任何元素</div>
           <div id="selectedRadiusControl" class="hidden">
@@ -1729,6 +1805,17 @@
 
         if (level.harbor && typeof level.harbor !== "object") {
           errors.push(prefix + "harbor 字段格式错误");
+        }
+
+        if (level.weather && typeof level.weather !== "object") {
+          errors.push(prefix + "weather 字段格式错误");
+        } else if (level.weather) {
+          for (const wt of ["seaBreeze", "denseFog", "lighthouseFlash"]) {
+            const wcfg = level.weather[wt];
+            if (wcfg && typeof wcfg !== "object") {
+              errors.push(prefix + "weather." + wt + " 格式错误");
+            }
+          }
         }
 
         return errors;
@@ -3884,6 +3971,16 @@
     const backFromEditorBtn = document.querySelector("#backFromEditorBtn");
     const exportCurrentLevelBtn = document.querySelector("#exportCurrentLevelBtn");
 
+    const weatherSeaBreezeToggle = document.querySelector("#weatherSeaBreezeToggle");
+    const weatherSeaBreezeHeader = document.querySelector("#weatherSeaBreezeHeader");
+    const weatherSeaBreezeParams = document.querySelector("#weatherSeaBreezeParams");
+    const weatherDenseFogToggle = document.querySelector("#weatherDenseFogToggle");
+    const weatherDenseFogHeader = document.querySelector("#weatherDenseFogHeader");
+    const weatherDenseFogParams = document.querySelector("#weatherDenseFogParams");
+    const weatherLighthouseFlashToggle = document.querySelector("#weatherLighthouseFlashToggle");
+    const weatherLighthouseFlashHeader = document.querySelector("#weatherLighthouseFlashHeader");
+    const weatherLighthouseFlashParams = document.querySelector("#weatherLighthouseFlashParams");
+
     // ===================== 关卡包导入导出 DOM 引用 =====================
     const exportPackBtn = document.querySelector("#exportPackBtn");
     const importPackBtn = document.querySelector("#importPackBtn");
@@ -4406,9 +4503,27 @@
         }
 
         let weatherIcons = "";
-        if (chapter.difficulty === "hard") weatherIcons = "🌬️🌫️⚡";
-        else if (chapter.difficulty === "normal") weatherIcons = "🌬️🌫️";
-        else weatherIcons = "🌤️";
+        if (chapter.isCustom || chapter.difficulty === "custom") {
+          var hasSb = false, hasDf = false, hasLf = false;
+          chapter.levels.forEach(function(lid) {
+            var lvl = LevelData.getLevelById(lid);
+            if (lvl && lvl.weather) {
+              if (lvl.weather.seaBreeze && lvl.weather.seaBreeze.enabled) hasSb = true;
+              if (lvl.weather.denseFog && lvl.weather.denseFog.enabled) hasDf = true;
+              if (lvl.weather.lighthouseFlash && lvl.weather.lighthouseFlash.enabled) hasLf = true;
+            }
+          });
+          if (hasSb) weatherIcons += "🌬️";
+          if (hasDf) weatherIcons += "🌫️";
+          if (hasLf) weatherIcons += "⚡";
+          if (!weatherIcons) weatherIcons = "🌤️";
+        } else if (chapter.difficulty === "hard") {
+          weatherIcons = "🌬️🌫️⚡";
+        } else if (chapter.difficulty === "normal") {
+          weatherIcons = "🌬️🌫️";
+        } else {
+          weatherIcons = "🌤️";
+        }
 
         card.innerHTML =
           '<div class="chapter-card-header">' +
@@ -4574,7 +4689,24 @@
       const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
       extraBtns.forEach(function(b) { b.remove(); });
 
-      const weatherIcons = chapter.difficulty === "hard" ? "🌬️🌫️⚡" : chapter.difficulty === "normal" ? "🌬️🌫️" : "🌤️";
+      let weatherIcons = "";
+      if (chapter.isCustom || chapter.difficulty === "custom") {
+        var hasSb2 = false, hasDf2 = false, hasLf2 = false;
+        chapter.levels.forEach(function(lid) {
+          var lvl = LevelData.getLevelById(lid);
+          if (lvl && lvl.weather) {
+            if (lvl.weather.seaBreeze && lvl.weather.seaBreeze.enabled) hasSb2 = true;
+            if (lvl.weather.denseFog && lvl.weather.denseFog.enabled) hasDf2 = true;
+            if (lvl.weather.lighthouseFlash && lvl.weather.lighthouseFlash.enabled) hasLf2 = true;
+          }
+        });
+        if (hasSb2) weatherIcons += "🌬️";
+        if (hasDf2) weatherIcons += "🌫️";
+        if (hasLf2) weatherIcons += "⚡";
+        if (!weatherIcons) weatherIcons = "🌤️";
+      } else {
+        weatherIcons = chapter.difficulty === "hard" ? "🌬️🌫️⚡" : chapter.difficulty === "normal" ? "🌬️🌫️" : "🌤️";
+      }
 
       overlayText.innerHTML =
         '<div class="campaign-chapter-intro" style="text-align:left;padding:14px;margin:12px -4px 4px;border-left:3px solid #e7c46a;">' +
@@ -5314,6 +5446,65 @@
       harborTopValue.textContent = editorLevel.harbor.top;
       harborBottomRange.value = editorLevel.harbor.bottom;
       harborBottomValue.textContent = editorLevel.harbor.bottom;
+      syncWeatherConfigToUI();
+    }
+
+    function syncWeatherConfigToUI() {
+      const w = editorLevel.weather || {};
+      const sb = w.seaBreeze || {};
+      const df = w.denseFog || {};
+      const lf = w.lighthouseFlash || {};
+
+      weatherSeaBreezeToggle.classList.toggle("on", !!sb.enabled);
+      weatherSeaBreezeParams.classList.toggle("hidden", !sb.enabled);
+      if (sb.enabled) {
+        document.getElementById("sbMinDurRange").value = sb.minDuration || 8;
+        document.getElementById("sbMinDurVal").textContent = (sb.minDuration || 8) + "s";
+        document.getElementById("sbMaxDurRange").value = sb.maxDuration || 18;
+        document.getElementById("sbMaxDurVal").textContent = (sb.maxDuration || 18) + "s";
+        document.getElementById("sbMinCoolRange").value = sb.minCooldown || 15;
+        document.getElementById("sbMinCoolVal").textContent = (sb.minCooldown || 15) + "s";
+        document.getElementById("sbMaxCoolRange").value = sb.maxCooldown || 30;
+        document.getElementById("sbMaxCoolVal").textContent = (sb.maxCooldown || 30) + "s";
+        document.getElementById("sbDriftRange").value = Math.round((sb.driftMultiplier || 2.0) * 10);
+        document.getElementById("sbDriftVal").textContent = (sb.driftMultiplier || 2.0).toFixed(1);
+        document.getElementById("sbSpeedRange").value = Math.round((sb.speedMultiplier || 1.15) * 100);
+        document.getElementById("sbSpeedVal").textContent = (sb.speedMultiplier || 1.15).toFixed(2);
+      }
+
+      weatherDenseFogToggle.classList.toggle("on", !!df.enabled);
+      weatherDenseFogParams.classList.toggle("hidden", !df.enabled);
+      if (df.enabled) {
+        document.getElementById("dfMinDurRange").value = df.minDuration || 10;
+        document.getElementById("dfMinDurVal").textContent = (df.minDuration || 10) + "s";
+        document.getElementById("dfMaxDurRange").value = df.maxDuration || 22;
+        document.getElementById("dfMaxDurVal").textContent = (df.maxDuration || 22) + "s";
+        document.getElementById("dfMinCoolRange").value = df.minCooldown || 20;
+        document.getElementById("dfMinCoolVal").textContent = (df.minCooldown || 20) + "s";
+        document.getElementById("dfMaxCoolRange").value = df.maxCooldown || 40;
+        document.getElementById("dfMaxCoolVal").textContent = (df.maxCooldown || 40) + "s";
+        document.getElementById("dfRangeRange").value = Math.round((df.beamRangeMultiplier || 0.55) * 100);
+        document.getElementById("dfRangeVal").textContent = (df.beamRangeMultiplier || 0.55).toFixed(2);
+        document.getElementById("dfOpacityRange").value = Math.round((df.fogOpacity || 0.5) * 100);
+        document.getElementById("dfOpacityVal").textContent = (df.fogOpacity || 0.5).toFixed(2);
+      }
+
+      weatherLighthouseFlashToggle.classList.toggle("on", !!lf.enabled);
+      weatherLighthouseFlashParams.classList.toggle("hidden", !lf.enabled);
+      if (lf.enabled) {
+        document.getElementById("lfMinDurRange").value = lf.minDuration || 5;
+        document.getElementById("lfMinDurVal").textContent = (lf.minDuration || 5) + "s";
+        document.getElementById("lfMaxDurRange").value = lf.maxDuration || 12;
+        document.getElementById("lfMaxDurVal").textContent = (lf.maxDuration || 12) + "s";
+        document.getElementById("lfMinCoolRange").value = lf.minCooldown || 18;
+        document.getElementById("lfMinCoolVal").textContent = (lf.minCooldown || 18) + "s";
+        document.getElementById("lfMaxCoolRange").value = lf.maxCooldown || 35;
+        document.getElementById("lfMaxCoolVal").textContent = (lf.maxCooldown || 35) + "s";
+        document.getElementById("lfJitterRange").value = Math.round((lf.jitterAmount || 0.08) * 100);
+        document.getElementById("lfJitterVal").textContent = (lf.jitterAmount || 0.08).toFixed(2);
+        document.getElementById("lfFlickerRange").value = Math.round((lf.flickerIntensity || 0.4) * 100);
+        document.getElementById("lfFlickerVal").textContent = (lf.flickerIntensity || 0.4).toFixed(2);
+      }
     }
 
     function updateEditorTools() {
@@ -6149,6 +6340,19 @@
           ctx.setLineDash([]);
         }
       }
+
+      const ew = editorLevel.weather || {};
+      const weatherLabels = [];
+      if (ew.seaBreeze && ew.seaBreeze.enabled) weatherLabels.push("🌬️海风");
+      if (ew.denseFog && ew.denseFog.enabled) weatherLabels.push("🌫️浓雾");
+      if (ew.lighthouseFlash && ew.lighthouseFlash.enabled) weatherLabels.push("⚡闪烁");
+      if (weatherLabels.length > 0) {
+        ctx.fillStyle = "rgba(13,29,37,.75)";
+        ctx.fillRect(8, 565, 14 + weatherLabels.join(" ").length * 13, 28);
+        ctx.font = "13px Arial";
+        ctx.fillStyle = "#e7c46a";
+        ctx.fillText("天气: " + weatherLabels.join(" "), 16, 584);
+      }
     }
 
     function draw() {
@@ -6168,6 +6372,61 @@
       }
     }
 
+    function computeReplayWeatherModifiers(events, currentTime, weatherConfig) {
+      var FADE_TIME = 1.5;
+      var driftMult = 1;
+      var speedMult = 1;
+      var beamRangeMult = 1;
+      var fogOpacity = 0;
+      var beamFlicker = 0;
+      var hasWeather = false;
+
+      if (!events || !weatherConfig) {
+        return { driftMultiplier: 1, speedMultiplier: 1, beamRangeMultiplier: 1, beamJitter: 0, beamFlicker: 0, fogOpacity: 0, hasWeather: false };
+      }
+
+      var activeWeathers = {};
+      for (var i = 0; i < events.length; i++) {
+        var ev = events[i];
+        if (ev.t > currentTime) break;
+        if (ev.type === "weatherStart" && ev.data && ev.data.type) {
+          activeWeathers[ev.data.type] = { startTime: ev.t, duration: ev.data.duration || 10, active: true };
+        } else if (ev.type === "weatherEnd" && ev.data && ev.data.type) {
+          if (activeWeathers[ev.data.type]) {
+            activeWeathers[ev.data.type].active = false;
+          }
+        }
+      }
+
+      for (var type in activeWeathers) {
+        var w = activeWeathers[type];
+        if (!w.active) continue;
+        var elapsed = currentTime - w.startTime;
+        var remaining = w.duration - elapsed;
+        if (remaining <= 0) continue;
+
+        var intensity = 1;
+        if (elapsed < FADE_TIME) intensity = elapsed / FADE_TIME;
+        else if (remaining < FADE_TIME) intensity = Math.max(0, remaining / FADE_TIME);
+
+        hasWeather = true;
+        var cfg = weatherConfig[type];
+        if (!cfg) continue;
+
+        if (type === "seaBreeze") {
+          driftMult += ((cfg.driftMultiplier || 2.0) - 1) * intensity;
+          speedMult += ((cfg.speedMultiplier || 1.15) - 1) * intensity;
+        } else if (type === "denseFog") {
+          beamRangeMult -= (1 - (cfg.beamRangeMultiplier || 0.55)) * intensity;
+          fogOpacity += (cfg.fogOpacity || 0.5) * intensity;
+        } else if (type === "lighthouseFlash") {
+          beamFlicker = (cfg.flickerIntensity || 0.4) * intensity;
+        }
+      }
+
+      return { driftMultiplier: driftMult, speedMultiplier: speedMult, beamRangeMultiplier: beamRangeMult, beamJitter: 0, beamFlicker: beamFlicker, fogOpacity: fogOpacity, hasWeather: hasWeather };
+    }
+
     function drawReplayScene() {
       const renderState = ReplayPlayer.getCurrentRenderState();
       if (!renderState) {
@@ -6176,6 +6435,10 @@
       }
       const meta = ReplayPlayer.getMeta();
       const levelData = meta ? meta.levelData : getCurrentLevelData();
+      const replayEvents = ReplayPlayer.getEvents();
+      const replayTime = ReplayPlayer.getCurrentTime();
+      const weatherConfig = levelData.weather || {};
+      const wm = computeReplayWeatherModifiers(replayEvents, replayTime, weatherConfig);
 
       const harbor = levelData.harbor || { x: 900, top: 70, bottom: 530 };
 
@@ -6188,6 +6451,21 @@
       ctx.strokeStyle = "rgba(140,190,190,.12)";
       for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
 
+      if (wm.driftMultiplier > 1.01) {
+        const windIntensity = (wm.driftMultiplier - 1) * 2;
+        ctx.strokeStyle = "rgba(180, 220, 230, " + (0.08 * windIntensity) + ")";
+        ctx.lineWidth = 1;
+        const time = Date.now() / 1000;
+        for (let i = 0; i < 15; i++) {
+          const y = (i * 43 + time * 30 * windIntensity) % 600;
+          const x = ((i * 73) % 960 + time * 80 * windIntensity) % 960;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + 20 + windIntensity * 15, y + 2);
+          ctx.stroke();
+        }
+      }
+
       for (const fog of levelData.fog) {
         const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
         g.addColorStop(0, "rgba(180,190,180,.26)");
@@ -6195,6 +6473,17 @@
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
       }
+
+      if (wm.fogOpacity > 0.01) {
+        const fogAlpha = wm.fogOpacity * 0.6;
+        const fogGrad = ctx.createRadialGradient(480, 300, 100, 480, 300, 600);
+        fogGrad.addColorStop(0, "rgba(200, 210, 210, 0)");
+        fogGrad.addColorStop(0.5, "rgba(180, 190, 190, " + (fogAlpha * 0.5) + ")");
+        fogGrad.addColorStop(1, "rgba(160, 170, 175, " + fogAlpha + ")");
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 0, 960, 600);
+      }
+
       for (const rock of levelData.rocks) {
         ctx.fillStyle = "#273a3a";
         ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
@@ -6207,19 +6496,34 @@
       ctx.fillStyle = "rgba(135, 212, 229, .3)";
       ctx.fillRect(harbor.x - 20, harbor.top, 20, harborH);
 
+      const beamAlpha = 0.24 * (1 - wm.beamFlicker * 0.5);
+      const beamRange = 780 * wm.beamRangeMultiplier;
+
       ctx.save();
       ctx.translate(lighthouse.x, lighthouse.y);
       ctx.rotate(renderState.beamAngle);
-      ctx.fillStyle = "rgba(247,220,125,.24)";
+      ctx.fillStyle = "rgba(247,220,125," + beamAlpha + ")";
       ctx.beginPath();
       const w = renderState.beamWide ? 0.42 : 0.22;
       ctx.moveTo(0, 0);
-      ctx.arc(0, 0, 780, -w, w);
+      ctx.arc(0, 0, beamRange, -w, w);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
-      ctx.fillStyle = "#e7c46a";
+
+      const lighthouseIntensity = 1 - wm.beamFlicker * 0.3;
+      ctx.fillStyle = "rgba(231, 196, 106, " + lighthouseIntensity + ")";
       ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
+      if (wm.beamFlicker > 0.01) {
+        const glowSize = 25 + wm.beamFlicker * 20;
+        const glowAlpha = 0.3 + wm.beamFlicker * 0.4;
+        const glow = ctx.createRadialGradient(lighthouse.x, lighthouse.y, 5, lighthouse.x, lighthouse.y, glowSize);
+        glow.addColorStop(0, "rgba(255, 240, 180, " + glowAlpha + ")");
+        glow.addColorStop(1, "rgba(255, 240, 180, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, glowSize, 0, Math.PI * 2); ctx.fill();
+      }
 
       for (const boat of renderState.boats) {
         const dx = boat.x - lighthouse.x;
@@ -6227,7 +6531,7 @@
         const ang = Math.atan2(dy, dx);
         let diff = Math.atan2(Math.sin(ang - renderState.beamAngle), Math.cos(ang - renderState.beamAngle));
         const bw = renderState.beamWide ? 0.42 : 0.22;
-        const boatInBeam = Math.abs(diff) < bw && Math.hypot(dx, dy) < 760;
+        const boatInBeam = Math.abs(diff) < bw && Math.hypot(dx, dy) < beamRange;
 
         ctx.save();
         ctx.translate(boat.x, boat.y);
@@ -6235,6 +6539,20 @@
         ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
         ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
         ctx.restore();
+      }
+
+      if (wm.hasWeather) {
+        const activeLabels = [];
+        if (wm.driftMultiplier > 1.01) activeLabels.push("🌬️海风");
+        if (wm.fogOpacity > 0.01 || wm.beamRangeMultiplier < 0.99) activeLabels.push("🌫️浓雾");
+        if (wm.beamFlicker > 0.01) activeLabels.push("⚡闪烁");
+        if (activeLabels.length > 0) {
+          ctx.fillStyle = "rgba(13,29,37,.75)";
+          ctx.fillRect(8, 565, 14 + activeLabels.join(" ").length * 13, 28);
+          ctx.font = "13px Arial";
+          ctx.fillStyle = "#e7c46a";
+          ctx.fillText("天气: " + activeLabels.join(" "), 16, 584);
+        }
       }
 
       if (!ReplayPlayer.isPlaying() && ReplayPlayer.getCurrentTime() > 0 && ReplayPlayer.getCurrentTime() < ReplayPlayer.getDuration() - 0.05) {
@@ -6416,6 +6734,128 @@
         harborBottomRange.value = editorLevel.harbor.bottom;
       }
       harborBottomValue.textContent = editorLevel.harbor.bottom;
+    });
+
+    function ensureWeatherObj(type) {
+      if (!editorLevel.weather) editorLevel.weather = {};
+      if (!editorLevel.weather[type]) editorLevel.weather[type] = {};
+      return editorLevel.weather[type];
+    }
+
+    function toggleWeatherConfig(type, toggleEl, paramsEl) {
+      const cfg = ensureWeatherObj(type);
+      cfg.enabled = !cfg.enabled;
+      toggleEl.classList.toggle("on", cfg.enabled);
+      paramsEl.classList.toggle("hidden", !cfg.enabled);
+      if (cfg.enabled) {
+        const defaults = WeatherSystem.getWeatherTypes()[type].defaultConfig;
+        for (const key in defaults) {
+          if (cfg[key] === undefined) cfg[key] = defaults[key];
+        }
+        syncWeatherConfigToUI();
+      }
+    }
+
+    weatherSeaBreezeHeader.addEventListener("click", function(e) {
+      if (e.target === weatherSeaBreezeToggle || weatherSeaBreezeToggle.contains(e.target)) return;
+      toggleWeatherConfig("seaBreeze", weatherSeaBreezeToggle, weatherSeaBreezeParams);
+    });
+    weatherSeaBreezeToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("seaBreeze", weatherSeaBreezeToggle, weatherSeaBreezeParams);
+    });
+
+    weatherDenseFogHeader.addEventListener("click", function(e) {
+      if (e.target === weatherDenseFogToggle || weatherDenseFogToggle.contains(e.target)) return;
+      toggleWeatherConfig("denseFog", weatherDenseFogToggle, weatherDenseFogParams);
+    });
+    weatherDenseFogToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("denseFog", weatherDenseFogToggle, weatherDenseFogParams);
+    });
+
+    weatherLighthouseFlashHeader.addEventListener("click", function(e) {
+      if (e.target === weatherLighthouseFlashToggle || weatherLighthouseFlashToggle.contains(e.target)) return;
+      toggleWeatherConfig("lighthouseFlash", weatherLighthouseFlashToggle, weatherLighthouseFlashParams);
+    });
+    weatherLighthouseFlashToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("lighthouseFlash", weatherLighthouseFlashToggle, weatherLighthouseFlashParams);
+    });
+
+    document.getElementById("sbMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").minDuration = v;
+      document.getElementById("sbMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("sbMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").maxDuration = v;
+      document.getElementById("sbMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("sbMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").minCooldown = v;
+      document.getElementById("sbMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("sbMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").maxCooldown = v;
+      document.getElementById("sbMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("sbDriftRange").addEventListener("input", function() {
+      const v = Number(this.value) / 10; ensureWeatherObj("seaBreeze").driftMultiplier = v;
+      document.getElementById("sbDriftVal").textContent = v.toFixed(1);
+    });
+    document.getElementById("sbSpeedRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("seaBreeze").speedMultiplier = v;
+      document.getElementById("sbSpeedVal").textContent = v.toFixed(2);
+    });
+
+    document.getElementById("dfMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").minDuration = v;
+      document.getElementById("dfMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("dfMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").maxDuration = v;
+      document.getElementById("dfMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("dfMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").minCooldown = v;
+      document.getElementById("dfMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("dfMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").maxCooldown = v;
+      document.getElementById("dfMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("dfRangeRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("denseFog").beamRangeMultiplier = v;
+      document.getElementById("dfRangeVal").textContent = v.toFixed(2);
+    });
+    document.getElementById("dfOpacityRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("denseFog").fogOpacity = v;
+      document.getElementById("dfOpacityVal").textContent = v.toFixed(2);
+    });
+
+    document.getElementById("lfMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").minDuration = v;
+      document.getElementById("lfMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("lfMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").maxDuration = v;
+      document.getElementById("lfMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("lfMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").minCooldown = v;
+      document.getElementById("lfMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("lfMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").maxCooldown = v;
+      document.getElementById("lfMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("lfJitterRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("lighthouseFlash").jitterAmount = v;
+      document.getElementById("lfJitterVal").textContent = v.toFixed(2);
+    });
+    document.getElementById("lfFlickerRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("lighthouseFlash").flickerIntensity = v;
+      document.getElementById("lfFlickerVal").textContent = v.toFixed(2);
     });
 
     selectedRadiusRange.addEventListener("input", function() {

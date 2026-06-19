@@ -20,6 +20,16 @@
 - 调整船只数量和起始位置
 - 设置港湾位置
 - 配置天气事件（海风、浓雾、灯塔闪烁）
+  - 海风：船只漂移加剧，可调整持续时间、冷却时间、漂移强度和速度加成
+  - 浓雾：光束射程缩短，可调整持续时间、冷却时间、射程缩减和雾气浓度
+  - 灯塔闪烁：光束角度抖动，可调整持续时间、冷却时间、抖动幅度和闪烁强度
+  - 开启天气后点击「试玩关卡」可立即体验当前配置的效果
+- 保存后的天气配置在以下场景中正确生效：
+  - **选择关卡**：关卡卡片显示天气图标，进入关卡时加载天气
+  - **航线战役**：战役进度会根据难度倍率调整天气持续时间与冷却时间
+  - **自定义航线**：章节卡片聚合显示所含关卡的实际天气类型，而非根据难度硬编码
+  - **关卡包导入导出**：天气配置随关卡数据一起导出和导入，保留完整参数
+  - **回放记录**：回放中录制 `weatherStart`/`weatherEnd` 事件，播放时实时渲染雾气覆盖、风线、光束射程缩减和闪烁效果
 
 ### 关卡包导入导出
 
@@ -71,7 +81,35 @@
       "rocks": [],
       "fog": [],
       "harbor": { "x": 900, "top": 70, "bottom": 530 },
-      "weather": { ... }
+      "weather": {
+        "seaBreeze": {
+          "enabled": true,
+          "minDuration": 8,
+          "maxDuration": 18,
+          "minCooldown": 15,
+          "maxCooldown": 30,
+          "driftMultiplier": 2.0,
+          "speedMultiplier": 1.15
+        },
+        "denseFog": {
+          "enabled": false,
+          "minDuration": 10,
+          "maxDuration": 22,
+          "minCooldown": 20,
+          "maxCooldown": 40,
+          "beamRangeMultiplier": 0.55,
+          "fogOpacity": 0.5
+        },
+        "lighthouseFlash": {
+          "enabled": false,
+          "minDuration": 5,
+          "maxDuration": 12,
+          "minCooldown": 18,
+          "maxCooldown": 35,
+          "jitterAmount": 0.08,
+          "flickerIntensity": 0.4
+        }
+      }
     }
   ],
   "levelBests": {
