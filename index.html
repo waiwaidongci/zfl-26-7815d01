@@ -19,9 +19,9 @@
     .stat { display: grid; grid-template-columns: 1fr auto; gap: 6px; padding: 8px 0; border-bottom: 1px solid #24414b; color: #c9d7d7; }
     .game { position: relative; display: grid; place-items: center; padding: 18px; }
     canvas { width: min(100%, 900px); max-height: calc(100vh - 36px); aspect-ratio: 16 / 10; border: 1px solid #315762; border-radius: 8px; background: #0a2735; display: block; }
-    .overlay { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+    .overlay { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 30; }
     .panel { width: min(430px, calc(100% - 28px)); background: rgba(13, 29, 37, .94); border: 1px solid #385c65; border-radius: 8px; padding: 22px; pointer-events: auto; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
     .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .key { padding: 8px; background: #142f3a; border-radius: 6px; color: #c9d7d7; }
     .level-select { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
@@ -51,7 +51,7 @@
     .pause-hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(13,29,37,.75); color: #a8bbc0; font-size: 13px; padding: 6px 16px; border-radius: 6px; pointer-events: none; }
     .game-settings-btn { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(13,29,37,.75); color: #eef6f2; font-size: 18px; cursor: pointer; display: grid; place-items: center; transition: background .2s; z-index: 5; margin: 0; padding: 0; width: 36px; }
     .game-settings-btn:hover { background: rgba(13,29,37,.9); }
-    .settings-panel-modal { width: min(380px, calc(100% - 28px)); }
+    .settings-panel-modal { width: min(380px, calc(100% - 28px)); max-height: calc(100vh - 56px); overflow-y: auto; }
     .settings-panel-modal h2 { margin: 0 0 14px; font-size: 20px; }
     .settings-panel-modal input[type="range"] { margin-bottom: 8px; }
 
@@ -64,6 +64,15 @@
     .editor-section:first-of-type { border-top: 0; margin-top: 0; padding-top: 0; }
     .editor-section-title { font-size: 14px; color: #e7c46a; font-weight: 700; margin-bottom: 8px; }
     .editor-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .weather-cfg-group { margin: 6px 0; border: 1px solid #24414b; border-radius: 6px; overflow: hidden; }
+    .weather-cfg-header { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; background: #0a1f27; transition: background .15s; }
+    .weather-cfg-header:hover { background: #0f2a33; }
+    .weather-cfg-header .settings-label { font-size: 13px; font-weight: 600; }
+    .weather-cfg-params { padding: 6px 10px 10px; border-top: 1px solid #1a3540; }
+    .weather-cfg-params .settings-row { padding: 4px 0; }
+    .weather-cfg-params .settings-label { font-size: 12px; }
+    .weather-cfg-params .settings-value { font-size: 12px; }
+    .weather-cfg-params input[type="range"] { margin-top: 2px; margin-bottom: 2px; }
     .custom-tag { display: inline-block; background: #3d6a78; color: #eef6f2; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
     .edit-btn { display: inline-block; background: #24414b; color: #e7c46a; font-size: 11px; padding: 2px 8px; border-radius: 4px; cursor: pointer; float: right; margin-top: 2px; }
     .edit-btn:hover { background: #3d6a78; }
@@ -329,47 +338,6 @@
     }
     .weather-stats-grid {
       grid-template-columns: 1fr 1fr 1fr;
-    }
-    .fail-reason-summary {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .fail-reason-bars {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 10px;
-    }
-    .fail-reason-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .fail-reason-bar-label {
-      font-size: 12px;
-      color: #a8bbc0;
-      min-width: 90px;
-    }
-    .fail-reason-bar-track {
-      flex: 1;
-      height: 8px;
-      background: #0a1f27;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .fail-reason-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #e2685d, #e7c46a);
-      border-radius: 4px;
-      transition: width .3s;
-    }
-    .fail-reason-bar-count {
-      font-size: 12px;
-      color: #eef6f2;
-      min-width: 24px;
-      text-align: right;
     }
     .achievement-list {
       display: flex;
@@ -737,6 +705,341 @@
     .log-summary-item-value.win { color: #7dd69b; }
     .log-summary-item-value.lose { color: #e2685d; }
 
+    .sort-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+    .sort-label {
+      font-size: 13px;
+      color: #a8bbc0;
+      white-space: nowrap;
+    }
+    .sort-row select {
+      flex: 1;
+      background: #0a1f27;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      padding: 8px 10px;
+      color: #eef6f2;
+      font-size: 13px;
+    }
+
+    .fail-reason-stats {
+      background: #142f3a;
+      border: 1px solid #24414b;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 10px;
+    }
+    .fail-reason-bar {
+      display: grid;
+      grid-template-columns: 100px 1fr 40px;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0;
+      font-size: 12px;
+    }
+    .fail-reason-bar-label {
+      color: #a8bbc0;
+    }
+    .fail-reason-bar-track {
+      background: #0a1f27;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .fail-reason-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #e2685d, #e7c46a);
+      border-radius: 4px;
+      transition: width .3s;
+    }
+    .fail-reason-bar-count {
+      color: #e7c46a;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .log-detail-panel {
+      width: min(600px, calc(100% - 28px));
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .log-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #24414b;
+    }
+    .log-detail-header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #eef6f2;
+    }
+    .log-detail-close {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      background: #24414b;
+      color: #eef6f2;
+      border-radius: 6px;
+      font-size: 20px;
+      cursor: pointer;
+      margin: 0;
+      padding: 0;
+      line-height: 1;
+      transition: background .2s;
+    }
+    .log-detail-close:hover {
+      background: #3d6a78;
+    }
+    .detail-section {
+      margin-bottom: 16px;
+    }
+    .detail-section-title {
+      font-size: 13px;
+      color: #e7c46a;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .detail-info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .detail-info-item {
+      background: #0a1f27;
+      border-radius: 6px;
+      padding: 8px 10px;
+    }
+    .detail-info-label {
+      font-size: 11px;
+      color: #879aa0;
+    }
+    .detail-info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: #eef6f2;
+      margin-top: 2px;
+    }
+    .detail-info-value.win { color: #7dd69b; }
+    .detail-info-value.lose { color: #e2685d; }
+
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      background: #24414b;
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 10px;
+      padding: 8px 10px;
+      background: #0a1f27;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -17px;
+      top: 12px;
+      width: 10px;
+      height: 10px;
+      background: #e7c46a;
+      border-radius: 50%;
+      border: 2px solid #142f3a;
+    }
+    .timeline-item.weather-start::before { background: #87d4e5; }
+    .timeline-item.weather-end::before { background: #3d6a78; }
+    .timeline-item.boat-lost::before { background: #e2685d; }
+    .timeline-item.level-start::before { background: #7dd69b; }
+    .timeline-item.level-end::before { background: #e7c46a; }
+    .timeline-time {
+      font-size: 10px;
+      color: #879aa0;
+      margin-bottom: 2px;
+    }
+    .timeline-content {
+      color: #eef6f2;
+    }
+    .timeline-content .weather-icon {
+      margin-right: 4px;
+    }
+
+    .boat-loss-item {
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #0a1f27;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    .boat-loss-index {
+      width: 30px;
+      height: 30px;
+      background: rgba(226, 104, 93, .2);
+      color: #e2685d;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+    }
+    .boat-loss-reason {
+      color: #eef6f2;
+    }
+    .boat-loss-position {
+      color: #879aa0;
+      font-size: 11px;
+    }
+
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .detail-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: #24414b;
+      color: #a8bbc0;
+    }
+    .detail-tag.campaign {
+      background: rgba(231, 196, 106, .2);
+      color: #e7c46a;
+    }
+    .detail-tag.replay {
+      background: rgba(125, 214, 155, .2);
+      color: #7dd69b;
+    }
+    .detail-tag.no-replay {
+      background: rgba(135, 154, 160, .2);
+      color: #879aa0;
+    }
+
+    .detail-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #24414b;
+    }
+    .detail-actions button {
+      margin: 0;
+    }
+
+    .log-item {
+      cursor: pointer;
+    }
+    .log-item.has-replay::after {
+      content: "▶";
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #e7c46a;
+      font-size: 10px;
+      opacity: .6;
+    }
+    .log-item {
+      position: relative;
+    }
+
+    .campaign-panel { padding-bottom: 16px; }
+    .campaign-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .campaign-title { font-size: 18px; color: #e7c46a; font-weight: 700; }
+    .campaign-progress-info { font-size: 12px; color: #879aa0; }
+    .chapter-list { display: flex; flex-direction: column; gap: 12px; }
+    .chapter-card { background: #142f3a; border: 1px solid #24414b; border-radius: 8px; padding: 14px; cursor: pointer; transition: all .2s; }
+    .chapter-card:hover:not(.locked):not(.active) { border-color: #e7c46a; transform: translateY(-2px); }
+    .chapter-card.locked { opacity: .45; cursor: not-allowed; }
+    .chapter-card.active { border-color: #e7c46a; background: #1a3947; }
+    .chapter-card.completed { border-color: #3d6a78; }
+    .chapter-card.has-warning { border-color: #e2685d; }
+    .chapter-card.has-warning:hover:not(.locked):not(.active) { border-color: #e2685d; }
+    .chapter-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .chapter-card h3 { margin: 0; font-size: 15px; color: #eef6f2; }
+    .chapter-card.locked h3 { color: #879aa0; }
+    .chapter-status-icon { font-size: 16px; }
+    .chapter-desc { font-size: 12px; color: #a8bbc0; line-height: 1.5; margin-bottom: 10px; }
+    .chapter-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 11px; color: #879aa0; }
+    .chapter-meta b { color: #eef6f2; font-weight: 600; }
+    .chapter-reward { margin-top: 10px; padding-top: 10px; border-top: 1px solid #24414b; font-size: 12px; }
+    .chapter-reward-label { color: #879aa0; }
+    .chapter-reward-value { color: #e7c46a; font-weight: 600; }
+    .chapter-best { margin-top: 8px; font-size: 12px; color: #7dd69b; }
+    .chapter-best .no-record { color: #6b8086; }
+
+    .campaign-hud { background: #0a1f27; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
+    .campaign-hud-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+    .campaign-hud-label { color: #879aa0; }
+    .campaign-hud-value { color: #eef6f2; font-weight: 600; }
+    .campaign-hud-value.positive { color: #7dd69b; }
+    .campaign-hud-value.negative { color: #e2685d; }
+    .campaign-hud-value.warning { color: #e7c46a; }
+
+    .campaign-battle-modifiers { background: rgba(231, 196, 106, .08); border: 1px solid rgba(231, 196, 106, .25); border-radius: 6px; padding: 10px; margin-top: 10px; }
+    .modifier-title { font-size: 12px; color: #e7c46a; font-weight: 600; margin-bottom: 6px; }
+    .modifier-list { font-size: 11px; color: #a8bbc0; line-height: 1.6; }
+    .modifier-item { display: flex; align-items: center; gap: 6px; }
+    .modifier-icon { font-size: 13px; }
+    .modifier-buff { color: #7dd69b; }
+    .modifier-nerf { color: #e2685d; }
+
+    .campaign-chapter-intro { background: #0a1f27; border-radius: 8px; padding: 16px; margin-bottom: 16px; border-left: 3px solid #e7c46a; }
+    .chapter-intro-title { font-size: 16px; color: #e7c46a; font-weight: 700; margin-bottom: 8px; }
+    .chapter-intro-desc { font-size: 13px; color: #a8bbc0; line-height: 1.6; margin-bottom: 12px; }
+    .chapter-intro-levels { font-size: 12px; color: #879aa0; }
+    .chapter-intro-levels b { color: #eef6f2; }
+
+    .campaign-settlement { text-align: center; }
+    .settlement-title { font-size: 22px; color: #e7c46a; font-weight: 800; margin-bottom: 12px; }
+    .settlement-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+    .settlement-stat { background: #0a1f27; border-radius: 6px; padding: 12px; }
+    .settlement-stat-label { font-size: 11px; color: #879aa0; }
+    .settlement-stat-value { font-size: 20px; color: #eef6f2; font-weight: 700; margin-top: 4px; }
+    .settlement-reward { background: rgba(125, 214, 155, .1); border: 1px solid rgba(125, 214, 155, .3); border-radius: 6px; padding: 12px; margin: 16px 0; }
+    .settlement-reward-label { font-size: 12px; color: #7dd69b; font-weight: 600; }
+    .settlement-reward-value { font-size: 16px; color: #eef6f2; font-weight: 700; margin-top: 4px; }
+    .settlement-unlock-animation { animation: rewardUnlock 1s ease-out; }
+    @keyframes rewardUnlock {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .campaign-fail-panel { text-align: center; }
+    .fail-title { font-size: 20px; color: #e2685d; font-weight: 700; margin-bottom: 12px; }
+    .fail-stats { background: rgba(226, 104, 93, .08); border-radius: 6px; padding: 12px; margin: 16px 0; }
+    .fail-reason { font-size: 13px; color: #e2685d; margin-bottom: 8px; }
+    .fail-progress { font-size: 12px; color: #a8bbc0; }
+
+    .campaign-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .campaign-btn-row.three { grid-template-columns: 1fr 1fr 1fr; }
+
+    .campaign-overlay { width: min(520px, calc(100% - 28px)); }
+
+    .custom-chapter-area { margin-bottom: 12px; }
+    .custom-chapter-area .chapter-card:hover { border-color: #e7c46a; transform: translateY(-2px); }
+    .custom-chapter-area .chapter-card.has-warning:hover { border-color: #e2685d; transform: translateY(-2px); }
+
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } .log-list { max-height: 40vh; } }
   </style>
 </head>
@@ -747,11 +1050,12 @@
         <h1>夜间灯塔守望</h1>
         <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
         <button id="startBtn">开始第1关</button>
+        <button id="campaignBtn" style="background: #3d6a78; color: #eef6f2;">⚔ 航线战役</button>
         <button id="levelSelectBtn" class="secondary">选择关卡</button>
         <button id="editorBtn" class="secondary">关卡编辑器</button>
         <button id="pauseBtn" class="secondary">暂停</button>
         <button id="achievementsBtn" class="secondary">成就与统计</button>
-        <button id="voyageLogBtn" class="secondary">航海日志</button>
+        <button id="voyageLogBtn" class="secondary">战绩分析</button>
         <button id="settingsBtn" class="secondary">游戏设置</button>
         <h2>状态</h2>
         <div class="stat"><span>关卡</span><b id="levelText">1 / 3</b></div>
@@ -786,6 +1090,27 @@
         <div class="settings-row">
           <span class="settings-label">暂停键提示</span>
           <div id="pauseHintToggle" class="toggle on"></div>
+        </div>
+        <h2 style="margin-top:20px;font-size:15px;color:#e7c46a;">可访问性</h2>
+        <div class="settings-row">
+          <span class="settings-label">旋转方向反转</span>
+          <div id="invertRotationToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">降低闪烁效果</span>
+          <div id="reduceFlickerToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">高对比度海面</span>
+          <div id="highContrastSeaToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">暂停时静音</span>
+          <div id="muteOnPauseToggle" class="toggle"></div>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label">回放自动暂停</span>
+          <div id="replayAutoPauseToggle" class="toggle"></div>
         </div>
         <button id="backFromSettingsBtn" class="secondary back-btn">返回</button>
       </div>
@@ -869,14 +1194,11 @@
         </div>
 
         <div class="section-title">失败分析</div>
-        <div class="fail-reason-summary">
-          <div class="stat-card" style="grid-column: 1 / -1;">
-            <div class="stat-icon">📊</div>
-            <div class="stat-value" id="statTopFailReason">--</div>
-            <div class="stat-label">最常见失败原因</div>
-          </div>
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value" id="statTopFailReason">--</div>
+          <div class="stat-label">最常见失败原因</div>
         </div>
-        <div class="fail-reason-bars" id="failReasonBarsStats"></div>
 
         <div class="section-title">成就列表 <span style="float:right;font-size:13px;color:#879aa0;font-weight:normal;"><span id="achievementProgress">0/0</span></span></div>
         <div class="achievement-list" id="achievementList"></div>
@@ -891,10 +1213,13 @@
       </div>
 
       <div id="voyageLogPanel" class="hidden log-panel">
-        <h1>航海日志</h1>
-        <p>自动记录每一次航行的挑战，重温历史战绩或从失败中重新挑战。</p>
+        <h1>战绩分析</h1>
+        <p>深入分析每一次航行的表现，从失败中学习，从胜利中总结经验。</p>
 
-        <div class="section-title">筛选条件</div>
+        <div class="section-title">搜索与筛选</div>
+        <div class="filter-row full">
+          <input type="text" id="logSearchInput" placeholder="🔍 搜索关卡名称...">
+        </div>
         <div class="filter-row">
           <select id="logFilterResult">
             <option value="all">全部结果</option>
@@ -905,15 +1230,36 @@
             <option value="all">全部来源</option>
             <option value="builtin">仅内置关卡</option>
             <option value="custom">仅自定义关卡</option>
+            <option value="campaign">仅战役模式</option>
           </select>
         </div>
-        <div class="filter-row full">
+        <div class="filter-row">
+          <select id="logFilterFailReason">
+            <option value="all">全部失败原因</option>
+            <option value="top">偏离上侧航道</option>
+            <option value="bottom">偏离下侧航道</option>
+            <option value="unlit">离开光束迷航</option>
+            <option value="rock">撞上暗礁</option>
+          </select>
           <select id="logFilterTime">
             <option value="all">全部时间</option>
             <option value="today">今天</option>
             <option value="week">最近7天</option>
             <option value="month">最近30天</option>
           </select>
+        </div>
+        <div class="filter-row full">
+          <div class="sort-row">
+            <span class="sort-label">排序：</span>
+            <select id="logSortBy">
+              <option value="time_desc">时间（最新）</option>
+              <option value="time_asc">时间（最早）</option>
+              <option value="score_desc">得分（从高到低）</option>
+              <option value="score_asc">得分（从低到高）</option>
+              <option value="duration_desc">耗时（从长到短）</option>
+              <option value="duration_asc">耗时（从短到长）</option>
+            </select>
+          </div>
         </div>
 
         <div id="logSummary" class="log-summary">
@@ -929,18 +1275,45 @@
             <div class="log-summary-item-label">失败</div>
             <div class="log-summary-item-value lose" id="logLoseCount">0</div>
           </div>
+          <div>
+            <div class="log-summary-item-label">胜率</div>
+            <div class="log-summary-item-value" id="logWinRate">0%</div>
+          </div>
+          <div>
+            <div class="log-summary-item-label">平均得分</div>
+            <div class="log-summary-item-value" id="logAvgScore">0</div>
+          </div>
+          <div>
+            <div class="log-summary-item-label">平均用时</div>
+            <div class="log-summary-item-value" id="logAvgDuration">0s</div>
+          </div>
         </div>
 
-        <div class="section-title">日志记录 <span style="float:right;font-size:13px;color:#879aa0;font-weight:normal;"><span id="logFilterCount">0</span> 条</span></div>
+        <div id="logFailReasonStats" class="fail-reason-stats hidden">
+          <div class="section-title" style="margin-top:0;margin-bottom:6px;">失败原因分布</div>
+          <div id="failReasonBars"></div>
+        </div>
+
+        <div class="section-title">战绩记录 <span style="float:right;font-size:13px;color:#879aa0;font-weight:normal;"><span id="logFilterCount">0</span> 条</span></div>
         <div id="logList" class="log-list"></div>
 
         <div class="reset-section">
           <div class="section-title" style="margin-top:0;">数据管理</div>
-          <p class="reset-hint">清空仅删除航海日志记录，不会影响成就、统计、关卡解锁和最佳分。</p>
-          <button id="clearVoyageLogBtn" class="danger">清空全部日志</button>
+          <p class="reset-hint">清空仅删除战绩分析记录，不会影响成就、统计、关卡解锁和最佳分。</p>
+          <button id="clearVoyageLogBtn" class="danger">清空全部战绩</button>
         </div>
 
         <button id="backFromVoyageLogBtn" class="secondary back-btn">返回主菜单</button>
+      </div>
+
+      <div id="logDetailModal" class="overlay hidden">
+        <div class="panel log-detail-panel">
+          <div class="log-detail-header">
+            <h2 id="detailLevelName">战绩详情</h2>
+            <button id="closeLogDetailBtn" class="log-detail-close">×</button>
+          </div>
+          <div id="detailContent"></div>
+        </div>
       </div>
 
       <div id="editorPanel" class="hidden">
@@ -1004,6 +1377,73 @@
         </div>
 
         <div class="editor-section">
+          <div class="editor-section-title">天气事件配置</div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherSeaBreezeHeader">
+              <span class="settings-label">🌬️ 海风 — 船只漂移加剧</span>
+              <div class="toggle" id="weatherSeaBreezeToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherSeaBreezeParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="sbMinDurVal" class="settings-value">8s</span></div>
+              <input type="range" id="sbMinDurRange" min="3" max="25" value="8">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="sbMaxDurVal" class="settings-value">18s</span></div>
+              <input type="range" id="sbMaxDurRange" min="5" max="45" value="18">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="sbMinCoolVal" class="settings-value">15s</span></div>
+              <input type="range" id="sbMinCoolRange" min="5" max="60" value="15">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="sbMaxCoolVal" class="settings-value">30s</span></div>
+              <input type="range" id="sbMaxCoolRange" min="10" max="90" value="30">
+              <div class="settings-row"><span class="settings-label">漂移强度</span><span id="sbDriftVal" class="settings-value">2.0</span></div>
+              <input type="range" id="sbDriftRange" min="10" max="40" value="20">
+              <div class="settings-row"><span class="settings-label">速度加成</span><span id="sbSpeedVal" class="settings-value">1.15</span></div>
+              <input type="range" id="sbSpeedRange" min="100" max="200" value="115" step="5">
+            </div>
+          </div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherDenseFogHeader">
+              <span class="settings-label">🌫️ 浓雾 — 光束射程缩短</span>
+              <div class="toggle" id="weatherDenseFogToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherDenseFogParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="dfMinDurVal" class="settings-value">10s</span></div>
+              <input type="range" id="dfMinDurRange" min="3" max="25" value="10">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="dfMaxDurVal" class="settings-value">22s</span></div>
+              <input type="range" id="dfMaxDurRange" min="5" max="45" value="22">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="dfMinCoolVal" class="settings-value">20s</span></div>
+              <input type="range" id="dfMinCoolRange" min="5" max="60" value="20">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="dfMaxCoolVal" class="settings-value">40s</span></div>
+              <input type="range" id="dfMaxCoolRange" min="10" max="90" value="40">
+              <div class="settings-row"><span class="settings-label">射程缩减</span><span id="dfRangeVal" class="settings-value">0.55</span></div>
+              <input type="range" id="dfRangeRange" min="20" max="90" value="55">
+              <div class="settings-row"><span class="settings-label">雾气浓度</span><span id="dfOpacityVal" class="settings-value">0.50</span></div>
+              <input type="range" id="dfOpacityRange" min="10" max="80" value="50">
+            </div>
+          </div>
+
+          <div class="weather-cfg-group">
+            <div class="weather-cfg-header" id="weatherLighthouseFlashHeader">
+              <span class="settings-label">⚡ 灯塔闪烁 — 光束角度抖动</span>
+              <div class="toggle" id="weatherLighthouseFlashToggle"></div>
+            </div>
+            <div class="weather-cfg-params hidden" id="weatherLighthouseFlashParams">
+              <div class="settings-row"><span class="settings-label">持续时间(最短)</span><span id="lfMinDurVal" class="settings-value">5s</span></div>
+              <input type="range" id="lfMinDurRange" min="2" max="20" value="5">
+              <div class="settings-row"><span class="settings-label">持续时间(最长)</span><span id="lfMaxDurVal" class="settings-value">12s</span></div>
+              <input type="range" id="lfMaxDurRange" min="4" max="35" value="12">
+              <div class="settings-row"><span class="settings-label">冷却时间(最短)</span><span id="lfMinCoolVal" class="settings-value">18s</span></div>
+              <input type="range" id="lfMinCoolRange" min="5" max="60" value="18">
+              <div class="settings-row"><span class="settings-label">冷却时间(最长)</span><span id="lfMaxCoolVal" class="settings-value">35s</span></div>
+              <input type="range" id="lfMaxCoolRange" min="10" max="90" value="35">
+              <div class="settings-row"><span class="settings-label">抖动幅度</span><span id="lfJitterVal" class="settings-value">0.08</span></div>
+              <input type="range" id="lfJitterRange" min="2" max="20" value="8">
+              <div class="settings-row"><span class="settings-label">闪烁强度</span><span id="lfFlickerVal" class="settings-value">0.40</span></div>
+              <input type="range" id="lfFlickerRange" min="10" max="80" value="40">
+            </div>
+          </div>
+        </div>
+
+        <div class="editor-section">
           <div class="editor-section-title">选中元素</div>
           <div id="selectedInfo" class="editor-hint">未选中任何元素</div>
           <div id="selectedRadiusControl" class="hidden">
@@ -1027,6 +1467,207 @@
           <button id="exportCurrentLevelBtn" class="secondary">📤 导出当前关卡</button>
           <button id="backFromEditorBtn" class="secondary back-btn">返回主菜单</button>
         </div>
+      </div>
+
+      <div id="campaignSelectPanel" class="hidden campaign-panel">
+        <h1>航线战役</h1>
+        <p>连续夜晚挑战，将多个关卡串联成史诗航程。上一关的表现将影响下一关的初始条件，通关解锁专属奖励。</p>
+
+        <div id="unfinishedCampaignArea" class="hidden" style="margin-bottom:18px;">
+          <div class="campaign-header">
+            <span class="campaign-title">⚓ 进行中的战役</span>
+            <span class="campaign-progress-info" id="unfinishedCampaignStatus">未完成</span>
+          </div>
+          <div id="unfinishedCampaignCard" class="chapter-card" style="border-color:#e7c46a;background:rgba(231,196,106,.08);">
+            <div class="chapter-card-header">
+              <h3 id="unfinishedChapterName">--</h3>
+              <span class="chapter-status-icon" id="unfinishedChapterIcon">⏸</span>
+            </div>
+            <div class="chapter-meta" style="margin-top:8px;">
+              <span>进度</span><b id="unfinishedProgress">0/0</b>
+              <span>生命</span><b id="unfinishedLives">❤️❤️❤️</b>
+              <span>得分</span><b style="color:#7dd69b;" id="unfinishedScore">0</b>
+            </div>
+            <div id="unfinishedFailReason" class="hidden" style="margin-top:8px;font-size:12px;color:#e2685d;">
+              ⚠ <span id="unfinishedFailText">--</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">
+              <button id="resumeCampaignBtn" class="primary" style="margin:0;font-size:13px;padding:8px 10px;">▶ 继续</button>
+              <button id="restartCampaignBtn" class="secondary" style="margin:0;font-size:13px;padding:8px 10px;">🔄 重开</button>
+              <button id="abandonCampaignBtn" class="danger" style="margin:0;font-size:13px;padding:8px 10px;">✕ 放弃</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="campaign-header">
+          <span class="campaign-title">战役章节</span>
+          <span class="campaign-progress-info" id="campaignProgressInfo">已通关 0/3 章</span>
+        </div>
+        <div id="chapterCards" class="chapter-list"></div>
+        <div class="campaign-header" style="margin-top:18px;">
+          <span class="campaign-title">自定义航线</span>
+          <span class="campaign-progress-info" style="font-size:11px;color:#879aa0;">用自定义关卡编排专属战役</span>
+        </div>
+        <div id="customChapterArea" class="custom-chapter-area">
+          <div id="customChapterCard" class="chapter-card" style="border-style:dashed;">
+            <div class="chapter-card-header">
+              <h3>🧭 自定义航线</h3>
+              <span class="chapter-status-icon">➕</span>
+            </div>
+            <div class="chapter-desc">选择自定义关卡，编排你的专属连续挑战航线。</div>
+          </div>
+        </div>
+        <div id="customChapterEditor" class="hidden" style="background:#0a1f27;border-radius:8px;padding:14px;margin:8px 0;">
+          <div style="font-size:14px;color:#e7c46a;font-weight:700;margin-bottom:8px;">编排自定义航线</div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">航线名称</label>
+            <input type="text" id="customChapterNameInput" value="自定义航线" maxlength="20" style="width:100%;background:#142f3a;border:1px solid #24414b;border-radius:4px;padding:6px 10px;color:#eef6f2;font-size:13px;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">选择关卡（点击添加/移除）</label>
+            <div id="customLevelPicker" style="max-height:200px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">已选关卡</label>
+            <div id="customSelectedLevels" style="min-height:30px;"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="confirmCustomChapterBtn" class="primary" style="flex:1;">确认并开始</button>
+            <button id="cancelCustomChapterBtn" class="secondary" style="flex:1;">取消</button>
+          </div>
+        </div>
+        <div class="reset-section">
+          <div class="section-title" style="margin-top:0;font-size:14px;color:#e7c46a;font-weight:700;">数据管理</div>
+          <p class="reset-hint">重置战役进度会清除所有章节通关记录和奖励，但不会影响单关最佳分和成就。</p>
+          <button id="resetCampaignProgressBtn" class="danger">重置战役进度</button>
+        </div>
+        <button id="backFromCampaignBtn" class="secondary back-btn">返回主菜单</button>
+      </div>
+
+      <div id="campaignPlayPanel" class="hidden campaign-panel">
+        <div class="campaign-hud">
+          <div class="campaign-hud-row">
+            <span class="campaign-hud-label">当前章节</span>
+            <span class="campaign-hud-value" id="campaignChapterName">--</span>
+          </div>
+          <div class="campaign-hud-row">
+            <span class="campaign-hud-label">战役进度</span>
+            <span class="campaign-hud-value" id="campaignLevelProgress">0/0</span>
+          </div>
+          <div class="campaign-hud-row">
+            <span class="campaign-hud-label">累计得分</span>
+            <span class="campaign-hud-value positive" id="campaignTotalScore">0</span>
+          </div>
+          <div class="campaign-hud-row">
+            <span class="campaign-hud-label">剩余生命</span>
+            <span class="campaign-hud-value" id="campaignLives">❤️❤️❤️</span>
+          </div>
+          <div class="campaign-battle-modifiers" id="battleModifiers">
+            <div class="modifier-title">⚔ 战役加成</div>
+            <div class="modifier-list" id="modifierList">
+              <div class="modifier-item"><span class="modifier-icon">✨</span><span>无特殊加成</span></div>
+            </div>
+          </div>
+        </div>
+        <h2>状态</h2>
+        <div class="stat"><span>关卡</span><b id="campaignLevelText">1 / 3</b></div>
+        <div class="stat"><span>本关得分</span><b id="campaignScoreText">0</b></div>
+        <div class="stat"><span>抵达</span><b id="campaignArrivedText">0</b></div>
+        <h2>操作</h2>
+        <div class="keys">
+          <div class="key">← / → 旋转光束</div>
+          <div class="key">空格 切换宽度</div>
+          <div class="key">P 暂停</div>
+          <div class="key">R 重开本关</div>
+        </div>
+        <button id="campaignPauseBtn" class="secondary">暂停</button>
+        <button id="campaignQuitBtn" class="danger">放弃战役</button>
+      </div>
+
+      <div id="campaignIntroPanel" class="hidden campaign-panel chapter-intro">
+        <h1 id="introChapterName">章节名称</h1>
+        <div class="intro-difficulty" id="introChapterDifficulty">难度：简单</div>
+        <p class="intro-description" id="introChapterDesc">章节描述</p>
+        <div class="intro-info">
+          <div class="intro-info-row">
+            <span>关卡数量</span>
+            <b id="introLevelCount">3 关</b>
+          </div>
+          <div class="intro-info-row">
+            <span>初始生命</span>
+            <b id="introStartingLives">❤️❤️❤️</b>
+          </div>
+          <div class="intro-info-row">
+            <span>通关奖励</span>
+            <b id="introReward">--</b>
+          </div>
+        </div>
+        <div class="intro-rules">
+          <h3>战役规则</h3>
+          <ul>
+            <li>连续完成所有关卡，中途失败可重试</li>
+            <li>上一关剩余船只越多，下一关灯塔能量越强</li>
+            <li>上一关得分越高，下一关天气影响越弱</li>
+            <li>完美通关可获得额外加成</li>
+            <li>生命耗尽则战役失败，需从头开始</li>
+          </ul>
+        </div>
+        <button id="startChapterFromIntroBtn" class="primary">开始战役</button>
+        <button id="backFromChapterIntroBtn" class="secondary back-btn">返回章节选择</button>
+      </div>
+
+      <div id="campaignSettlementPanel" class="hidden campaign-panel campaign-settlement">
+        <div class="settlement-header">
+          <div class="settlement-icon">🏆</div>
+          <h1>战役通关！</h1>
+          <p id="settlementChapterName">章节名称</p>
+        </div>
+        <div class="settlement-stats">
+          <div class="settlement-stat">
+            <span class="settlement-label">累计得分</span>
+            <span class="settlement-value positive" id="settlementTotalScore">0</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">护送船只</span>
+            <span class="settlement-value" id="settlementTotalBoats">0</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">完美通关</span>
+            <span class="settlement-value" id="settlementPerfectCount">0</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">剩余生命</span>
+            <span class="settlement-value" id="settlementLivesLeft">0</span>
+          </div>
+        </div>
+        <div class="settlement-unlock">
+          <div class="settlement-unlock-title">🎁 解锁奖励</div>
+          <div class="settlement-unlock-item" id="settlementRewardItem">
+            <span class="reward-icon">👑</span>
+            <span class="reward-name" id="settlementRewardName">--</span>
+          </div>
+          <div class="settlement-unlock-desc" id="settlementRewardDesc">--</div>
+        </div>
+        <button id="campaignSettlementNextBtn" class="primary">继续</button>
+      </div>
+
+      <div id="campaignFailPanel" class="hidden campaign-panel campaign-fail-panel">
+        <div class="fail-icon">💀</div>
+        <h1>战役失败</h1>
+        <p class="fail-reason" id="campaignFailReason">生命已耗尽</p>
+        <div class="fail-stats">
+          <div class="fail-stat">
+            <span>完成关卡</span>
+            <b id="failCompletedLevels">0</b>
+          </div>
+          <div class="fail-stat">
+            <span>累计得分</span>
+            <b id="failTotalScore">0</b>
+          </div>
+        </div>
+        <p class="fail-hint">不要气馁，灯塔守望者永不言弃！</p>
+        <button id="campaignRetryFromBeginningBtn" class="primary">从头再来</button>
+        <button id="campaignFailBackBtn" class="secondary back-btn">返回章节选择</button>
       </div>
     </aside>
 
@@ -1088,6 +1729,27 @@
           <div class="settings-row">
             <span class="settings-label">暂停键提示</span>
             <div id="modalPauseHintToggle" class="toggle on"></div>
+          </div>
+          <h2 style="margin-top:16px;font-size:15px;color:#e7c46a;">可访问性</h2>
+          <div class="settings-row">
+            <span class="settings-label">旋转方向反转</span>
+            <div id="modalInvertRotationToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">降低闪烁效果</span>
+            <div id="modalReduceFlickerToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">高对比度海面</span>
+            <div id="modalHighContrastSeaToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">暂停时静音</span>
+            <div id="modalMuteOnPauseToggle" class="toggle"></div>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">回放自动暂停</span>
+            <div id="modalReplayAutoPauseToggle" class="toggle"></div>
           </div>
           <button id="closeSettingsBtn" class="secondary back-btn">关闭</button>
         </div>
@@ -1199,6 +1861,14 @@
             </div>
             <div id="importDuplicateWarning" class="hidden" style="color:#e7c46a;font-size:13px;margin:8px 0;">
               ⚠️ 检测到 <span id="importDuplicateCount">0</span> 个重复关卡
+            </div>
+            <div class="editor-section">
+              <div class="editor-section-title">选择要导入的关卡 <span style="float:right;font-size:12px;color:#879aa0;font-weight:normal;" id="importSelectedCount">0 个</span></div>
+              <div class="level-list" id="importLevelList"></div>
+              <div class="editor-btn-row" style="margin-top: 8px;">
+                <button class="secondary" id="selectAllImportBtn">全选</button>
+                <button class="secondary" id="deselectAllImportBtn">全不选</button>
+              </div>
             </div>
           </div>
           <div id="importPackError" class="error-msg hidden"></div>
@@ -1537,6 +2207,17 @@
           errors.push(prefix + "harbor 字段格式错误");
         }
 
+        if (level.weather && typeof level.weather !== "object") {
+          errors.push(prefix + "weather 字段格式错误");
+        } else if (level.weather) {
+          for (const wt of ["seaBreeze", "denseFog", "lighthouseFlash"]) {
+            const wcfg = level.weather[wt];
+            if (wcfg && typeof wcfg !== "object") {
+              errors.push(prefix + "weather." + wt + " 格式错误");
+            }
+          }
+        }
+
         return errors;
       }
 
@@ -1561,7 +2242,17 @@
         return duplicates;
       }
 
-      function importPack(pack, duplicateStrategy) {
+      function getWeatherSummary(level) {
+        const labels = [];
+        if (level.weather) {
+          if (level.weather.seaBreeze && level.weather.seaBreeze.enabled) labels.push("🌬️海风");
+          if (level.weather.denseFog && level.weather.denseFog.enabled) labels.push("🌫️浓雾");
+          if (level.weather.lighthouseFlash && level.weather.lighthouseFlash.enabled) labels.push("⚡闪烁");
+        }
+        return labels.length > 0 ? labels.join(" ") : "🌤️晴朗";
+      }
+
+      function importPack(pack, duplicateStrategy, selectedLevelIndices) {
         const validation = validatePack(pack);
         if (!validation.valid) {
           return {
@@ -1581,7 +2272,11 @@
         const existingBests = LevelData.loadLevelBests();
         const newBests = Object.assign({}, existingBests);
 
-        pack.levels.forEach(function(packLvl) {
+        const levelsToImport = selectedLevelIndices && selectedLevelIndices.length > 0
+          ? pack.levels.filter(function(_, idx) { return selectedLevelIndices.indexOf(idx) >= 0; })
+          : pack.levels;
+
+        levelsToImport.forEach(function(packLvl) {
           const normalized = LevelData.normalizeLevel(packLvl);
           const dupIdx = existingCustoms.findIndex(function(existing) {
             if (normalized.id && existing.id === normalized.id) return true;
@@ -1700,10 +2395,622 @@
         createPack: createPack,
         validatePack: validatePack,
         findDuplicates: findDuplicates,
+        getWeatherSummary: getWeatherSummary,
         importPack: importPack,
         exportPackToFile: exportPackToFile,
         parsePackFromText: parsePackFromText,
         readPackFromFile: readPackFromFile
+      };
+    })();
+
+    // ===================== CampaignConfig 模块：战役章节配置 =====================
+    const CampaignConfig = (function() {
+      const chapters = [
+        {
+          id: "chapter_coast",
+          name: "海岸线守望",
+          description: "初入守望者行列，守护平静的海岸线。熟悉灯塔操作，在相对温和的天气下完成护航任务。",
+          levels: ["builtin_0", "builtin_0", "builtin_1"],
+          reward: {
+            type: "title",
+            name: "海岸线守望者",
+            description: "完成海岸线守望章节解锁"
+          },
+          startingLives: 3,
+          difficulty: "easy"
+        },
+        {
+          id: "chapter_storm",
+          name: "风暴航线",
+          description: "挑战更恶劣的天气，在海风和浓雾交织的风暴中指引船只。你的每一个决策都将影响后续航程。",
+          levels: ["builtin_1", "builtin_1", "builtin_2", "builtin_2"],
+          reward: {
+            type: "title",
+            name: "风暴领航员",
+            description: "完成风暴航线章节解锁"
+          },
+          startingLives: 3,
+          difficulty: "normal",
+          requires: ["chapter_coast"]
+        },
+        {
+          id: "chapter_maelstrom",
+          name: "无尽漩涡",
+          description: "终极挑战！在最恶劣的天气条件下连续作战，证明你是真正的灯塔守护人。",
+          levels: ["builtin_2", "builtin_2", "builtin_1", "builtin_2", "builtin_0"],
+          reward: {
+            type: "title",
+            name: "灯塔守护者",
+            description: "完成无尽漩涡章节解锁，获得最高荣誉"
+          },
+          startingLives: 2,
+          difficulty: "hard",
+          requires: ["chapter_storm"]
+        }
+      ];
+
+      const CUSTOM_CHAPTER_KEY = "zfl26CustomChapter";
+
+      function getAllChapters() {
+        return chapters;
+      }
+
+      function getChapterById(id) {
+        if (id === "chapter_custom") {
+          return loadCustomChapter();
+        }
+        return chapters.find(c => c.id === id);
+      }
+
+      function getChapterIndex(id) {
+        return chapters.findIndex(c => c.id === id);
+      }
+
+      function getDifficultyLabel(difficulty) {
+        const labels = { easy: "简单", normal: "普通", hard: "困难", "custom": "自定义" };
+        return labels[difficulty] || difficulty;
+      }
+
+      function createCustomChapter(levelIds, name) {
+        const safeIds = (levelIds || []).filter(function(id) {
+          return LevelData.getLevelById(id) != null;
+        });
+        if (safeIds.length === 0) return null;
+
+        return {
+          id: "chapter_custom",
+          name: name || "自定义航线",
+          description: "由你亲手编排的连续挑战航线，将自定义关卡串联成独特冒险。",
+          levels: safeIds,
+          reward: {
+            type: "title",
+            name: "自由航路开拓者",
+            description: "完成自定义航线章节解锁"
+          },
+          startingLives: Math.max(1, Math.min(5, Math.ceil(safeIds.length / 2))),
+          difficulty: "custom",
+          isCustom: true
+        };
+      }
+
+      function saveCustomChapter(levelIds, name) {
+        try {
+          localStorage.setItem(CUSTOM_CHAPTER_KEY, JSON.stringify({
+            levelIds: levelIds,
+            name: name || "自定义航线"
+          }));
+        } catch (e) {}
+      }
+
+      function loadCustomChapter() {
+        try {
+          const stored = localStorage.getItem(CUSTOM_CHAPTER_KEY);
+          if (stored) {
+            const data = JSON.parse(stored);
+            return createCustomChapter(data.levelIds, data.name);
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function loadRawCustomChapterData() {
+        try {
+          const stored = localStorage.getItem(CUSTOM_CHAPTER_KEY);
+          if (stored) {
+            const data = JSON.parse(stored);
+            return {
+              levelIds: data.levelIds || [],
+              name: data.name || "自定义航线"
+            };
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function getCustomChapterInvalidLevelIds() {
+        const raw = loadRawCustomChapterData();
+        if (!raw) return [];
+        return (raw.levelIds || []).filter(function(id) {
+          return LevelData.getLevelById(id) == null;
+        });
+      }
+
+      function getTotalBoatsForLevelIds(levelIds) {
+        let total = 0;
+        (levelIds || []).forEach(function(id) {
+          const lvl = LevelData.getLevelById(id);
+          if (lvl) total += (lvl.boats || 0);
+        });
+        return total;
+      }
+
+      function hasCustomChapter() {
+        const ch = loadCustomChapter();
+        return ch !== null && ch.levels.length > 0;
+      }
+
+      function hasInvalidCustomLevels() {
+        return getCustomChapterInvalidLevelIds().length > 0;
+      }
+
+      return {
+        getAllChapters,
+        getChapterById,
+        getChapterIndex,
+        getDifficultyLabel,
+        createCustomChapter,
+        saveCustomChapter,
+        loadCustomChapter,
+        loadRawCustomChapterData,
+        hasCustomChapter,
+        hasInvalidCustomLevels,
+        getCustomChapterInvalidLevelIds,
+        getTotalBoatsForLevelIds
+      };
+    })();
+
+    // ===================== CampaignStore 模块：战役数据存储层 =====================
+    const CampaignStore = (function() {
+      const CAMPAIGN_KEY = "zfl26CampaignProgress";
+      const REWARDS_KEY = "zfl26CampaignRewards";
+
+      const defaultProgress = {
+        currentChapterId: null,
+        currentLevelIndex: 0,
+        totalScore: 0,
+        lives: 3,
+        startingLives: 3,
+        carryOver: null,
+        chapterProgress: {},
+        currentRun: null,
+        lastFailReason: null,
+        lastFailReasonText: null,
+        campaignSaveState: null,
+        lastSavedAt: null
+      };
+
+      function loadProgress() {
+        try {
+          const stored = localStorage.getItem(CAMPAIGN_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            return Object.assign({}, defaultProgress, parsed);
+          }
+        } catch (e) {}
+        return Object.assign({}, defaultProgress);
+      }
+
+      function saveProgress(progress) {
+        localStorage.setItem(CAMPAIGN_KEY, JSON.stringify(progress));
+      }
+
+      function loadRewards() {
+        try {
+          const stored = localStorage.getItem(REWARDS_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return { titles: [], unlockedAt: {} };
+      }
+
+      function saveRewards(rewards) {
+        localStorage.setItem(REWARDS_KEY, JSON.stringify(rewards));
+      }
+
+      function isChapterUnlocked(chapterId) {
+        const chapter = CampaignConfig.getChapterById(chapterId);
+        if (!chapter) return false;
+        if (!chapter.requires || chapter.requires.length === 0) return true;
+        const progress = loadProgress();
+        return chapter.requires.every(reqId => {
+          return progress.chapterProgress[reqId] && progress.chapterProgress[reqId].completed;
+        });
+      }
+
+      function isChapterCompleted(chapterId) {
+        const progress = loadProgress();
+        return progress.chapterProgress[chapterId] && progress.chapterProgress[chapterId].completed;
+      }
+
+      function getChapterBestScore(chapterId) {
+        const progress = loadProgress();
+        return progress.chapterProgress[chapterId] ? progress.chapterProgress[chapterId].bestScore || 0 : 0;
+      }
+
+      function startChapter(chapterId) {
+        const chapter = CampaignConfig.getChapterById(chapterId);
+        if (!chapter) return null;
+        const progress = loadProgress();
+        progress.currentChapterId = chapterId;
+        progress.currentLevelIndex = 0;
+        progress.totalScore = 0;
+        progress.lives = chapter.startingLives;
+        progress.startingLives = chapter.startingLives;
+        progress.carryOver = null;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = "playing";
+        progress.lastSavedAt = Date.now();
+        progress.currentRun = {
+          chapterId: chapterId,
+          startTime: Date.now(),
+          levelScores: [],
+          levelResults: []
+        };
+        saveProgress(progress);
+        return progress;
+      }
+
+      function completeLevel(levelScore, levelResult, carryOverData) {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        progress.currentRun.levelScores.push(levelScore);
+        progress.currentRun.levelResults.push(levelResult);
+        progress.totalScore += levelScore;
+        progress.carryOver = carryOverData;
+        progress.currentLevelIndex++;
+
+        saveProgress(progress);
+        return progress;
+      }
+
+      function loseLife() {
+        const progress = loadProgress();
+        progress.lives = Math.max(0, progress.lives - 1);
+        saveProgress(progress);
+        return progress.lives;
+      }
+
+      function completeChapter() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        const chapterId = progress.currentChapterId;
+        const chapter = CampaignConfig.getChapterById(chapterId);
+
+        if (!progress.chapterProgress[chapterId]) {
+          progress.chapterProgress[chapterId] = {};
+        }
+
+        const chapterData = progress.chapterProgress[chapterId];
+        chapterData.completed = true;
+        chapterData.completedAt = Date.now();
+        chapterData.bestScore = Math.max(chapterData.bestScore || 0, progress.totalScore);
+        chapterData.lastRun = {
+          score: progress.totalScore,
+          completedAt: Date.now(),
+          levelScores: progress.currentRun.levelScores.slice()
+        };
+
+        const startingLives = progress.startingLives || (chapter && chapter.startingLives) || 3;
+        const isNoDamage = progress.lives === startingLives;
+        const isCustom = !!(chapter && chapter.isCustom);
+        const reward = unlockReward(chapter.reward);
+
+        progress.currentChapterId = null;
+        progress.currentLevelIndex = 0;
+        progress.currentRun = null;
+        progress.carryOver = null;
+        progress.lives = 3;
+        progress.startingLives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
+
+        saveProgress(progress);
+        return { progress: progress, reward: reward, chapterId: chapterId, isNoDamage: isNoDamage, isCustom: isCustom };
+      }
+
+      function failChapter() {
+        const progress = loadProgress();
+        progress.campaignSaveState = "failed";
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      function unlockReward(reward) {
+        if (!reward) return null;
+        const rewards = loadRewards();
+        if (reward.type === "title") {
+          if (rewards.titles.indexOf(reward.name) === -1) {
+            rewards.titles.push(reward.name);
+            rewards.unlockedAt[reward.name] = Date.now();
+            saveRewards(rewards);
+            return { ...reward, newlyUnlocked: true };
+          }
+          return { ...reward, newlyUnlocked: false };
+        }
+        return null;
+      }
+
+      function getUnlockedTitles() {
+        const rewards = loadRewards();
+        return rewards.titles || [];
+      }
+
+      function getCompletedCount() {
+        const progress = loadProgress();
+        return Object.values(progress.chapterProgress).filter(c => c.completed).length;
+      }
+
+      function resetCampaignProgress() {
+        localStorage.removeItem(CAMPAIGN_KEY);
+        localStorage.removeItem(REWARDS_KEY);
+        return Object.assign({}, defaultProgress);
+      }
+
+      function clearProgress() {
+        const progress = loadProgress();
+        progress.currentChapterId = null;
+        progress.currentLevelIndex = 0;
+        progress.currentRun = null;
+        progress.carryOver = null;
+        progress.lives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
+        saveProgress(progress);
+        return progress;
+      }
+
+      function resetAllProgress() {
+        localStorage.removeItem(CAMPAIGN_KEY);
+        return Object.assign({}, defaultProgress);
+      }
+
+      function resetAllRewards() {
+        localStorage.removeItem(REWARDS_KEY);
+        return { titles: [], unlockedAt: {} };
+      }
+
+      function isInCampaign() {
+        const progress = loadProgress();
+        return progress.currentChapterId !== null && progress.currentRun !== null;
+      }
+
+      function getCurrentLevelId() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId) return null;
+        const chapter = CampaignConfig.getChapterById(progress.currentChapterId);
+        if (!chapter) return null;
+        if (progress.currentLevelIndex >= chapter.levels.length) return null;
+        return chapter.levels[progress.currentLevelIndex];
+      }
+
+      function getCurrentLevelData() {
+        const levelId = getCurrentLevelId();
+        if (!levelId) return null;
+        return LevelData.getLevelById(levelId);
+      }
+
+      function calculateBattleModifiers(carryOver) {
+        const modifiers = {
+          beamRangeMultiplier: 1,
+          weatherIntensity: 1,
+          boatSpeedMultiplier: 1,
+          scoreMultiplier: 1,
+          buffs: [],
+          nerfs: []
+        };
+
+        if (!carryOver) return modifiers;
+
+        if (carryOver.remainingBoatsRatio !== undefined) {
+          const ratio = carryOver.remainingBoatsRatio;
+          if (ratio >= 1) {
+            modifiers.beamRangeMultiplier = 1.15;
+            modifiers.buffs.push({ icon: "🔦", text: "灯塔能量 +15%", type: "buff" });
+          } else if (ratio >= 0.7) {
+            modifiers.beamRangeMultiplier = 1.05;
+            modifiers.buffs.push({ icon: "🔦", text: "灯塔能量 +5%", type: "buff" });
+          } else if (ratio <= 0.3) {
+            modifiers.beamRangeMultiplier = 0.9;
+            modifiers.nerfs.push({ icon: "🔦", text: "灯塔能量 -10%", type: "nerf" });
+          }
+        }
+
+        if (carryOver.scoreRatio !== undefined) {
+          const scoreRatio = carryOver.scoreRatio;
+          if (scoreRatio >= 0.9) {
+            modifiers.weatherIntensity = 0.85;
+            modifiers.buffs.push({ icon: "🌤️", text: "天气强度 -15%", type: "buff" });
+          } else if (scoreRatio >= 0.7) {
+            modifiers.weatherIntensity = 0.95;
+            modifiers.buffs.push({ icon: "🌤️", text: "天气强度 -5%", type: "buff" });
+          } else if (scoreRatio <= 0.4) {
+            modifiers.weatherIntensity = 1.15;
+            modifiers.nerfs.push({ icon: "⛈️", text: "天气强度 +15%", type: "nerf" });
+          }
+        }
+
+        if (carryOver.perfectClear) {
+          modifiers.boatSpeedMultiplier = 0.9;
+          modifiers.buffs.push({ icon: "⛵", text: "船只速度 -10%", type: "buff" });
+          modifiers.scoreMultiplier = 1.2;
+          modifiers.buffs.push({ icon: "✨", text: "得分倍率 +20%", type: "buff" });
+        }
+
+        if (carryOver.streakBonus && carryOver.streakBonus > 0) {
+          modifiers.scoreMultiplier *= (1 + carryOver.streakBonus * 0.05);
+          modifiers.buffs.push({ icon: "🔥", text: "连胜加成 +" + (carryOver.streakBonus * 5) + "%", type: "buff" });
+        }
+
+        return modifiers;
+      }
+
+      function generateCarryOverData(boats, score, levelData, won) {
+        if (!won) return null;
+
+        const totalBoats = levelData.boats;
+        const arrivedBoats = boats.filter(b => b.arrived).length;
+        const lostBoats = boats.filter(b => b.lost).length;
+        const remainingRatio = arrivedBoats / totalBoats;
+
+        const maxPossibleScore = totalBoats * 180;
+        const scoreRatio = Math.min(1, score / maxPossibleScore);
+
+        const perfectClear = lostBoats === 0;
+
+        return {
+          remainingBoats: arrivedBoats,
+          totalBoats: totalBoats,
+          remainingBoatsRatio: remainingRatio,
+          score: score,
+          maxPossibleScore: maxPossibleScore,
+          scoreRatio: scoreRatio,
+          perfectClear: perfectClear,
+          completedAt: Date.now()
+        };
+      }
+
+      function saveCampaignState(state, failReason, failReasonText) {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        progress.campaignSaveState = state || "paused";
+        progress.lastSavedAt = Date.now();
+        if (failReason !== undefined) {
+          progress.lastFailReason = failReason;
+        }
+        if (failReasonText !== undefined) {
+          progress.lastFailReasonText = failReasonText;
+        }
+        saveProgress(progress);
+        return progress;
+      }
+
+      function hasUnfinishedCampaign() {
+        const progress = loadProgress();
+        return progress.currentChapterId !== null && progress.currentRun !== null;
+      }
+
+      function getUnfinishedCampaignInfo() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        const chapter = CampaignConfig.getChapterById(progress.currentChapterId);
+        if (!chapter) return null;
+
+        return {
+          chapterId: progress.currentChapterId,
+          chapterName: chapter.name,
+          chapterDifficulty: chapter.difficulty,
+          currentLevelIndex: progress.currentLevelIndex,
+          totalLevels: chapter.levels.length,
+          totalScore: progress.totalScore,
+          lives: progress.lives,
+          lastFailReason: progress.lastFailReason,
+          lastFailReasonText: progress.lastFailReasonText,
+          campaignSaveState: progress.campaignSaveState,
+          lastSavedAt: progress.lastSavedAt,
+          isCustom: chapter.isCustom || false
+        };
+      }
+
+      function abandonAndSave(failReason, failReasonText) {
+        const progress = loadProgress();
+        if (!progress.currentChapterId) return null;
+
+        progress.campaignSaveState = "abandoned";
+        progress.lastFailReason = failReason || "abandoned";
+        progress.lastFailReasonText = failReasonText || "玩家主动退出";
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      function clearCampaignSave() {
+        const progress = loadProgress();
+        progress.currentChapterId = null;
+        progress.currentLevelIndex = 0;
+        progress.currentRun = null;
+        progress.carryOver = null;
+        progress.lives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
+        saveProgress(progress);
+        return progress;
+      }
+
+      function resumeCampaign() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        progress.campaignSaveState = "playing";
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      function recordFailReason(failReason, failReasonText) {
+        const progress = loadProgress();
+        progress.lastFailReason = failReason;
+        progress.lastFailReasonText = failReasonText;
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      return {
+        loadProgress,
+        saveProgress,
+        loadRewards,
+        saveRewards,
+        isChapterUnlocked,
+        isChapterCompleted,
+        getChapterBestScore,
+        startChapter,
+        completeLevel,
+        loseLife,
+        completeChapter,
+        failChapter,
+        unlockReward,
+        getUnlockedTitles,
+        getCompletedCount,
+        resetCampaignProgress,
+        clearProgress,
+        resetAllProgress,
+        resetAllRewards,
+        isInCampaign,
+        getCurrentLevelId,
+        getCurrentLevelData,
+        calculateBattleModifiers,
+        generateCarryOverData,
+        saveCampaignState,
+        hasUnfinishedCampaign,
+        getUnfinishedCampaignInfo,
+        abandonAndSave,
+        clearCampaignSave,
+        resumeCampaign,
+        recordFailReason
       };
     })();
 
@@ -1736,14 +3043,11 @@
         }
       };
 
-      function deepMergeDefaults(target, defaults) {
-        const result = Object.assign({}, defaults, target);
-        for (const key in defaults) {
-          if (defaults[key] && typeof defaults[key] === "object" && !Array.isArray(defaults[key])) {
-            result[key] = Object.assign({}, defaults[key], target[key] || {});
-          }
-        }
-        return result;
+      function mergeStats(parsed) {
+        const stats = Object.assign({}, defaultStats, parsed || {});
+        stats.weatherWins = Object.assign({}, defaultStats.weatherWins, (parsed && parsed.weatherWins) || {});
+        stats.failReasons = Object.assign({}, defaultStats.failReasons, (parsed && parsed.failReasons) || {});
+        return stats;
       }
 
       function loadStats() {
@@ -1751,10 +3055,10 @@
           const stored = localStorage.getItem(STATS_KEY);
           if (stored) {
             const parsed = JSON.parse(stored);
-            return deepMergeDefaults(parsed, defaultStats);
+            return mergeStats(parsed);
           }
         } catch (e) {}
-        return deepMergeDefaults({}, defaultStats);
+        return mergeStats({});
       }
 
       function saveStats(stats) {
@@ -1795,16 +3099,15 @@
         if (clearTime != null && (stats.fastestClearTime === null || clearTime < stats.fastestClearTime)) {
           stats.fastestClearTime = clearTime;
         }
-        if (weatherEventsSeen && Array.isArray(weatherEventsSeen)) {
+        if (Array.isArray(weatherEventsSeen)) {
           if (weatherEventsSeen.indexOf("denseFog") !== -1) {
             stats.fogWins++;
           }
-          for (let i = 0; i < weatherEventsSeen.length; i++) {
-            const wt = weatherEventsSeen[i];
-            if (stats.weatherWins.hasOwnProperty(wt)) {
-              stats.weatherWins[wt]++;
+          weatherEventsSeen.forEach(function(type) {
+            if (stats.weatherWins.hasOwnProperty(type)) {
+              stats.weatherWins[type]++;
             }
-          }
+          });
         }
         stats.currentLossStreak = 0;
         saveStats(stats);
@@ -1842,8 +3145,9 @@
       }
 
       function resetStats() {
-        saveStats(deepMergeDefaults({}, defaultStats));
-        return deepMergeDefaults({}, defaultStats);
+        const stats = mergeStats({});
+        saveStats(stats);
+        return stats;
       }
 
       function getAll() {
@@ -1895,6 +3199,9 @@
           levelId: null,
           levelName: "",
           isCustom: false,
+          isCampaign: false,
+          campaignChapterId: null,
+          campaignChapterName: "",
           startTime: Date.now(),
           endTime: null,
           duration: 0,
@@ -1903,7 +3210,10 @@
           failReason: null,
           failReasonText: "",
           weatherEvents: [],
-          watchedReplay: false
+          weatherTimeline: [],
+          boatLosses: [],
+          watchedReplay: false,
+          replayDataId: null
         }, entryData);
         return entry;
       }
@@ -1951,13 +3261,25 @@
         const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
         const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
 
-        return logs.filter(function(log) {
+        let filtered = logs.filter(function(log) {
+          if (f.search && f.search.trim()) {
+            const searchLower = f.search.trim().toLowerCase();
+            const levelName = (log.levelName || "").toLowerCase();
+            const chapterName = (log.campaignChapterName || "").toLowerCase();
+            if (levelName.indexOf(searchLower) === -1 && chapterName.indexOf(searchLower) === -1) {
+              return false;
+            }
+          }
           if (f.result && f.result !== "all") {
             if (log.result !== f.result) return false;
           }
           if (f.source && f.source !== "all") {
             if (f.source === "builtin" && log.isCustom) return false;
             if (f.source === "custom" && !log.isCustom) return false;
+            if (f.source === "campaign" && !log.isCampaign) return false;
+          }
+          if (f.failReason && f.failReason !== "all") {
+            if (log.result !== "lose" || log.failReason !== f.failReason) return false;
           }
           if (f.time && f.time !== "all") {
             const t = log.startTime;
@@ -1967,16 +3289,62 @@
           }
           return true;
         });
+
+        if (f.sortBy) {
+          filtered = filtered.slice().sort(function(a, b) {
+            let valA, valB;
+            switch (f.sortBy) {
+              case "score_desc":
+                return (b.score || 0) - (a.score || 0);
+              case "score_asc":
+                return (a.score || 0) - (b.score || 0);
+              case "duration_desc":
+                return (b.duration || 0) - (a.duration || 0);
+              case "duration_asc":
+                return (a.duration || 0) - (b.duration || 0);
+              case "time_desc":
+              default:
+                return (b.startTime || 0) - (a.startTime || 0);
+              case "time_asc":
+                return (a.startTime || 0) - (b.startTime || 0);
+            }
+          });
+        }
+
+        return filtered;
       }
 
       function getStats(filteredLogs) {
         const logs = filteredLogs || loadAll();
         const winCount = logs.filter(function(l) { return l.result === "win"; }).length;
         const loseCount = logs.filter(function(l) { return l.result === "lose"; }).length;
+        const totalScore = logs.reduce(function(sum, l) { return sum + (l.score || 0); }, 0);
+        const totalDuration = logs.reduce(function(sum, l) { return sum + (l.duration || 0); }, 0);
+        const avgScore = logs.length > 0 ? Math.round(totalScore / logs.length) : 0;
+        const avgDuration = logs.length > 0 ? totalDuration / logs.length : 0;
+        const winRate = logs.length > 0 ? Math.round((winCount / logs.length) * 100) : 0;
+        const campaignCount = logs.filter(function(l) { return l.isCampaign; }).length;
+        const replayWatchedCount = logs.filter(function(l) { return l.watchedReplay; }).length;
+
+        const failReasons = {};
+        logs.forEach(function(l) {
+          if (l.result === "lose" && l.failReason) {
+            failReasons[l.failReason] = (failReasons[l.failReason] || 0) + 1;
+          }
+        });
+
         return {
           total: logs.length,
           win: winCount,
-          lose: loseCount
+          lose: loseCount,
+          totalScore: totalScore,
+          avgScore: avgScore,
+          totalDuration: totalDuration,
+          avgDuration: avgDuration,
+          winRate: winRate,
+          campaignCount: campaignCount,
+          replayWatchedCount: replayWatchedCount,
+          failReasons: failReasons
         };
       }
 
@@ -2454,6 +3822,7 @@
             const type = ev.type;
             activeEvents.splice(i, 1);
             cooldowns[type] = config[type].minCooldown + Math.random() * (config[type].maxCooldown - config[type].minCooldown);
+            emit("end", { type: type, event: ev });
             emit("changed", getActiveEvents());
           }
         }
@@ -2514,9 +3883,17 @@
         let fogOpacity = 0;
 
         for (const ev of activeEvents) {
-          const intensity = ev.intensity;
+          let intensity = ev.intensity;
           const cfg = config[ev.type];
           if (!cfg) continue;
+
+          if (typeof campaignWeatherMultiplier !== "undefined" && campaignWeatherMultiplier !== 1) {
+            if (campaignWeatherMultiplier < 1) {
+              intensity = intensity * campaignWeatherMultiplier;
+            } else {
+              intensity = Math.min(1, intensity * campaignWeatherMultiplier);
+            }
+          }
 
           if (ev.type === "seaBreeze") {
             driftMult += (cfg.driftMultiplier - 1) * intensity;
@@ -2528,6 +3905,15 @@
             beamJitter = jitterOffset;
             beamFlicker = cfg.flickerIntensity * intensity;
           }
+        }
+
+        if (typeof campaignBoatSpeedMultiplier !== "undefined") {
+          speedMult *= campaignBoatSpeedMultiplier;
+        }
+
+        if (typeof gameSettings !== "undefined" && gameSettings.reduceFlicker) {
+          beamJitter *= 0.25;
+          beamFlicker *= 0.2;
         }
 
         return {
@@ -2704,6 +4090,74 @@
         stop: stop,
         isRecording: isRecording,
         getElapsed: getElapsed
+      };
+    })();
+
+    // ===================== ReplayStore：回放数据存储 =====================
+    const ReplayStore = (function() {
+      const REPLAY_KEY_PREFIX = "zfl26Replay_";
+      const MAX_REPLAYS = 100;
+
+      function generateId() {
+        return "replay_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+      }
+
+      function getAllKeys() {
+        const keys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf(REPLAY_KEY_PREFIX) === 0) {
+            keys.push(key);
+          }
+        }
+        return keys.sort().reverse();
+      }
+
+      function save(replayData) {
+        if (!replayData) return null;
+        const id = generateId();
+        try {
+          const keys = getAllKeys();
+          if (keys.length >= MAX_REPLAYS) {
+            const toDelete = keys.slice(MAX_REPLAYS - 1);
+            toDelete.forEach(function(k) { localStorage.removeItem(k); });
+          }
+          localStorage.setItem(REPLAY_KEY_PREFIX + id, JSON.stringify(replayData));
+          return id;
+        } catch (e) {
+          console.error("Failed to save replay:", e);
+          return null;
+        }
+      }
+
+      function load(id) {
+        if (!id) return null;
+        try {
+          const data = localStorage.getItem(REPLAY_KEY_PREFIX + id);
+          if (data) {
+            return JSON.parse(data);
+          }
+        } catch (e) {
+          console.error("Failed to load replay:", e);
+        }
+        return null;
+      }
+
+      function remove(id) {
+        if (!id) return;
+        localStorage.removeItem(REPLAY_KEY_PREFIX + id);
+      }
+
+      function clearAll() {
+        const keys = getAllKeys();
+        keys.forEach(function(k) { localStorage.removeItem(k); });
+      }
+
+      return {
+        save: save,
+        load: load,
+        remove: remove,
+        clearAll: clearAll
       };
     })();
 
@@ -3113,6 +4567,16 @@
     const modalSensitivityRange = document.querySelector("#modalSensitivityRange");
     const modalSensitivityValue = document.querySelector("#modalSensitivityValue");
     const modalPauseHintToggle = document.querySelector("#modalPauseHintToggle");
+    const invertRotationToggle = document.querySelector("#invertRotationToggle");
+    const reduceFlickerToggle = document.querySelector("#reduceFlickerToggle");
+    const highContrastSeaToggle = document.querySelector("#highContrastSeaToggle");
+    const muteOnPauseToggle = document.querySelector("#muteOnPauseToggle");
+    const replayAutoPauseToggle = document.querySelector("#replayAutoPauseToggle");
+    const modalInvertRotationToggle = document.querySelector("#modalInvertRotationToggle");
+    const modalReduceFlickerToggle = document.querySelector("#modalReduceFlickerToggle");
+    const modalHighContrastSeaToggle = document.querySelector("#modalHighContrastSeaToggle");
+    const modalMuteOnPauseToggle = document.querySelector("#modalMuteOnPauseToggle");
+    const modalReplayAutoPauseToggle = document.querySelector("#modalReplayAutoPauseToggle");
     const cursorHint = document.querySelector("#cursorHint");
     const backFromPlaytestBtn = document.querySelector("#backFromPlaytestBtn");
     const achievementsBtn = document.querySelector("#achievementsBtn");
@@ -3134,7 +4598,6 @@
     const statWeatherFog = document.querySelector("#statWeatherFog");
     const statWeatherFlash = document.querySelector("#statWeatherFlash");
     const statTopFailReason = document.querySelector("#statTopFailReason");
-    const failReasonBarsStats = document.querySelector("#failReasonBarsStats");
     const voyageLogBtn = document.querySelector("#voyageLogBtn");
     const voyageLogPanel = document.querySelector("#voyageLogPanel");
     const backFromVoyageLogBtn = document.querySelector("#backFromVoyageLogBtn");
@@ -3143,6 +4606,54 @@
     const logFilterSource = document.querySelector("#logFilterSource");
     const logFilterTime = document.querySelector("#logFilterTime");
     const logList = document.querySelector("#logList");
+
+    // ===================== 战役模式 DOM 引用 =====================
+    const campaignBtn = document.querySelector("#campaignBtn");
+    const campaignSelectPanel = document.querySelector("#campaignSelectPanel");
+    const campaignPlayPanel = document.querySelector("#campaignPlayPanel");
+    const campaignIntroPanel = document.querySelector("#campaignIntroPanel");
+    const campaignSettlementPanel = document.querySelector("#campaignSettlementPanel");
+    const campaignFailPanel = document.querySelector("#campaignFailPanel");
+    const backFromCampaignBtn = document.querySelector("#backFromCampaignBtn");
+    const chapterCards = document.querySelector("#chapterCards");
+    const campaignProgressInfo = document.querySelector("#campaignProgressInfo");
+    const resetCampaignProgressBtn = document.querySelector("#resetCampaignProgressBtn");
+    const campaignChapterName = document.querySelector("#campaignChapterName");
+    const campaignLevelProgress = document.querySelector("#campaignLevelProgress");
+    const campaignTotalScore = document.querySelector("#campaignTotalScore");
+    const campaignLives = document.querySelector("#campaignLives");
+    const battleModifiers = document.querySelector("#battleModifiers");
+    const modifierList = document.querySelector("#modifierList");
+    const campaignLevelText = document.querySelector("#campaignLevelText");
+    const campaignScoreText = document.querySelector("#campaignScoreText");
+    const campaignArrivedText = document.querySelector("#campaignArrivedText");
+    const campaignQuitBtn = document.querySelector("#campaignQuitBtn");
+    const campaignSettlementNextBtn = document.querySelector("#campaignSettlementNextBtn");
+    const campaignRetryFromBeginningBtn = document.querySelector("#campaignRetryFromBeginningBtn");
+    const campaignFailBackBtn = document.querySelector("#campaignFailBackBtn");
+    const backFromChapterIntroBtn = document.querySelector("#backFromChapterIntroBtn");
+    const startChapterFromIntroBtn = document.querySelector("#startChapterFromIntroBtn");
+    const customChapterCard = document.querySelector("#customChapterCard");
+    const customChapterArea = document.querySelector("#customChapterArea");
+    const customChapterEditor = document.querySelector("#customChapterEditor");
+    const customChapterNameInput = document.querySelector("#customChapterNameInput");
+    const customLevelPicker = document.querySelector("#customLevelPicker");
+    const customSelectedLevels = document.querySelector("#customSelectedLevels");
+    const confirmCustomChapterBtn = document.querySelector("#confirmCustomChapterBtn");
+    const cancelCustomChapterBtn = document.querySelector("#cancelCustomChapterBtn");
+    const unfinishedCampaignArea = document.querySelector("#unfinishedCampaignArea");
+    const unfinishedCampaignCard = document.querySelector("#unfinishedCampaignCard");
+    const unfinishedChapterName = document.querySelector("#unfinishedChapterName");
+    const unfinishedChapterIcon = document.querySelector("#unfinishedChapterIcon");
+    const unfinishedProgress = document.querySelector("#unfinishedProgress");
+    const unfinishedLives = document.querySelector("#unfinishedLives");
+    const unfinishedScore = document.querySelector("#unfinishedScore");
+    const unfinishedFailReason = document.querySelector("#unfinishedFailReason");
+    const unfinishedFailText = document.querySelector("#unfinishedFailText");
+    const unfinishedCampaignStatus = document.querySelector("#unfinishedCampaignStatus");
+    const resumeCampaignBtn = document.querySelector("#resumeCampaignBtn");
+    const restartCampaignBtn = document.querySelector("#restartCampaignBtn");
+    const abandonCampaignBtn = document.querySelector("#abandonCampaignBtn");
 
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
@@ -3171,6 +4682,16 @@
     const saveStatus = document.querySelector("#saveStatus");
     const backFromEditorBtn = document.querySelector("#backFromEditorBtn");
     const exportCurrentLevelBtn = document.querySelector("#exportCurrentLevelBtn");
+
+    const weatherSeaBreezeToggle = document.querySelector("#weatherSeaBreezeToggle");
+    const weatherSeaBreezeHeader = document.querySelector("#weatherSeaBreezeHeader");
+    const weatherSeaBreezeParams = document.querySelector("#weatherSeaBreezeParams");
+    const weatherDenseFogToggle = document.querySelector("#weatherDenseFogToggle");
+    const weatherDenseFogHeader = document.querySelector("#weatherDenseFogHeader");
+    const weatherDenseFogParams = document.querySelector("#weatherDenseFogParams");
+    const weatherLighthouseFlashToggle = document.querySelector("#weatherLighthouseFlashToggle");
+    const weatherLighthouseFlashHeader = document.querySelector("#weatherLighthouseFlashHeader");
+    const weatherLighthouseFlashParams = document.querySelector("#weatherLighthouseFlashParams");
 
     // ===================== 关卡包导入导出 DOM 引用 =====================
     const exportPackBtn = document.querySelector("#exportPackBtn");
@@ -3202,6 +4723,10 @@
     const importPackVersion = document.querySelector("#importPackVersion");
     const importDuplicateWarning = document.querySelector("#importDuplicateWarning");
     const importDuplicateCount = document.querySelector("#importDuplicateCount");
+    const importLevelList = document.querySelector("#importLevelList");
+    const importSelectedCount = document.querySelector("#importSelectedCount");
+    const selectAllImportBtn = document.querySelector("#selectAllImportBtn");
+    const deselectAllImportBtn = document.querySelector("#deselectAllImportBtn");
     const confirmImportBtn = document.querySelector("#confirmImportBtn");
     const cancelImportBtn = document.querySelector("#cancelImportBtn");
     const importPackError = document.querySelector("#importPackError");
@@ -3224,8 +4749,20 @@
     let hasBoatLostThisLevel = false;
     let currentLogId = null;
     let logWeatherEventsSeen = [];
+    let logWeatherTimeline = [];
+    let logBoatLosses = [];
     let currentLogFailReason = null;
     let currentLogFailText = "";
+
+    // ===================== 战役模式状态 =====================
+    let campaignState = "idle";
+    let currentBattleModifiers = null;
+    let campaignLevelStartScore = 0;
+    let campaignWeatherMultiplier = 1;
+    let campaignBoatSpeedMultiplier = 1;
+    let campaignBeamRangeMultiplier = 1;
+    let campaignScoreMultiplier = 1;
+    let startingChapterId = null;
 
     // ===================== 编辑器状态 =====================
     let editorLevel = LevelData.createEmptyCustomLevel();
@@ -3235,12 +4772,30 @@
     let editorDragOffset = { x: 0, y: 0 };
 
     // ===================== 设置 =====================
+    function getDefaultSettings() {
+      return {
+        sound: true,
+        brightness: 100,
+        sensitivity: 1.0,
+        pauseHint: true,
+        invertRotation: false,
+        reduceFlicker: false,
+        highContrastSea: false,
+        muteOnPause: false,
+        replayAutoPause: false
+      };
+    }
+
     function loadSettings() {
+      const defaults = getDefaultSettings();
       try {
         const stored = localStorage.getItem("zfl26Settings");
-        if (stored) return JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          return Object.assign({}, defaults, parsed);
+        }
       } catch (e) {}
-      return { sound: true, brightness: 100, sensitivity: 1.0, pauseHint: true };
+      return defaults;
     }
 
     function saveSettings() {
@@ -3250,19 +4805,33 @@
     let gameSettings = loadSettings();
 
     function applySettings() {
-      SoundManager.setEnabled(gameSettings.sound);
+      let soundEnabled = gameSettings.sound;
+      if (gameSettings.muteOnPause && state === "paused") {
+        soundEnabled = false;
+      }
+      SoundManager.setEnabled(soundEnabled);
       soundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
       brightnessRange.value = gameSettings.brightness;
       brightnessValue.textContent = gameSettings.brightness + "%";
       sensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
       sensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
       pauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      invertRotationToggle.className = "toggle" + (gameSettings.invertRotation ? " on" : "");
+      reduceFlickerToggle.className = "toggle" + (gameSettings.reduceFlicker ? " on" : "");
+      highContrastSeaToggle.className = "toggle" + (gameSettings.highContrastSea ? " on" : "");
+      muteOnPauseToggle.className = "toggle" + (gameSettings.muteOnPause ? " on" : "");
+      replayAutoPauseToggle.className = "toggle" + (gameSettings.replayAutoPause ? " on" : "");
       modalSoundToggle.className = "toggle" + (gameSettings.sound ? " on" : "");
       modalBrightnessRange.value = gameSettings.brightness;
       modalBrightnessValue.textContent = gameSettings.brightness + "%";
       modalSensitivityRange.value = Math.round(gameSettings.sensitivity * 10);
       modalSensitivityValue.textContent = gameSettings.sensitivity.toFixed(1) + "x";
       modalPauseHintToggle.className = "toggle" + (gameSettings.pauseHint ? " on" : "");
+      modalInvertRotationToggle.className = "toggle" + (gameSettings.invertRotation ? " on" : "");
+      modalReduceFlickerToggle.className = "toggle" + (gameSettings.reduceFlicker ? " on" : "");
+      modalHighContrastSeaToggle.className = "toggle" + (gameSettings.highContrastSea ? " on" : "");
+      modalMuteOnPauseToggle.className = "toggle" + (gameSettings.muteOnPause ? " on" : "");
+      modalReplayAutoPauseToggle.className = "toggle" + (gameSettings.replayAutoPause ? " on" : "");
       updatePauseHint();
       canvas.style.filter = "brightness(" + (gameSettings.brightness / 100) + ")";
     }
@@ -3310,13 +4879,13 @@
           const campaignTargets = { campaign_chapter_first: 1, campaign_chapter_3: 3 };
           return Math.min(100, (stats.campaignCompletions / campaignTargets[achievement.id]) * 100);
         case "campaign_no_damage":
-          return stats.campaignNoDamageCompletions >= 1 ? 100 : Math.min(100, (stats.campaignNoDamageCompletions / 1) * 100);
+          return stats.campaignNoDamageCompletions >= 1 ? 100 : 0;
         case "fog_victory":
-          return stats.fogWins >= 1 ? 100 : Math.min(100, (stats.fogWins / 1) * 100);
+          return stats.fogWins >= 1 ? 100 : 0;
         case "flash_escort":
-          return stats.flashEscortSuccess >= 1 ? 100 : Math.min(100, (stats.flashEscortSuccess / 1) * 100);
+          return stats.flashEscortSuccess >= 1 ? 100 : 0;
         case "custom_route_complete":
-          return stats.customRouteCompletions >= 1 ? 100 : Math.min(100, (stats.customRouteCompletions / 1) * 100);
+          return stats.customRouteCompletions >= 1 ? 100 : 0;
         default:
           return 0;
       }
@@ -3342,30 +4911,11 @@
         unlit: "光束迷航",
         rock: "撞上暗礁"
       };
-      const failReasons = stats.failReasons;
-      const reasonEntries = Object.entries(failReasons).sort(function(a, b) { return b[1] - a[1]; });
-      const totalFails = Object.values(failReasons).reduce(function(a, b) { return a + b; }, 0);
-      const maxFails = Math.max.apply(null, Object.values(failReasons).concat([1]));
-
-      if (totalFails === 0) {
-        statTopFailReason.textContent = "--";
+      const failReasonEntries = Object.entries(stats.failReasons).sort(function(a, b) { return b[1] - a[1]; });
+      if (failReasonEntries.length > 0 && failReasonEntries[0][1] > 0) {
+        statTopFailReason.textContent = failReasonLabels[failReasonEntries[0][0]] || failReasonEntries[0][0];
       } else {
-        statTopFailReason.textContent = failReasonLabels[reasonEntries[0][0]] || reasonEntries[0][0];
-      }
-
-      if (failReasonBarsStats) {
-        failReasonBarsStats.innerHTML = "";
-        Object.keys(failReasonLabels).forEach(function(key) {
-          const count = failReasons[key] || 0;
-          const pct = totalFails > 0 ? Math.round((count / maxFails) * 100) : 0;
-          const row = document.createElement("div");
-          row.className = "fail-reason-bar-row";
-          row.innerHTML =
-            '<span class="fail-reason-bar-label">' + failReasonLabels[key] + '</span>' +
-            '<span class="fail-reason-bar-track"><span class="fail-reason-bar-fill" style="width:' + pct + '%"></span></span>' +
-            '<span class="fail-reason-bar-count">' + count + '</span>';
-          failReasonBarsStats.appendChild(row);
-        });
+        statTopFailReason.textContent = "--";
       }
     }
 
@@ -3441,6 +4991,7 @@
       achievementsPanel.classList.add("hidden");
       voyageLogPanel.classList.remove("hidden");
       renderVoyageLogFilters();
+      bindVoyageLogFilterEvents();
       renderVoyageLogList();
     }
 
@@ -3449,15 +5000,74 @@
       mainMenu.classList.remove("hidden");
     }
 
-    let currentLogFilters = { result: "all", source: "all", time: "all" };
+    let currentLogFilters = {
+      result: "all",
+      source: "all",
+      failReason: "all",
+      time: "all",
+      sortBy: "time_desc",
+      search: ""
+    };
 
     function renderVoyageLogFilters() {
       const filterResult = document.getElementById("logFilterResult");
       const filterSource = document.getElementById("logFilterSource");
+      const filterFailReason = document.getElementById("logFilterFailReason");
       const filterTime = document.getElementById("logFilterTime");
+      const sortBy = document.getElementById("logSortBy");
+      const searchInput = document.getElementById("logSearchInput");
       if (filterResult) filterResult.value = currentLogFilters.result;
       if (filterSource) filterSource.value = currentLogFilters.source;
+      if (filterFailReason) filterFailReason.value = currentLogFilters.failReason;
       if (filterTime) filterTime.value = currentLogFilters.time;
+      if (sortBy) sortBy.value = currentLogFilters.sortBy;
+      if (searchInput) searchInput.value = currentLogFilters.search;
+    }
+
+    function bindVoyageLogFilterEvents() {
+      const filterResult = document.getElementById("logFilterResult");
+      const filterSource = document.getElementById("logFilterSource");
+      const filterFailReason = document.getElementById("logFilterFailReason");
+      const filterTime = document.getElementById("logFilterTime");
+      const sortBy = document.getElementById("logSortBy");
+      const searchInput = document.getElementById("logSearchInput");
+
+      if (filterResult) {
+        filterResult.onchange = function() {
+          currentLogFilters.result = filterResult.value;
+          renderVoyageLogList();
+        };
+      }
+      if (filterSource) {
+        filterSource.onchange = function() {
+          currentLogFilters.source = filterSource.value;
+          renderVoyageLogList();
+        };
+      }
+      if (filterFailReason) {
+        filterFailReason.onchange = function() {
+          currentLogFilters.failReason = filterFailReason.value;
+          renderVoyageLogList();
+        };
+      }
+      if (filterTime) {
+        filterTime.onchange = function() {
+          currentLogFilters.time = filterTime.value;
+          renderVoyageLogList();
+        };
+      }
+      if (sortBy) {
+        sortBy.onchange = function() {
+          currentLogFilters.sortBy = sortBy.value;
+          renderVoyageLogList();
+        };
+      }
+      if (searchInput) {
+        searchInput.oninput = function() {
+          currentLogFilters.search = searchInput.value;
+          renderVoyageLogList();
+        };
+      }
     }
 
     function renderVoyageLogSummary(filteredLogs) {
@@ -3465,11 +5075,45 @@
       const totalEl = document.getElementById("logTotalCount");
       const winEl = document.getElementById("logWinCount");
       const loseEl = document.getElementById("logLoseCount");
+      const winRateEl = document.getElementById("logWinRate");
+      const avgScoreEl = document.getElementById("logAvgScore");
+      const avgDurationEl = document.getElementById("logAvgDuration");
       const countEl = document.getElementById("logFilterCount");
+      const failReasonStatsEl = document.getElementById("logFailReasonStats");
+      const failReasonBarsEl = document.getElementById("failReasonBars");
+
       if (totalEl) totalEl.textContent = stats.total;
       if (winEl) winEl.textContent = stats.win;
       if (loseEl) loseEl.textContent = stats.lose;
+      if (winRateEl) winRateEl.textContent = stats.winRate + "%";
+      if (avgScoreEl) avgScoreEl.textContent = stats.avgScore;
+      if (avgDurationEl) avgDurationEl.textContent = formatDuration(stats.avgDuration);
       if (countEl) countEl.textContent = filteredLogs.length;
+
+      if (failReasonStatsEl && failReasonBarsEl && stats.lose > 0) {
+        const reasonLabels = {
+          top: "偏离上侧",
+          bottom: "偏离下侧",
+          unlit: "光束迷航",
+          rock: "撞上暗礁"
+        };
+        const maxCount = Math.max.apply(null, Object.values(stats.failReasons).concat([1]));
+        let barsHtml = "";
+        ["top", "bottom", "unlit", "rock"].forEach(function(reason) {
+          const count = stats.failReasons[reason] || 0;
+          const pct = Math.round((count / maxCount) * 100);
+          barsHtml +=
+            '<div class="fail-reason-bar">' +
+              '<div class="fail-reason-bar-label">' + reasonLabels[reason] + '</div>' +
+              '<div class="fail-reason-bar-track"><div class="fail-reason-bar-fill" style="width:' + pct + '%"></div></div>' +
+              '<div class="fail-reason-bar-count">' + count + '</div>' +
+            '</div>';
+        });
+        failReasonBarsEl.innerHTML = barsHtml;
+        failReasonStatsEl.classList.remove("hidden");
+      } else if (failReasonStatsEl) {
+        failReasonStatsEl.classList.add("hidden");
+      }
     }
 
     function renderVoyageLogList() {
@@ -3482,8 +5126,8 @@
       if (filteredLogs.length === 0) {
         listEl.innerHTML =
           '<div class="log-empty">' +
-            '<div class="log-empty-icon">📜</div>' +
-            '<div>' + (VoyageLogStore.loadAll().length === 0 ? "还没有航海记录，开始你的第一次航行吧！" : "没有符合筛选条件的记录。") + '</div>' +
+            '<div class="log-empty-icon">📊</div>' +
+            '<div>' + (VoyageLogStore.loadAll().length === 0 ? "还没有战绩记录，开始你的第一次航行吧！" : "没有符合筛选条件的记录。") + '</div>' +
           '</div>';
         return;
       }
@@ -3497,13 +5141,19 @@
         const isBuiltin = LevelData.isBuiltinLevel(log.levelId);
         const displayIdx = isBuiltin ? (parseInt(log.levelId.split("_")[1]) + 1) : (lvlIdx >= 0 ? (lvlIdx - builtinCount + 1) : "?");
         const prefix = isBuiltin ? "第" + displayIdx + "关：" : (log.isCustom ? "自定义" + displayIdx + "：" : "");
+        const hasReplay = log.replayDataId !== null && log.replayDataId !== undefined;
 
         let tagsHtml = "";
+        if (log.isCampaign) {
+          tagsHtml += '<span class="log-tag weather">⚔️ 战役模式</span>';
+        }
         if (log.isCustom) {
           tagsHtml += '<span class="log-tag custom">自定义关卡</span>';
         }
         if (log.watchedReplay) {
           tagsHtml += '<span class="log-tag replay">🎬 已观看回放</span>';
+        } else if (hasReplay) {
+          tagsHtml += '<span class="log-tag">🎬 可观看回放</span>';
         }
         if (log.weatherEvents && log.weatherEvents.length > 0) {
           log.weatherEvents.forEach(function(w) {
@@ -3525,8 +5175,10 @@
         const retryDisabled = !canRetry || !levelStillExists;
         const retryTitle = !levelStillExists ? "该关卡已被删除" : "";
 
+        const itemClass = "log-item " + resultClass + (hasReplay ? " has-replay" : "");
+
         html +=
-          '<div class="log-item ' + resultClass + '" data-id="' + log.id + '">' +
+          '<div class="' + itemClass + '" data-id="' + log.id + '" data-action="detail">' +
             '<div class="log-item-header">' +
               '<span class="log-item-level" title="' + prefix + log.levelName + '">' + prefix + log.levelName + '</span>' +
               '<span class="log-item-result ' + resultClass + '">' + resultText + '</span>' +
@@ -3562,6 +5214,7 @@
               '<button class="log-btn primary" data-action="retry" data-id="' + log.id + '" ' + (retryDisabled ? 'disabled title="' + retryTitle + '"' : '') + '>' +
                 (retryDisabled ? '不可重挑战' : '🔁 重新挑战') +
               '</button>' +
+              (hasReplay ? '<button class="log-btn secondary" data-action="replay" data-id="' + log.id + '">🎬 观看回放</button>' : '') +
               '<button class="log-btn secondary" data-action="delete" data-id="' + log.id + '">🗑 删除</button>' +
             '</div>' +
           '</div>';
@@ -3569,21 +5222,243 @@
 
       listEl.innerHTML = html;
 
+      listEl.querySelectorAll('[data-action="detail"]').forEach(function(item) {
+        item.onclick = function(e) {
+          if (e.target.closest('[data-action="retry"]') || e.target.closest('[data-action="delete"]') || e.target.closest('[data-action="replay"]')) {
+            return;
+          }
+          const logId = item.getAttribute("data-id");
+          showLogDetail(logId);
+        };
+      });
       listEl.querySelectorAll('[data-action="retry"]').forEach(function(btn) {
-        btn.onclick = function() {
+        btn.onclick = function(e) {
+          e.stopPropagation();
           const logId = btn.getAttribute("data-id");
           retryLogLevel(logId);
         };
       });
-      listEl.querySelectorAll('[data-action="delete"]').forEach(function(btn) {
-        btn.onclick = function() {
+      listEl.querySelectorAll('[data-action="replay"]').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
           const logId = btn.getAttribute("data-id");
-          if (confirm("确定删除这条航海日志吗？")) {
+          watchLogReplay(logId);
+        };
+      });
+      listEl.querySelectorAll('[data-action="delete"]').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          const logId = btn.getAttribute("data-id");
+          if (confirm("确定删除这条战绩记录吗？")) {
             VoyageLogStore.deleteEntry(logId);
             renderVoyageLogList();
           }
         };
       });
+    }
+
+    function showLogDetail(logId) {
+      const log = VoyageLogStore.getEntry(logId);
+      if (!log) return;
+
+      const modal = document.getElementById("logDetailModal");
+      const levelNameEl = document.getElementById("detailLevelName");
+      const contentEl = document.getElementById("detailContent");
+      if (!modal || !levelNameEl || !contentEl) return;
+
+      const builtinCount = LevelData.getBuiltinCount();
+      const lvlIdx = LevelData.getLevelIndex(log.levelId);
+      const isBuiltin = LevelData.isBuiltinLevel(log.levelId);
+      const displayIdx = isBuiltin ? (parseInt(log.levelId.split("_")[1]) + 1) : (lvlIdx >= 0 ? (lvlIdx - builtinCount + 1) : "?");
+      const prefix = isBuiltin ? "第" + displayIdx + "关：" : (log.isCustom ? "自定义" + displayIdx + "：" : "");
+      const hasReplay = log.replayDataId !== null && log.replayDataId !== undefined;
+
+      levelNameEl.textContent = prefix + log.levelName;
+
+      const resultClass = log.result === "win" ? "win" : "lose";
+      const resultText = log.result === "win" ? "守望成功" : "守望失败";
+
+      const reasonLabels = {
+        top: "船只偏离上侧安全航道",
+        bottom: "船只偏离下侧安全航道",
+        unlit: "船只离开光束太久而迷航",
+        rock: "船只撞上暗礁"
+      };
+
+      let tagsHtml = '<div class="detail-tags">';
+      if (log.isCampaign) {
+        tagsHtml += '<span class="detail-tag campaign">⚔️ 来自战役' + (log.campaignChapterName ? '：' + log.campaignChapterName : '') + '</span>';
+      }
+      if (log.isCustom) {
+        tagsHtml += '<span class="detail-tag">🎨 自定义关卡</span>';
+      }
+      if (log.watchedReplay) {
+        tagsHtml += '<span class="detail-tag replay">🎬 已观看回放</span>';
+      } else if (hasReplay) {
+        tagsHtml += '<span class="detail-tag no-replay">🎬 未观看回放</span>';
+      }
+      tagsHtml += '</div>';
+
+      let infoHtml =
+        '<div class="detail-section">' +
+          '<div class="detail-section-title">基本信息</div>' +
+          '<div class="detail-info-grid">' +
+            '<div class="detail-info-item">' +
+              '<div class="detail-info-label">结果</div>' +
+              '<div class="detail-info-value ' + resultClass + '">' + resultText + '</div>' +
+            '</div>' +
+            '<div class="detail-info-item">' +
+              '<div class="detail-info-label">得分</div>' +
+              '<div class="detail-info-value">' + log.score + '</div>' +
+            '</div>' +
+            '<div class="detail-info-item">' +
+              '<div class="detail-info-label">用时</div>' +
+              '<div class="detail-info-value">' + formatDuration(log.duration) + '</div>' +
+            '</div>' +
+            '<div class="detail-info-item">' +
+              '<div class="detail-info-label">开始时间</div>' +
+              '<div class="detail-info-value" style="font-size:12px;">' + formatDateTime(log.startTime) + '</div>' +
+            '</div>' +
+          '</div>' +
+          tagsHtml +
+        '</div>';
+
+      if (log.result === "lose" && log.failReasonText) {
+        infoHtml +=
+          '<div class="detail-section">' +
+            '<div class="detail-section-title">失败原因</div>' +
+            '<div class="log-item-fail" style="margin:0;">⚠ ' + log.failReasonText + '</div>' +
+          '</div>';
+      }
+
+      if (log.boatLosses && log.boatLosses.length > 0) {
+        infoHtml += '<div class="detail-section"><div class="detail-section-title">船只损失记录</div>';
+        log.boatLosses.forEach(function(loss, idx) {
+          const reasonText = reasonLabels[loss.reason] || loss.reason;
+          infoHtml +=
+            '<div class="boat-loss-item">' +
+              '<div class="boat-loss-index">' + (idx + 1) + '</div>' +
+              '<div>' +
+                '<div class="boat-loss-reason">' + reasonText + '</div>' +
+                '<div class="boat-loss-position">位置：(' + Math.round(loss.x) + ', ' + Math.round(loss.y) + ')</div>' +
+              '</div>' +
+              '<div style="font-size:11px;color:#879aa0;">' + formatDuration(loss.time || 0) + '</div>' +
+            '</div>';
+        });
+        infoHtml += '</div>';
+      }
+
+      const weatherIcons = {
+        seaBreeze: "🌬️",
+        denseFog: "🌫️",
+        lighthouseFlash: "⚡"
+      };
+
+      if (log.weatherTimeline && log.weatherTimeline.length > 0) {
+        infoHtml += '<div class="detail-section"><div class="detail-section-title">天气事件时间线</div><div class="timeline">';
+        log.weatherTimeline.forEach(function(event) {
+          const icon = weatherIcons[event.type] || "🌤️";
+          const typeName = getWeatherTypeName(event.type);
+          let timeText = formatDuration(event.time || 0);
+          let content = "";
+          let itemClass = "";
+
+          if (event.event === "start") {
+            itemClass = "weather-start";
+            content = '<span class="weather-icon">' + icon + '</span>' + typeName + ' 开始' + (event.duration ? '（持续约' + event.duration.toFixed(0) + '秒）' : '');
+          } else if (event.event === "end") {
+            itemClass = "weather-end";
+            content = '<span class="weather-icon">' + icon + '</span>' + typeName + ' 结束';
+          } else if (event.event === "boatLost") {
+            itemClass = "boat-lost";
+            const reasonText = reasonLabels[event.reason] || event.reason;
+            content = '💥 船只损失：' + reasonText;
+          } else if (event.event === "levelStart") {
+            itemClass = "level-start";
+            content = '🚢 航行开始';
+          } else if (event.event === "levelEnd") {
+            itemClass = "level-end";
+            content = (event.win ? '✅ 守望成功' : '❌ 守望失败') + '，得分：' + (event.score || 0);
+          }
+
+          if (content) {
+            infoHtml +=
+              '<div class="timeline-item ' + itemClass + '">' +
+                '<div class="timeline-time">' + timeText + '</div>' +
+                '<div class="timeline-content">' + content + '</div>' +
+              '</div>';
+          }
+        });
+        infoHtml += '</div></div>';
+      } else if (log.weatherEvents && log.weatherEvents.length > 0) {
+        infoHtml +=
+          '<div class="detail-section">' +
+            '<div class="detail-section-title">出现的天气</div>' +
+            '<div class="detail-tags">';
+        log.weatherEvents.forEach(function(w) {
+          const icon = weatherIcons[w] || "🌤️";
+          infoHtml += '<span class="detail-tag">' + icon + ' ' + getWeatherTypeName(w) + '</span>';
+        });
+        infoHtml += '</div></div>';
+      }
+
+      const canRetry = log.levelId && (isBuiltin || log.isCustom);
+      let levelStillExists = true;
+      if (canRetry) {
+        const lvl = LevelData.getLevelById(log.levelId);
+        if (!lvl) levelStillExists = false;
+      }
+
+      infoHtml += '<div class="detail-actions">';
+      if (canRetry && levelStillExists) {
+        infoHtml += '<button class="log-btn primary" data-detail-action="retry">🔁 重新挑战</button>';
+      } else {
+        infoHtml += '<button class="log-btn primary" disabled>关卡已删除</button>';
+      }
+      if (hasReplay) {
+        infoHtml += '<button class="log-btn secondary" data-detail-action="replay">🎬 观看回放</button>';
+      } else {
+        infoHtml += '<button class="log-btn secondary" disabled>无回放数据</button>';
+      }
+      infoHtml += '</div>';
+
+      contentEl.innerHTML = infoHtml;
+
+      contentEl.querySelectorAll('[data-detail-action="retry"]').forEach(function(btn) {
+        btn.onclick = function() {
+          hideLogDetail();
+          retryLogLevel(logId);
+        };
+      });
+      contentEl.querySelectorAll('[data-detail-action="replay"]').forEach(function(btn) {
+        btn.onclick = function() {
+          hideLogDetail();
+          watchLogReplay(logId);
+        };
+      });
+
+      modal.classList.remove("hidden");
+    }
+
+    function hideLogDetail() {
+      const modal = document.getElementById("logDetailModal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function watchLogReplay(logId) {
+      const log = VoyageLogStore.getEntry(logId);
+      if (!log || !log.replayDataId) {
+        alert("没有找到对应的回放数据。");
+        return;
+      }
+      const replayData = ReplayStore.load(log.replayDataId);
+      if (!replayData) {
+        alert("回放数据已被删除。");
+        return;
+      }
+      replayData._logId = logId;
+      hideVoyageLogPanel();
+      startReplayMode(replayData);
     }
 
     function retryLogLevel(logId) {
@@ -3640,6 +5515,995 @@
     function getCurrentLevelIndex() {
       if (playtestLevel) return -1;
       return LevelData.getLevelIndex(currentLevelId);
+    }
+
+    // ===================== 战役模式 UI 控制器 =====================
+    function renderUnfinishedCampaign() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+
+      if (!info) {
+        unfinishedCampaignArea.classList.add("hidden");
+        return;
+      }
+
+      unfinishedCampaignArea.classList.remove("hidden");
+      unfinishedChapterName.textContent = info.chapterName;
+      unfinishedProgress.textContent = (info.currentLevelIndex + 1) + "/" + info.totalLevels;
+      unfinishedScore.textContent = info.totalScore;
+
+      let hearts = "";
+      for (let i = 0; i < info.lives; i++) hearts += "❤️";
+      for (let i = info.lives; i < 3; i++) hearts += "🖤";
+      unfinishedLives.textContent = hearts;
+
+      const saveState = info.campaignSaveState;
+      if (saveState === "failed") {
+        unfinishedCampaignStatus.textContent = "已失败";
+        unfinishedChapterIcon.textContent = "💔";
+        unfinishedCampaignCard.style.borderColor = "#e2685d";
+        unfinishedCampaignCard.style.background = "rgba(226,104,93,.08)";
+        resumeCampaignBtn.disabled = true;
+        resumeCampaignBtn.style.opacity = "0.5";
+        resumeCampaignBtn.style.cursor = "not-allowed";
+      } else if (saveState === "abandoned") {
+        unfinishedCampaignStatus.textContent = "已暂停";
+        unfinishedChapterIcon.textContent = "⏸";
+        unfinishedCampaignCard.style.borderColor = "#e7c46a";
+        unfinishedCampaignCard.style.background = "rgba(231,196,106,.08)";
+        resumeCampaignBtn.disabled = false;
+        resumeCampaignBtn.style.opacity = "1";
+        resumeCampaignBtn.style.cursor = "pointer";
+      } else {
+        unfinishedCampaignStatus.textContent = "进行中";
+        unfinishedChapterIcon.textContent = "▶";
+        unfinishedCampaignCard.style.borderColor = "#3d6a78";
+        unfinishedCampaignCard.style.background = "rgba(61,106,120,.1)";
+        resumeCampaignBtn.disabled = false;
+        resumeCampaignBtn.style.opacity = "1";
+        resumeCampaignBtn.style.cursor = "pointer";
+      }
+
+      if (info.lastFailReasonText) {
+        unfinishedFailReason.classList.remove("hidden");
+        unfinishedFailText.textContent = info.lastFailReasonText;
+      } else {
+        unfinishedFailReason.classList.add("hidden");
+      }
+    }
+
+    function renderChapterCards() {
+      const chapters = CampaignConfig.getAllChapters();
+      const completedCount = CampaignStore.getCompletedCount();
+      campaignProgressInfo.textContent = "已通关 " + completedCount + "/" + chapters.length + " 章";
+
+      chapterCards.innerHTML = "";
+
+      chapters.forEach(function(chapter, idx) {
+        const isUnlocked = CampaignStore.isChapterUnlocked(chapter.id);
+        const isCompleted = CampaignStore.isChapterCompleted(chapter.id);
+        const bestScore = CampaignStore.getChapterBestScore(chapter.id);
+
+        const card = document.createElement("div");
+        card.className = "chapter-card" + (isUnlocked ? "" : " locked") + (isCompleted ? " completed" : "");
+
+        let statusIcon = "";
+        if (!isUnlocked) statusIcon = "🔒";
+        else if (isCompleted) statusIcon = "✅";
+        else statusIcon = "🎯";
+
+        const difficultyLabel = CampaignConfig.getDifficultyLabel(chapter.difficulty);
+        const difficultyColor = chapter.difficulty === "easy" ? "#7dd69b" : chapter.difficulty === "normal" ? "#e7c46a" : "#e2685d";
+
+        let bestScoreHtml = "";
+        if (isCompleted) {
+          if (bestScore > 0) {
+            bestScoreHtml = '<div class="chapter-best">最佳：' + bestScore + ' 分</div>';
+          } else {
+            bestScoreHtml = '<div class="chapter-best"><span class="no-record">尚未通关</span></div>';
+          }
+        } else if (!isUnlocked) {
+          const reqChapter = chapter.requires && chapter.requires[0] ? CampaignConfig.getChapterById(chapter.requires[0]) : null;
+          const reqName = reqChapter ? reqChapter.name : "前一章节";
+          bestScoreHtml = '<div class="chapter-best"><span class="no-record">通关「' + reqName + '」解锁</span></div>';
+        }
+
+        let weatherIcons = "";
+        if (chapter.isCustom || chapter.difficulty === "custom") {
+          var hasSb = false, hasDf = false, hasLf = false;
+          chapter.levels.forEach(function(lid) {
+            var lvl = LevelData.getLevelById(lid);
+            if (lvl && lvl.weather) {
+              if (lvl.weather.seaBreeze && lvl.weather.seaBreeze.enabled) hasSb = true;
+              if (lvl.weather.denseFog && lvl.weather.denseFog.enabled) hasDf = true;
+              if (lvl.weather.lighthouseFlash && lvl.weather.lighthouseFlash.enabled) hasLf = true;
+            }
+          });
+          if (hasSb) weatherIcons += "🌬️";
+          if (hasDf) weatherIcons += "🌫️";
+          if (hasLf) weatherIcons += "⚡";
+          if (!weatherIcons) weatherIcons = "🌤️";
+        } else if (chapter.difficulty === "hard") {
+          weatherIcons = "🌬️🌫️⚡";
+        } else if (chapter.difficulty === "normal") {
+          weatherIcons = "🌬️🌫️";
+        } else {
+          weatherIcons = "🌤️";
+        }
+
+        card.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>' + chapter.name + ' <span style="font-size:11px;color:' + difficultyColor + ';font-weight:normal;">[' + difficultyLabel + ']</span></h3>' +
+            '<span class="chapter-status-icon">' + statusIcon + '</span>' +
+          '</div>' +
+          '<div class="chapter-desc">' + chapter.description + '</div>' +
+          '<div class="chapter-meta">' +
+            '<span>关卡</span><b>' + chapter.levels.length + ' 关</b>' +
+            '<span>生命</span><b>❤️ ×' + chapter.startingLives + '</b>' +
+            '<span>天气</span><b>' + weatherIcons + '</b>' +
+            '<span>奖励</span><b style="color:#e7c46a;">🏆 ' + chapter.reward.name + '</b>' +
+          '</div>' +
+          bestScoreHtml;
+
+        if (isUnlocked) {
+          card.onclick = function() {
+            showChapterIntro(chapter.id);
+          };
+        }
+
+        chapterCards.appendChild(card);
+      });
+
+      updateCustomChapterCard();
+    }
+
+    let customSelectedLevelIds = [];
+
+    function updateCustomChapterCard() {
+      const existingChapter = CampaignConfig.loadCustomChapter();
+      const hasInvalid = CampaignConfig.hasInvalidCustomLevels();
+      const invalidIds = CampaignConfig.getCustomChapterInvalidLevelIds();
+      const rawData = CampaignConfig.loadRawCustomChapterData();
+      const totalIds = rawData && rawData.levelIds ? rawData.levelIds.length : 0;
+      const totalBoats = existingChapter ? CampaignConfig.getTotalBoatsForLevelIds(existingChapter.levels) : 0;
+
+      if (existingChapter) {
+        const isCompleted = CampaignStore.isChapterCompleted("chapter_custom");
+        customChapterCard.className = "chapter-card" + (isCompleted ? " completed" : "") + (hasInvalid ? " has-warning" : "");
+        customChapterCard.style.borderStyle = "solid";
+
+        let statusIcon = "🎯";
+        if (isCompleted) statusIcon = "✅";
+        if (hasInvalid) statusIcon = "⚠️";
+
+        let descText = existingChapter.levels.length + " 个关卡";
+        if (hasInvalid) {
+          descText += '（<span style="color:#e2685d;">' + invalidIds.length + ' 个失效</span>）';
+        }
+        descText += ' · 生命 ❤️ ×' + existingChapter.startingLives;
+        descText += ' · 船只 🚢 ×' + totalBoats;
+
+        let metaText = "点击重新编排或直接开始";
+        if (hasInvalid) {
+          metaText = '<span style="color:#e2685d;">⚠️ 部分关卡已失效，点击清理或重新编排</span>';
+        }
+
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 ' + existingChapter.name + '</h3>' +
+            '<span class="chapter-status-icon">' + statusIcon + '</span>' +
+          '</div>' +
+          '<div class="chapter-desc">' + descText + '</div>' +
+          '<div class="chapter-meta" style="font-size:12px;margin-top:6px;">' + metaText + '</div>';
+      } else if (rawData && totalIds > 0) {
+        customChapterCard.className = "chapter-card has-warning";
+        customChapterCard.style.borderStyle = "solid";
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 ' + (rawData.name || "自定义航线") + '</h3>' +
+            '<span class="chapter-status-icon">⚠️</span>' +
+          '</div>' +
+          '<div class="chapter-desc" style="color:#e2685d;">全部 ' + totalIds + ' 个关卡已失效</div>' +
+          '<div class="chapter-meta" style="font-size:12px;color:#e2685d;margin-top:6px;">点击重新编排航线</div>';
+      } else {
+        customChapterCard.className = "chapter-card";
+        customChapterCard.style.borderStyle = "dashed";
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 自定义航线</h3>' +
+            '<span class="chapter-status-icon">➕</span>' +
+          '</div>' +
+          '<div class="chapter-desc">选择自定义关卡，编排你的专属连续挑战航线。</div>';
+      }
+    }
+
+    function openCustomChapterEditor() {
+      customChapterEditor.classList.remove("hidden");
+      customSelectedLevelIds = [];
+
+      const rawData = CampaignConfig.loadRawCustomChapterData();
+      if (rawData) {
+        customChapterNameInput.value = rawData.name || "自定义航线";
+        customSelectedLevelIds = (rawData.levelIds || []).slice();
+      }
+
+      renderCustomLevelPicker();
+      renderCustomSelectedLevels();
+    }
+
+    function closeCustomChapterEditor() {
+      customChapterEditor.classList.add("hidden");
+    }
+
+    function renderCustomLevelPicker() {
+      const allLevels = LevelData.getAllLevels();
+      customLevelPicker.innerHTML = "";
+
+      if (allLevels.length === 0) {
+        customLevelPicker.innerHTML = '<div style="text-align:center;color:#879aa0;padding:10px;font-size:12px;">还没有可用关卡。请先在关卡编辑器中创建。</div>';
+        return;
+      }
+
+      allLevels.forEach(function(lvl) {
+        const isSelected = customSelectedLevelIds.indexOf(lvl.id) >= 0;
+        const item = document.createElement("div");
+        item.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 10px;margin:3px 0;border-radius:4px;cursor:pointer;font-size:12px;" +
+          (isSelected ? "background:rgba(125,214,155,.15);border:1px solid rgba(125,214,155,.3);" : "background:#142f3a;border:1px solid #24414b;");
+        item.innerHTML =
+          '<span style="color:' + (isSelected ? "#7dd69b" : "#eef6f2") + ';">' +
+            (LevelData.isCustomLevel(lvl.id) ? "📝" : "🗺️") + " " + lvl.name +
+          '</span>' +
+          '<span style="color:' + (isSelected ? "#7dd69b" : "#879aa0") + ';font-size:11px;">' +
+            (isSelected ? "✓ 已选" : "点击添加") +
+          '</span>';
+        item.onclick = function() {
+          const idx = customSelectedLevelIds.indexOf(lvl.id);
+          if (idx >= 0) {
+            customSelectedLevelIds.splice(idx, 1);
+          } else {
+            customSelectedLevelIds.push(lvl.id);
+          }
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+        customLevelPicker.appendChild(item);
+      });
+    }
+
+    function renderCustomSelectedLevels() {
+      if (customSelectedLevelIds.length === 0) {
+        customSelectedLevels.innerHTML = '<div style="text-align:center;color:#879aa0;font-size:12px;padding:8px;">尚未选择关卡</div>';
+        confirmCustomChapterBtn.disabled = true;
+        return;
+      }
+
+      let validCount = 0;
+      let invalidCount = 0;
+      let totalBoats = 0;
+
+      let html = '<div style="display:flex;flex-direction:column;gap:4px;">';
+      customSelectedLevelIds.forEach(function(id, idx) {
+        const lvl = LevelData.getLevelById(id);
+        const isValid = lvl != null;
+        if (isValid) {
+          validCount++;
+          totalBoats += (lvl.boats || 0);
+        } else {
+          invalidCount++;
+        }
+        const name = isValid ? lvl.name : (id || "未知关卡");
+        const isFirst = idx === 0;
+        const isLast = idx === customSelectedLevelIds.length - 1;
+
+        const borderColor = isValid ? "#24414b" : "#e2685d";
+        const bgColor = isValid ? "#142f3a" : "rgba(226,104,93,.1)";
+        const textColor = isValid ? "#eef6f2" : "#e2685d";
+
+        html += '<div style="background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:4px;padding:5px 8px;font-size:12px;color:' + textColor + ';display:flex;align-items:center;gap:6px;">' +
+          '<span style="color:#e7c46a;font-size:11px;min-width:22px;">' + (idx + 1) + '.</span>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+            (isValid ? "" : "⚠️ ") + name +
+            (isValid ? '<span style="color:#879aa0;font-size:10px;margin-left:6px;">🚢×' + (lvl.boats || 0) + '</span>' : '<span style="color:#e2685d;font-size:10px;margin-left:6px;">已失效</span>') +
+          '</span>' +
+          '<span style="display:flex;gap:2px;align-items:center;">' +
+            (isFirst ? '<span style="color:#3a5058;font-size:11px;cursor:not-allowed;padding:0 3px;">↑</span>' : '<span style="color:#879aa0;font-size:11px;cursor:pointer;padding:0 3px;" data-moveup="' + idx + '" title="上移">↑</span>') +
+            (isLast ? '<span style="color:#3a5058;font-size:11px;cursor:not-allowed;padding:0 3px;">↓</span>' : '<span style="color:#879aa0;font-size:11px;cursor:pointer;padding:0 3px;" data-movedown="' + idx + '" title="下移">↓</span>') +
+            '<span style="color:#e2685d;cursor:pointer;padding:0 3px;margin-left:2px;" data-remove="' + id + '" title="移除">✕</span>' +
+          '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+
+      const validLevelIds = customSelectedLevelIds.filter(function(id) { return LevelData.getLevelById(id) != null; });
+      const startingLives = Math.max(1, Math.min(5, Math.ceil(validLevelIds.length / 2)));
+
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;">';
+      html += '<div style="color:#879aa0;">';
+      html += '共 ' + customSelectedLevelIds.length + ' 关';
+      if (invalidCount > 0) {
+        html += '（<span style="color:#e2685d;">' + invalidCount + ' 个失效</span>）';
+      }
+      html += '</div>';
+      html += '<div style="color:#879aa0;">';
+      html += '生命 ❤️ ×' + startingLives + ' · 船只 🚢 ×' + totalBoats;
+      html += '</div>';
+      html += '</div>';
+
+      if (invalidCount > 0) {
+        html += '<div style="margin-top:8px;">' +
+          '<button id="cleanupInvalidBtn" class="danger" style="width:100%;font-size:12px;padding:6px 10px;">🧹 一键清理失效关卡（' + invalidCount + '）</button>' +
+        '</div>';
+      }
+
+      customSelectedLevels.innerHTML = html;
+
+      confirmCustomChapterBtn.disabled = validCount === 0;
+
+      customSelectedLevels.querySelectorAll("[data-remove]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const removeId = el.getAttribute("data-remove");
+          const ridx = customSelectedLevelIds.indexOf(removeId);
+          if (ridx >= 0) customSelectedLevelIds.splice(ridx, 1);
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+      });
+
+      customSelectedLevels.querySelectorAll("[data-moveup]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const idx = parseInt(el.getAttribute("data-moveup"), 10);
+          if (idx > 0) {
+            const tmp = customSelectedLevelIds[idx];
+            customSelectedLevelIds[idx] = customSelectedLevelIds[idx - 1];
+            customSelectedLevelIds[idx - 1] = tmp;
+            renderCustomSelectedLevels();
+          }
+        };
+      });
+
+      customSelectedLevels.querySelectorAll("[data-movedown]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const idx = parseInt(el.getAttribute("data-movedown"), 10);
+          if (idx < customSelectedLevelIds.length - 1) {
+            const tmp = customSelectedLevelIds[idx];
+            customSelectedLevelIds[idx] = customSelectedLevelIds[idx + 1];
+            customSelectedLevelIds[idx + 1] = tmp;
+            renderCustomSelectedLevels();
+          }
+        };
+      });
+
+      const cleanupBtn = document.getElementById("cleanupInvalidBtn");
+      if (cleanupBtn) {
+        cleanupBtn.onclick = function() {
+          customSelectedLevelIds = customSelectedLevelIds.filter(function(id) {
+            return LevelData.getLevelById(id) != null;
+          });
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+      }
+    }
+
+    function confirmAndStartCustomChapter() {
+      const validLevelIds = customSelectedLevelIds.filter(function(id) {
+        return LevelData.getLevelById(id) != null;
+      });
+      if (validLevelIds.length === 0) {
+        alert("请至少选择一个有效关卡。");
+        return;
+      }
+
+      const name = customChapterNameInput.value.trim() || "自定义航线";
+      CampaignConfig.saveCustomChapter(customSelectedLevelIds.slice(), name);
+
+      const chapter = CampaignConfig.loadCustomChapter();
+      if (!chapter) {
+        alert("创建自定义航线失败，请重试。");
+        return;
+      }
+
+      closeCustomChapterEditor();
+      updateCustomChapterCard();
+      startCampaignChapter("chapter_custom");
+    }
+
+    function showChapterIntro(chapterId) {
+      const chapter = CampaignConfig.getChapterById(chapterId);
+      if (!chapter) return;
+
+      overlayTitle.textContent = chapter.name;
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+
+      let weatherIcons = "";
+      if (chapter.isCustom || chapter.difficulty === "custom") {
+        var hasSb2 = false, hasDf2 = false, hasLf2 = false;
+        chapter.levels.forEach(function(lid) {
+          var lvl = LevelData.getLevelById(lid);
+          if (lvl && lvl.weather) {
+            if (lvl.weather.seaBreeze && lvl.weather.seaBreeze.enabled) hasSb2 = true;
+            if (lvl.weather.denseFog && lvl.weather.denseFog.enabled) hasDf2 = true;
+            if (lvl.weather.lighthouseFlash && lvl.weather.lighthouseFlash.enabled) hasLf2 = true;
+          }
+        });
+        if (hasSb2) weatherIcons += "🌬️";
+        if (hasDf2) weatherIcons += "🌫️";
+        if (hasLf2) weatherIcons += "⚡";
+        if (!weatherIcons) weatherIcons = "🌤️";
+      } else {
+        weatherIcons = chapter.difficulty === "hard" ? "🌬️🌫️⚡" : chapter.difficulty === "normal" ? "🌬️🌫️" : "🌤️";
+      }
+
+      const totalBoats = chapter.isCustom ? CampaignConfig.getTotalBoatsForLevelIds(chapter.levels) : null;
+      const hasInvalid = chapter.isCustom && CampaignConfig.hasInvalidCustomLevels();
+      const invalidCount = hasInvalid ? CampaignConfig.getCustomChapterInvalidLevelIds().length : 0;
+
+      let invalidWarningHtml = "";
+      if (hasInvalid) {
+        invalidWarningHtml = '<div style="background:rgba(226,104,93,.1);border:1px solid #e2685d;border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:#e2685d;">' +
+          '⚠️ 注意：航线中有 ' + invalidCount + ' 个关卡已失效，已自动跳过。' +
+        '</div>';
+      }
+
+      let statsLine = '<b>关卡数：</b>' + chapter.levels.length + ' 关 · ' +
+        '<b>初始生命：</b>❤️ ×' + chapter.startingLives + ' · ' +
+        '<b>天气：</b>' + weatherIcons;
+      if (totalBoats != null) {
+        statsLine += ' · <b>船只总数：</b>🚢 ×' + totalBoats;
+      }
+
+      overlayText.innerHTML =
+        '<div class="campaign-chapter-intro" style="text-align:left;padding:14px;margin:12px -4px 4px;border-left:3px solid #e7c46a;">' +
+          '<div class="chapter-intro-title" style="font-size:15px;color:#e7c46a;font-weight:700;margin-bottom:8px;">章节说明</div>' +
+          invalidWarningHtml +
+          '<div class="chapter-intro-desc" style="font-size:13px;color:#a8bbc0;line-height:1.6;margin-bottom:10px;">' + chapter.description + '</div>' +
+          '<div class="chapter-intro-levels" style="font-size:12px;color:#879aa0;">' +
+            statsLine +
+          '</div>' +
+        '</div>' +
+        '<div style="font-size:12px;color:#879aa0;margin-top:8px;">💡 上一关的剩余船只和得分表现会影响下一关的初始条件。完美通关可获得额外加成！</div>';
+
+      overlayBtn.textContent = "开始战役";
+      overlayBtn.onclick = function() {
+        startCampaignChapter(chapterId);
+      };
+
+      const backBtn = document.createElement("button");
+      backBtn.className = "extra-overlay-btn secondary";
+      backBtn.textContent = "返回章节选择";
+      backBtn.style.marginTop = "10px";
+      backBtn.onclick = function() {
+        showCampaignSelectPanel();
+      };
+      btnParent.appendChild(backBtn);
+
+      overlay.classList.remove("hidden");
+    }
+
+    function showCampaignSelectPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
+      campaignPlayPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
+      customChapterEditor.classList.add("hidden");
+      campaignSelectPanel.classList.remove("hidden");
+      state = "campaignSelect";
+      cursorHint.classList.add("hidden");
+      backFromPlaytestBtn.style.display = "none";
+      renderUnfinishedCampaign();
+      renderChapterCards();
+    }
+
+    function hideCampaignSelectPanel() {
+      campaignSelectPanel.classList.add("hidden");
+      mainMenu.classList.remove("hidden");
+    }
+
+    function showCampaignPlayPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
+      campaignSelectPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
+      campaignPlayPanel.classList.remove("hidden");
+    }
+
+    function hideCampaignPlayPanel() {
+      campaignPlayPanel.classList.add("hidden");
+    }
+
+    function updateCampaignHud() {
+      const progress = CampaignStore.loadProgress();
+      const chapter = progress.currentChapterId ? CampaignConfig.getChapterById(progress.currentChapterId) : null;
+
+      if (!chapter) return;
+
+      campaignChapterName.textContent = chapter.name;
+      campaignLevelProgress.textContent = (progress.currentLevelIndex + 1) + "/" + chapter.levels.length;
+      campaignTotalScore.textContent = progress.totalScore;
+
+      let hearts = "";
+      for (let i = 0; i < progress.lives; i++) hearts += "❤️";
+      for (let i = progress.lives; i < 3; i++) hearts += "🖤";
+      campaignLives.textContent = hearts;
+
+      const currentLevelIdx = progress.currentLevelIndex;
+      campaignLevelText.textContent = (currentLevelIdx + 1) + " / " + chapter.levels.length;
+      campaignScoreText.textContent = score;
+      campaignArrivedText.textContent = boats.filter(boat => boat.arrived).length + " / " + boats.length;
+
+      updateBattleModifiersUI();
+    }
+
+    function updateBattleModifiersUI() {
+      if (!currentBattleModifiers) {
+        modifierList.innerHTML = '<div class="modifier-item"><span class="modifier-icon">✨</span><span>等待上一关结果...</span></div>';
+        return;
+      }
+
+      const buffs = currentBattleModifiers.buffs || [];
+      const nerfs = currentBattleModifiers.nerfs || [];
+
+      if (buffs.length === 0 && nerfs.length === 0) {
+        modifierList.innerHTML = '<div class="modifier-item"><span class="modifier-icon">✨</span><span>无特殊加成</span></div>';
+        return;
+      }
+
+      let html = "";
+      buffs.forEach(function(b) {
+        html += '<div class="modifier-item modifier-buff"><span class="modifier-icon">' + b.icon + '</span><span>' + b.text + '</span></div>';
+      });
+      nerfs.forEach(function(n) {
+        html += '<div class="modifier-item modifier-nerf"><span class="modifier-icon">' + n.icon + '</span><span>' + n.text + '</span></div>';
+      });
+      modifierList.innerHTML = html;
+    }
+
+    function startCampaignChapter(chapterId) {
+      const started = CampaignStore.startChapter(chapterId);
+      if (!started) {
+        alert("无法开始战役，请刷新页面重试。");
+        return;
+      }
+
+      campaignState = "playing";
+      currentBattleModifiers = null;
+      campaignWeatherMultiplier = 1;
+      campaignBoatSpeedMultiplier = 1;
+      campaignBeamRangeMultiplier = 1;
+      campaignScoreMultiplier = 1;
+
+      showCampaignPlayPanel();
+      resetCampaignLevel();
+    }
+
+    function resumeCampaign() {
+      const progress = CampaignStore.resumeCampaign();
+      if (!progress || !progress.currentChapterId) {
+        alert("没有可继续的战役。");
+        return;
+      }
+
+      campaignState = "playing";
+      campaignWeatherMultiplier = 1;
+      campaignBoatSpeedMultiplier = 1;
+      campaignBeamRangeMultiplier = 1;
+      campaignScoreMultiplier = 1;
+
+      showCampaignPlayPanel();
+      resetCampaignLevel();
+    }
+
+    function restartCampaign() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+      if (!info || !info.chapterId) {
+        alert("没有可重开的战役。");
+        return;
+      }
+
+      if (!confirm("确定要从头开始吗？当前进度将被清除。")) {
+        return;
+      }
+
+      CampaignStore.clearCampaignSave();
+      startCampaignChapter(info.chapterId);
+    }
+
+    function abandonCampaignFromSave() {
+      if (!confirm("确定要放弃这个战役吗？进度将被永久清除。")) {
+        return;
+      }
+
+      CampaignStore.clearCampaignSave();
+      renderUnfinishedCampaign();
+    }
+
+    function resetCampaignLevel() {
+      const progress = CampaignStore.loadProgress();
+      const chapter = progress.currentChapterId ? CampaignConfig.getChapterById(progress.currentChapterId) : null;
+      const levelData = CampaignStore.getCurrentLevelData();
+
+      if (!chapter) {
+        alert("战役数据异常，请返回重新开始。");
+        abandonCampaign();
+        return;
+      }
+
+      if (!levelData) {
+        const fallbackLevelId = chapter.levels[progress.currentLevelIndex];
+        const fallbackData = LevelData.getLevelById(fallbackLevelId);
+        if (!fallbackData) {
+          alert("关卡数据缺失，请返回重新开始。");
+          abandonCampaign();
+          return;
+        }
+      }
+
+      const effectiveLevelData = levelData || LevelData.getLevelById(chapter.levels[progress.currentLevelIndex]);
+
+      score = progress.totalScore;
+      levelScore = score;
+      campaignLevelStartScore = score;
+
+      const carryOver = progress.carryOver;
+      currentBattleModifiers = CampaignStore.calculateBattleModifiers(carryOver);
+
+      campaignBeamRangeMultiplier = currentBattleModifiers.beamRangeMultiplier;
+      campaignWeatherMultiplier = currentBattleModifiers.weatherIntensity;
+      campaignBoatSpeedMultiplier = currentBattleModifiers.boatSpeedMultiplier;
+      campaignScoreMultiplier = currentBattleModifiers.scoreMultiplier;
+
+      applySettings();
+      SoundManager.startGame();
+
+      currentLevelId = chapter.levels[progress.currentLevelIndex];
+      playtestLevel = null;
+
+      const harbor = effectiveLevelData.harbor || { x: 900, top: 70, bottom: 530 };
+      const difficulty = progress.currentLevelIndex;
+
+      boats = Array.from({ length: effectiveLevelData.boats }, function(_, i) {
+        const startY = effectiveLevelData.boatStartY != null ? effectiveLevelData.boatStartY : 130;
+        const spread = effectiveLevelData.boatSpread != null ? effectiveLevelData.boatSpread : 330;
+        return {
+          x: 40 - i * 42,
+          y: startY + i * (spread / Math.max(1, effectiveLevelData.boats - 1)),
+          speed: (26 + difficulty * 8 + i * 3) * campaignBoatSpeedMultiplier,
+          drift: (i % 2 ? 1 : -1) * (12 + difficulty * 3),
+          lit: 3.2,
+          arrived: false,
+          lost: false,
+          harborX: harbor.x
+        };
+      });
+
+      beamAngle = -0.1;
+      beamWide = false;
+      levelStartTime = performance.now() / 1000;
+      usedWideBeamThisLevel = false;
+      hasBoatLostThisLevel = false;
+      logWeatherEventsSeen = [];
+      logWeatherTimeline = [];
+      logBoatLosses = [];
+      currentLogFailReason = null;
+      currentLogFailText = "";
+      state = "playing";
+      overlay.classList.add("hidden");
+      updatePauseHint();
+      updateCampaignHud();
+
+      const modifiedWeather = JSON.parse(JSON.stringify(effectiveLevelData.weather || {}));
+      if (campaignWeatherMultiplier !== 1) {
+        for (const wt in modifiedWeather) {
+          if (modifiedWeather[wt] && modifiedWeather[wt].enabled) {
+            modifiedWeather[wt].minDuration = Math.round(modifiedWeather[wt].minDuration * campaignWeatherMultiplier);
+            modifiedWeather[wt].maxDuration = Math.round(modifiedWeather[wt].maxDuration * campaignWeatherMultiplier);
+            modifiedWeather[wt].minCooldown = Math.round(modifiedWeather[wt].minCooldown / campaignWeatherMultiplier);
+            modifiedWeather[wt].maxCooldown = Math.round(modifiedWeather[wt].maxCooldown / campaignWeatherMultiplier);
+          }
+        }
+      }
+      WeatherSystem.init(modifiedWeather);
+      updateWeatherUI();
+
+      logWeatherTimeline.push({
+        event: "levelStart",
+        time: 0
+      });
+
+      const logEntry = VoyageLogStore.createEntry({
+        levelId: currentLevelId,
+        levelName: effectiveLevelData.name || "",
+        isCustom: LevelData.isCustomLevel(currentLevelId),
+        isCampaign: true,
+        campaignChapterId: chapter.id,
+        campaignChapterName: chapter.name || "",
+        startTime: Date.now(),
+        result: null
+      });
+      const saved = VoyageLogStore.addEntry(logEntry);
+      currentLogId = saved.id;
+
+      ReplayRecorder.start(effectiveLevelData, currentLevelId, {
+        beamAngle: beamAngle,
+        beamWide: beamWide,
+        score: score,
+        boats: boats
+      });
+      ReplayRecorder.recordEvent("campaignLevelStart", {
+        chapterId: chapter.id,
+        levelIndex: progress.currentLevelIndex,
+        modifiers: currentBattleModifiers
+      });
+    }
+
+    function handleCampaignLevelWin() {
+      const progress = CampaignStore.loadProgress();
+      const chapter = progress.currentChapterId ? CampaignConfig.getChapterById(progress.currentChapterId) : null;
+      const levelData = getCurrentLevelData();
+
+      if (!chapter) return;
+
+      const currentLevelScore = score - campaignLevelStartScore;
+      const carryOver = CampaignStore.generateCarryOverData(boats, currentLevelScore, levelData || { boats: boats.length }, true);
+
+      const updated = CampaignStore.completeLevel(currentLevelScore, "win", carryOver);
+      score = updated.totalScore;
+
+      if (updated.currentLevelIndex >= chapter.levels.length) {
+        showCampaignSettlement();
+      } else {
+        showCampaignBetweenLevels(currentLevelScore);
+      }
+    }
+
+    function handleCampaignLevelLose(failReason, failReasonText) {
+      const livesLeft = CampaignStore.loseLife();
+      CampaignStore.recordFailReason(failReason, failReasonText);
+
+      if (livesLeft <= 0) {
+        showCampaignFail(failReason, failReasonText);
+      } else {
+        showCampaignRetry(failReason, failReasonText, livesLeft);
+      }
+    }
+
+    function showCampaignBetweenLevels(levelScore) {
+      state = "campaignBetween";
+      const progress = CampaignStore.loadProgress();
+      const chapter = CampaignConfig.getChapterById(progress.currentChapterId);
+
+      overlayTitle.textContent = "第 " + progress.currentLevelIndex + " 关完成";
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+
+      const carryOver = progress.carryOver;
+      let carryOverHtml = "";
+      if (carryOver) {
+        carryOverHtml =
+          '<div class="campaign-battle-modifiers" style="background:rgba(231,196,106,.08);border:1px solid rgba(231,196,106,.25);border-radius:6px;padding:12px;margin-top:12px;text-align:left;">' +
+            '<div class="modifier-title" style="font-size:13px;color:#e7c46a;font-weight:600;margin-bottom:8px;">⚔ 下一关加成预览</div>' +
+            '<div class="modifier-list" style="font-size:12px;color:#a8bbc0;line-height:1.8;">';
+
+        const nextMods = CampaignStore.calculateBattleModifiers(carryOver);
+        if (nextMods.buffs.length === 0 && nextMods.nerfs.length === 0) {
+          carryOverHtml += '<div class="modifier-item"><span class="modifier-icon">✨</span><span>无特殊加成</span></div>';
+        } else {
+          nextMods.buffs.forEach(function(b) {
+            carryOverHtml += '<div class="modifier-item modifier-buff" style="color:#7dd69b;"><span class="modifier-icon">' + b.icon + '</span><span>' + b.text + '</span></div>';
+          });
+          nextMods.nerfs.forEach(function(n) {
+            carryOverHtml += '<div class="modifier-item modifier-nerf" style="color:#e2685d;"><span class="modifier-icon">' + n.icon + '</span><span>' + n.text + '</span></div>';
+          });
+        }
+        carryOverHtml += '</div></div>';
+      }
+
+      overlayText.innerHTML =
+        '<div style="font-size:14px;color:#a8bbc0;">本关得分：<b style="color:#e7c46a;">' + levelScore + '</b> 分</div>' +
+        '<div style="font-size:13px;color:#879aa0;margin-top:6px;">累计得分：<b style="color:#7dd69b;">' + progress.totalScore + '</b> 分</div>' +
+        carryOverHtml;
+
+      overlayBtn.textContent = "继续下一关";
+      overlayBtn.onclick = function() {
+        resetCampaignLevel();
+      };
+
+      const quitBtn = document.createElement("button");
+      quitBtn.className = "extra-overlay-btn secondary";
+      quitBtn.textContent = "退出到主菜单";
+      quitBtn.style.marginTop = "10px";
+      quitBtn.onclick = function() {
+        if (confirm("确定要退出到主菜单吗？战役进度会自动保存。")) {
+          quitCampaignToMenu();
+        }
+      };
+      btnParent.appendChild(quitBtn);
+
+      overlay.classList.remove("hidden");
+    }
+
+    function showCampaignSettlement() {
+      campaignState = "settlement";
+      const result = CampaignStore.completeChapter();
+      if (!result) return;
+
+      const { progress, reward, chapterId, isNoDamage, isCustom } = result;
+      const chapter = CampaignConfig.getChapterById(chapterId);
+      StatsStore.recordCampaignCompletion(isNoDamage, isCustom);
+      checkAndNotifyAchievements();
+
+      state = "campaignSettlement";
+
+      overlayTitle.textContent = "🎉 战役胜利！";
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+
+      let rewardHtml = "";
+      if (reward && reward.newlyUnlocked) {
+        rewardHtml =
+          '<div class="settlement-reward settlement-unlock-animation" style="background:rgba(125,214,155,.1);border:1px solid rgba(125,214,155,.3);border-radius:6px;padding:14px;margin:16px 0;">' +
+            '<div class="settlement-reward-label" style="font-size:12px;color:#7dd69b;font-weight:600;">🎁 解锁新奖励</div>' +
+            '<div class="settlement-reward-value" style="font-size:18px;color:#eef6f2;font-weight:700;margin-top:6px;">🏆 ' + reward.name + '</div>' +
+            '<div style="font-size:11px;color:#879aa0;margin-top:4px;">' + reward.description + '</div>' +
+          '</div>';
+      } else if (reward) {
+        rewardHtml =
+          '<div class="settlement-reward" style="background:rgba(231,196,106,.08);border:1px solid rgba(231,196,106,.25);border-radius:6px;padding:12px;margin:12px 0;">' +
+            '<div style="font-size:12px;color:#879aa0;">已拥有奖励</div>' +
+            '<div style="font-size:15px;color:#e7c46a;font-weight:600;margin-top:2px;">🏆 ' + reward.name + '</div>' +
+          '</div>';
+      }
+
+      overlayText.innerHTML =
+        '<div class="campaign-settlement">' +
+          '<div class="settlement-title" style="font-size:20px;color:#e7c46a;font-weight:800;margin-bottom:12px;">' + (chapter ? chapter.name : "战役") + ' 完成</div>' +
+          '<div class="settlement-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;">' +
+            '<div class="settlement-stat" style="background:#0a1f27;border-radius:6px;padding:10px;">' +
+              '<div class="settlement-stat-label" style="font-size:11px;color:#879aa0;">最终得分</div>' +
+              '<div class="settlement-stat-value" style="font-size:22px;color:#eef6f2;font-weight:700;margin-top:2px;">' + progress.totalScore + '</div>' +
+            '</div>' +
+            '<div class="settlement-stat" style="background:#0a1f27;border-radius:6px;padding:10px;">' +
+              '<div class="settlement-stat-label" style="font-size:11px;color:#879aa0;">关卡数</div>' +
+              '<div class="settlement-stat-value" style="font-size:22px;color:#7dd69b;font-weight:700;margin-top:2px;">' + (chapter ? chapter.levels.length : 0) + '</div>' +
+            '</div>' +
+          '</div>' +
+          rewardHtml +
+        '</div>';
+
+      overlayBtn.textContent = "返回章节选择";
+      overlayBtn.onclick = function() {
+        campaignState = "idle";
+        showCampaignSelectPanel();
+      };
+
+      overlay.classList.remove("hidden");
+    }
+
+    function showCampaignRetry(failReason, failReasonText, livesLeft) {
+      state = "campaignRetry";
+
+      overlayTitle.textContent = "💔 本关失败";
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+
+      let hearts = "";
+      for (let i = 0; i < livesLeft; i++) hearts += "❤️";
+      for (let i = livesLeft; i < 3; i++) hearts += "🖤";
+
+      overlayText.innerHTML =
+        '<div class="campaign-fail-panel">' +
+          '<div class="fail-reason" style="font-size:13px;color:#e2685d;margin-bottom:10px;">⚠ ' + (failReasonText || "本关挑战失败") + '</div>' +
+          '<div class="fail-stats" style="background:rgba(226,104,93,.08);border-radius:6px;padding:12px;margin:12px 0;">' +
+            '<div style="font-size:14px;margin-bottom:6px;">剩余生命：' + hearts + '</div>' +
+            '<div style="font-size:12px;color:#a8bbc0;">你还有 ' + livesLeft + ' 次重试机会</div>' +
+          '</div>' +
+        '</div>';
+
+      overlayBtn.textContent = "🔁 重试本关";
+      overlayBtn.onclick = function() {
+        resetCampaignLevel();
+      };
+
+      const quitBtn = document.createElement("button");
+      quitBtn.className = "extra-overlay-btn secondary";
+      quitBtn.textContent = "退出到主菜单";
+      quitBtn.style.marginTop = "10px";
+      quitBtn.onclick = function() {
+        if (confirm("确定要退出到主菜单吗？战役进度会自动保存。")) {
+          CampaignStore.recordFailReason(failReason, failReasonText);
+          quitCampaignToMenu();
+        }
+      };
+      btnParent.appendChild(quitBtn);
+
+      overlay.classList.remove("hidden");
+    }
+
+    function showCampaignFail(failReason, failReasonText) {
+      campaignState = "failed";
+      CampaignStore.failChapter();
+      CampaignStore.recordFailReason(failReason, failReasonText);
+
+      state = "campaignFailed";
+
+      overlayTitle.textContent = "⚓ 战役失败";
+      const btnParent = overlayBtn.parentElement;
+      const extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+
+      const progress = CampaignStore.loadProgress();
+      overlayText.innerHTML =
+        '<div class="campaign-fail-panel">' +
+          '<div class="fail-title" style="font-size:18px;color:#e2685d;font-weight:700;margin-bottom:10px;">所有生命已耗尽</div>' +
+          '<div class="fail-reason" style="font-size:13px;color:#e2685d;margin-bottom:10px;">失败原因：' + (failReasonText || "挑战失败") + '</div>' +
+          '<div class="fail-stats" style="background:rgba(226,104,93,.08);border-radius:6px;padding:12px;margin:12px 0;">' +
+            '<div style="font-size:13px;color:#a8bbc0;">累计得分：<b style="color:#eef6f2;">' + progress.totalScore + '</b> 分</div>' +
+          '</div>' +
+          '<div style="font-size:12px;color:#879aa0;margin-top:10px;">不要气馁，总结经验再战一次！</div>' +
+        '</div>';
+
+      overlayBtn.textContent = "🔄 重新开始";
+      overlayBtn.onclick = function() {
+        const chapterId = progress.currentChapterId;
+        campaignState = "idle";
+        if (chapterId && CampaignStore.isChapterUnlocked(chapterId)) {
+          startCampaignChapter(chapterId);
+        } else {
+          showCampaignSelectPanel();
+        }
+      };
+
+      const backBtn = document.createElement("button");
+      backBtn.className = "extra-overlay-btn secondary";
+      backBtn.textContent = "返回主菜单";
+      backBtn.style.marginTop = "10px";
+      backBtn.onclick = function() {
+        campaignState = "idle";
+        hideCampaignPlayPanel();
+        showMainMenu();
+      };
+      btnParent.appendChild(backBtn);
+
+      overlay.classList.remove("hidden");
+    }
+
+    function abandonCampaign() {
+      CampaignStore.abandonAndSave("abandoned", "玩家主动放弃");
+      campaignState = "idle";
+      currentBattleModifiers = null;
+      hideCampaignPlayPanel();
+      showMainMenu();
+    }
+
+    function quitCampaignToMenu() {
+      CampaignStore.saveCampaignState("paused");
+      campaignState = "idle";
+      currentBattleModifiers = null;
+      hideCampaignPlayPanel();
+      showMainMenu();
+    }
+
+    function isCampaignMode() {
+      return campaignState === "playing" || campaignState === "settlement";
     }
 
     // ===================== 关卡选择渲染 =====================
@@ -3739,6 +6603,11 @@
       editorPanel.classList.add("hidden");
       achievementsPanel.classList.add("hidden");
       voyageLogPanel.classList.add("hidden");
+      campaignSelectPanel.classList.add("hidden");
+      campaignPlayPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
       state = "menu";
       playtestLevel = null;
       cursorHint.classList.add("hidden");
@@ -3785,6 +6654,7 @@
       if (prevState === "playing") {
         state = "playing";
         updatePauseHint();
+        SoundManager.setEnabled(gameSettings.sound);
       }
     }
 
@@ -3836,6 +6706,65 @@
       harborTopValue.textContent = editorLevel.harbor.top;
       harborBottomRange.value = editorLevel.harbor.bottom;
       harborBottomValue.textContent = editorLevel.harbor.bottom;
+      syncWeatherConfigToUI();
+    }
+
+    function syncWeatherConfigToUI() {
+      const w = editorLevel.weather || {};
+      const sb = w.seaBreeze || {};
+      const df = w.denseFog || {};
+      const lf = w.lighthouseFlash || {};
+
+      weatherSeaBreezeToggle.classList.toggle("on", !!sb.enabled);
+      weatherSeaBreezeParams.classList.toggle("hidden", !sb.enabled);
+      if (sb.enabled) {
+        document.getElementById("sbMinDurRange").value = sb.minDuration || 8;
+        document.getElementById("sbMinDurVal").textContent = (sb.minDuration || 8) + "s";
+        document.getElementById("sbMaxDurRange").value = sb.maxDuration || 18;
+        document.getElementById("sbMaxDurVal").textContent = (sb.maxDuration || 18) + "s";
+        document.getElementById("sbMinCoolRange").value = sb.minCooldown || 15;
+        document.getElementById("sbMinCoolVal").textContent = (sb.minCooldown || 15) + "s";
+        document.getElementById("sbMaxCoolRange").value = sb.maxCooldown || 30;
+        document.getElementById("sbMaxCoolVal").textContent = (sb.maxCooldown || 30) + "s";
+        document.getElementById("sbDriftRange").value = Math.round((sb.driftMultiplier || 2.0) * 10);
+        document.getElementById("sbDriftVal").textContent = (sb.driftMultiplier || 2.0).toFixed(1);
+        document.getElementById("sbSpeedRange").value = Math.round((sb.speedMultiplier || 1.15) * 100);
+        document.getElementById("sbSpeedVal").textContent = (sb.speedMultiplier || 1.15).toFixed(2);
+      }
+
+      weatherDenseFogToggle.classList.toggle("on", !!df.enabled);
+      weatherDenseFogParams.classList.toggle("hidden", !df.enabled);
+      if (df.enabled) {
+        document.getElementById("dfMinDurRange").value = df.minDuration || 10;
+        document.getElementById("dfMinDurVal").textContent = (df.minDuration || 10) + "s";
+        document.getElementById("dfMaxDurRange").value = df.maxDuration || 22;
+        document.getElementById("dfMaxDurVal").textContent = (df.maxDuration || 22) + "s";
+        document.getElementById("dfMinCoolRange").value = df.minCooldown || 20;
+        document.getElementById("dfMinCoolVal").textContent = (df.minCooldown || 20) + "s";
+        document.getElementById("dfMaxCoolRange").value = df.maxCooldown || 40;
+        document.getElementById("dfMaxCoolVal").textContent = (df.maxCooldown || 40) + "s";
+        document.getElementById("dfRangeRange").value = Math.round((df.beamRangeMultiplier || 0.55) * 100);
+        document.getElementById("dfRangeVal").textContent = (df.beamRangeMultiplier || 0.55).toFixed(2);
+        document.getElementById("dfOpacityRange").value = Math.round((df.fogOpacity || 0.5) * 100);
+        document.getElementById("dfOpacityVal").textContent = (df.fogOpacity || 0.5).toFixed(2);
+      }
+
+      weatherLighthouseFlashToggle.classList.toggle("on", !!lf.enabled);
+      weatherLighthouseFlashParams.classList.toggle("hidden", !lf.enabled);
+      if (lf.enabled) {
+        document.getElementById("lfMinDurRange").value = lf.minDuration || 5;
+        document.getElementById("lfMinDurVal").textContent = (lf.minDuration || 5) + "s";
+        document.getElementById("lfMaxDurRange").value = lf.maxDuration || 12;
+        document.getElementById("lfMaxDurVal").textContent = (lf.maxDuration || 12) + "s";
+        document.getElementById("lfMinCoolRange").value = lf.minCooldown || 18;
+        document.getElementById("lfMinCoolVal").textContent = (lf.minCooldown || 18) + "s";
+        document.getElementById("lfMaxCoolRange").value = lf.maxCooldown || 35;
+        document.getElementById("lfMaxCoolVal").textContent = (lf.maxCooldown || 35) + "s";
+        document.getElementById("lfJitterRange").value = Math.round((lf.jitterAmount || 0.08) * 100);
+        document.getElementById("lfJitterVal").textContent = (lf.jitterAmount || 0.08).toFixed(2);
+        document.getElementById("lfFlickerRange").value = Math.round((lf.flickerIntensity || 0.4) * 100);
+        document.getElementById("lfFlickerVal").textContent = (lf.flickerIntensity || 0.4).toFixed(2);
+      }
     }
 
     function updateEditorTools() {
@@ -3982,6 +6911,15 @@
       const endTimestamp = Date.now();
       const durationSec = performance.now() / 1000 - levelStartTime;
       const currentLevelScore = score - levelScore;
+
+      const endTime = performance.now() / 1000 - levelStartTime;
+      logWeatherTimeline.push({
+        event: "levelEnd",
+        time: endTime,
+        win: result === "win",
+        score: currentLevelScore
+      });
+
       VoyageLogStore.updateEntry(currentLogId, {
         endTime: endTimestamp,
         duration: durationSec,
@@ -3989,7 +6927,16 @@
         score: currentLevelScore,
         failReason: result === "win" ? null : failReason,
         failReasonText: result === "win" ? "" : failReasonText,
-        weatherEvents: logWeatherEventsSeen.slice()
+        weatherEvents: logWeatherEventsSeen.slice(),
+        weatherTimeline: logWeatherTimeline.slice(),
+        boatLosses: logBoatLosses.slice()
+      });
+    }
+
+    function setLogReplayDataId(logId, replayDataId) {
+      if (!logId) return;
+      VoyageLogStore.updateEntry(logId, {
+        replayDataId: replayDataId
       });
     }
 
@@ -4021,6 +6968,8 @@
       usedWideBeamThisLevel = false;
       hasBoatLostThisLevel = false;
       logWeatherEventsSeen = [];
+      logWeatherTimeline = [];
+      logBoatLosses = [];
       currentLogFailReason = null;
       currentLogFailText = "";
       state = "playing";
@@ -4032,10 +6981,16 @@
       updateWeatherUI();
 
       if (!playtestLevel) {
+        logWeatherTimeline.push({
+          event: "levelStart",
+          time: 0
+        });
+
         const logEntry = VoyageLogStore.createEntry({
           levelId: currentLevelId,
           levelName: data.name || "",
           isCustom: LevelData.isCustomLevel(currentLevelId),
+          isCampaign: false,
           startTime: Date.now(),
           result: null
         });
@@ -4062,7 +7017,10 @@
       const effectiveBeamAngle = beamAngle + weatherMods.beamJitter;
       let diff = Math.atan2(Math.sin(angle - effectiveBeamAngle), Math.cos(angle - effectiveBeamAngle));
       const width = beamWide ? 0.42 : 0.22;
-      const range = 760 * weatherMods.beamRangeMultiplier;
+      let range = 760 * weatherMods.beamRangeMultiplier;
+      if (isCampaignMode()) {
+        range *= campaignBeamRangeMultiplier;
+      }
       return Math.abs(diff) < width && Math.hypot(dx, dy) < range;
     }
 
@@ -4107,8 +7065,9 @@
         return;
       }
       if (state !== "playing") return;
-      if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity;
-      if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity;
+      const rotDir = gameSettings.invertRotation ? -1 : 1;
+      if (keys.ArrowLeft) beamAngle -= dt * 1.6 * gameSettings.sensitivity * rotDir;
+      if (keys.ArrowRight) beamAngle += dt * 1.6 * gameSettings.sensitivity * rotDir;
 
       WeatherSystem.update(dt);
       updateWeatherUI();
@@ -4122,6 +7081,8 @@
         boats[i]._prevArrived = boats[i].arrived;
         boats[i]._prevLost = boats[i].lost;
       }
+
+      const inCampaign = isCampaignMode();
 
       for (const boat of boats) {
         if (boat.arrived || boat.lost) continue;
@@ -4145,24 +7106,66 @@
           }[failReason] || "有船只迷航或触礁。";
           currentLogFailReason = failReason;
           currentLogFailText = reasonText;
+
+          const currentTime = performance.now() / 1000 - levelStartTime;
+          const boatIndex = boats.indexOf(boat);
+
+          if (currentLogId) {
+            logBoatLosses.push({
+              index: boatIndex,
+              reason: failReason,
+              reasonText: reasonText,
+              x: boat.x,
+              y: boat.y,
+              time: currentTime
+            });
+            logWeatherTimeline.push({
+              event: "boatLost",
+              reason: failReason,
+              time: currentTime,
+              x: boat.x,
+              y: boat.y
+            });
+          }
+
           if (!playtestLevel) {
             StatsStore.recordLoss(failReason);
             checkAndNotifyAchievements();
           }
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatLost", {
-              index: boats.indexOf(boat),
+              index: boatIndex,
               reason: failReason,
               x: boat.x, y: boat.y
             });
           }
-          end(false, describeFailure(failReason));
+
+          if (inCampaign) {
+            completeCurrentVoyageLog("lose", failReason, reasonText);
+            if (ReplayRecorder.isRecording()) {
+              ReplayRecorder.recordEvent("levelEnd", { win: false, score: score });
+              const replayData = ReplayRecorder.stop(score, "lose");
+              if (replayData && currentLogId && !playtestLevel) {
+                const replayId = ReplayStore.save(replayData);
+                if (replayId) {
+                  setLogReplayDataId(currentLogId, replayId);
+                }
+              }
+            }
+            handleCampaignLevelLose(failReason, reasonText);
+          } else {
+            end(false, describeFailure(failReason));
+          }
           return;
         }
         if (boat.x > harbor.x) {
           boat.arrived = true;
           SoundManager.boatArrived();
-          score += Math.round(100 + boat.lit * 20);
+          let bonus = Math.round(100 + boat.lit * 20);
+          if (inCampaign) {
+            bonus = Math.round(bonus * campaignScoreMultiplier);
+          }
+          score += bonus;
           if (!playtestLevel) {
             StatsStore.recordBoatEscorted();
             if (WeatherSystem.isActive("lighthouseFlash")) {
@@ -4173,7 +7176,7 @@
           if (ReplayRecorder.isRecording()) {
             ReplayRecorder.recordEvent("boatArrived", {
               index: boats.indexOf(boat),
-              bonus: Math.round(100 + boat.lit * 20),
+              bonus: bonus,
               x: boat.x, y: boat.y
             });
           }
@@ -4191,7 +7194,7 @@
           checkAndNotifyAchievements();
         }
         const builtinIdx = LevelData.isBuiltinLevel(currentLevelId) ? parseInt(currentLevelId.split("_")[1]) : -1;
-        if (builtinIdx >= 0 && !playtestLevel) {
+        if (builtinIdx >= 0 && !playtestLevel && !inCampaign) {
           const unlocked = LevelData.loadBuiltinUnlocked();
           if (builtinIdx + 1 >= unlocked && builtinIdx < LevelData.getBuiltinCount() - 1) {
             LevelData.saveBuiltinUnlocked(builtinIdx + 2);
@@ -4208,6 +7211,27 @@
 
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 你可以继续调整关卡或保存。");
+        } else if (inCampaign) {
+          completeCurrentVoyageLog("win", null, "");
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordFrame({
+              beamAngle: beamAngle,
+              beamWide: beamWide,
+              paused: false,
+              score: score,
+              arrivedCount: boats.length,
+              boats: boats
+            }, 1 / 30);
+            ReplayRecorder.recordEvent("campaignLevelEnd", { win: true, score: score });
+            const replayData = ReplayRecorder.stop(score, "win");
+            if (replayData && currentLogId && !playtestLevel) {
+              const replayId = ReplayStore.save(replayData);
+              if (replayId) {
+                setLogReplayDataId(currentLogId, replayId);
+              }
+            }
+          }
+          handleCampaignLevelWin();
         } else if (builtinIdx >= 0 && builtinIdx < LevelData.getBuiltinCount() - 1) {
           completeCurrentVoyageLog("win", null, "");
           if (ReplayRecorder.isRecording()) {
@@ -4221,8 +7245,12 @@
             }, 1 / 30);
             ReplayRecorder.recordEvent("levelEnd", { win: true, score: score });
             lastReplayData = ReplayRecorder.stop(score, "win");
-            if (lastReplayData && currentLogId) {
+            if (lastReplayData && currentLogId && !playtestLevel) {
               lastReplayData._logId = currentLogId;
+              const replayId = ReplayStore.save(lastReplayData);
+              if (replayId) {
+                setLogReplayDataId(currentLogId, replayId);
+              }
             }
           }
           const nextId = "builtin_" + (builtinIdx + 1);
@@ -4245,7 +7273,11 @@
         }, dt);
       }
 
-      updateHud();
+      if (inCampaign) {
+        updateCampaignHud();
+      } else {
+        updateHud();
+      }
     }
 
     function end(win, text) {
@@ -4265,6 +7297,10 @@
         lastReplayData = ReplayRecorder.stop(score, win ? "win" : "lose");
         if (lastReplayData && currentLogId && !playtestLevel) {
           lastReplayData._logId = currentLogId;
+          const replayId = ReplayStore.save(lastReplayData);
+          if (replayId) {
+            setLogReplayDataId(currentLogId, replayId);
+          }
         }
       }
 
@@ -4381,9 +7417,11 @@
       if (entered) {
         state = "replay";
         updatePauseHint();
-        setTimeout(function() {
-          ReplayPlayer.play();
-        }, 100);
+        if (!gameSettings.replayAutoPause) {
+          setTimeout(function() {
+            ReplayPlayer.play();
+          }, 100);
+        }
       }
     }
 
@@ -4448,19 +7486,29 @@
     }
 
     // ===================== 绘制 =====================
+    function fillSeaBackground(gridOpacity) {
+      ctx.clearRect(0, 0, 960, 600);
+      const sea = ctx.createLinearGradient(0, 0, 960, 600);
+      if (gameSettings.highContrastSea) {
+        sea.addColorStop(0, "#051a24");
+        sea.addColorStop(1, "#02070a");
+      } else {
+        sea.addColorStop(0, "#08222f");
+        sea.addColorStop(1, "#061017");
+      }
+      ctx.fillStyle = sea;
+      ctx.fillRect(0, 0, 960, 600);
+      const gridAlpha = gridOpacity != null ? gridOpacity : (gameSettings.highContrastSea ? 0.22 : 0.12);
+      ctx.strokeStyle = "rgba(140,190,190," + gridAlpha + ")";
+      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+    }
+
     function drawGameScene(drawBoats) {
       const data = getCurrentLevelData();
       const harbor = data.harbor || { x: 900, top: 70, bottom: 530 };
       const weatherMods = WeatherSystem.getModifiers();
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-      ctx.strokeStyle = "rgba(140,190,190,.12)";
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      fillSeaBackground();
 
       if (weatherMods.driftMultiplier > 1.01) {
         const windIntensity = (weatherMods.driftMultiplier - 1) * 2;
@@ -4510,7 +7558,10 @@
       if (drawBoats !== false) {
         const effectiveBeamAngle = beamAngle + weatherMods.beamJitter;
         const beamAlpha = 0.24 * (1 - weatherMods.beamFlicker * 0.5);
-        const beamRange = 780 * weatherMods.beamRangeMultiplier;
+        let beamRange = 780 * weatherMods.beamRangeMultiplier;
+        if (isCampaignMode()) {
+          beamRange *= campaignBeamRangeMultiplier;
+        }
 
         ctx.save();
         ctx.translate(lighthouse.x, lighthouse.y);
@@ -4555,16 +7606,10 @@
       const startY = data.boatStartY != null ? data.boatStartY : 130;
       const spread = data.boatSpread != null ? data.boatSpread : 330;
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-
-      ctx.strokeStyle = "rgba(140,190,190,.08)";
+      fillSeaBackground(gameSettings.highContrastSea ? 0.15 : 0.08);
       ctx.lineWidth = 1;
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      const hGridAlpha = gameSettings.highContrastSea ? 0.15 : 0.08;
+      ctx.strokeStyle = "rgba(140,190,190," + hGridAlpha + ")";
       for (let y = 0; y < 600; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(960, y); ctx.stroke(); }
 
       for (let i = 0; i < data.boats; i++) {
@@ -4633,6 +7678,19 @@
           ctx.setLineDash([]);
         }
       }
+
+      const ew = editorLevel.weather || {};
+      const weatherLabels = [];
+      if (ew.seaBreeze && ew.seaBreeze.enabled) weatherLabels.push("🌬️海风");
+      if (ew.denseFog && ew.denseFog.enabled) weatherLabels.push("🌫️浓雾");
+      if (ew.lighthouseFlash && ew.lighthouseFlash.enabled) weatherLabels.push("⚡闪烁");
+      if (weatherLabels.length > 0) {
+        ctx.fillStyle = "rgba(13,29,37,.75)";
+        ctx.fillRect(8, 565, 14 + weatherLabels.join(" ").length * 13, 28);
+        ctx.font = "13px Arial";
+        ctx.fillStyle = "#e7c46a";
+        ctx.fillText("天气: " + weatherLabels.join(" "), 16, 584);
+      }
     }
 
     function draw() {
@@ -4652,6 +7710,72 @@
       }
     }
 
+    function computeReplayWeatherModifiers(events, currentTime, weatherConfig) {
+      var FADE_TIME = 1.5;
+      var driftMult = 1;
+      var speedMult = 1;
+      var beamRangeMult = 1;
+      var fogOpacity = 0;
+      var beamJitter = 0;
+      var beamFlicker = 0;
+      var hasWeather = false;
+
+      if (!events || !weatherConfig) {
+        return { driftMultiplier: 1, speedMultiplier: 1, beamRangeMultiplier: 1, beamJitter: 0, beamFlicker: 0, fogOpacity: 0, hasWeather: false };
+      }
+
+      var activeWeathers = {};
+      for (var i = 0; i < events.length; i++) {
+        var ev = events[i];
+        if (ev.t > currentTime) break;
+        if (ev.type === "weatherStart" && ev.data && ev.data.type) {
+          activeWeathers[ev.data.type] = { startTime: ev.t, duration: ev.data.duration || 10, active: true };
+        } else if (ev.type === "weatherEnd" && ev.data && ev.data.type) {
+          if (activeWeathers[ev.data.type]) {
+            activeWeathers[ev.data.type].active = false;
+          }
+        }
+      }
+
+      for (var type in activeWeathers) {
+        var w = activeWeathers[type];
+        if (!w.active) continue;
+        var elapsed = currentTime - w.startTime;
+        var remaining = w.duration - elapsed;
+        if (remaining <= 0) continue;
+
+        var intensity = 1;
+        if (elapsed < FADE_TIME) intensity = elapsed / FADE_TIME;
+        else if (remaining < FADE_TIME) intensity = Math.max(0, remaining / FADE_TIME);
+
+        hasWeather = true;
+        var cfg = weatherConfig[type];
+        if (!cfg) continue;
+
+        if (type === "seaBreeze") {
+          driftMult += ((cfg.driftMultiplier || 2.0) - 1) * intensity;
+          speedMult += ((cfg.speedMultiplier || 1.15) - 1) * intensity;
+        } else if (type === "denseFog") {
+          beamRangeMult -= (1 - (cfg.beamRangeMultiplier || 0.55)) * intensity;
+          fogOpacity += (cfg.fogOpacity || 0.5) * intensity;
+        } else if (type === "lighthouseFlash") {
+          var jitterAmount = cfg.jitterAmount || 0.08;
+          beamJitter = (
+            Math.sin((currentTime - w.startTime) * 17.3) * 0.65 +
+            Math.sin((currentTime - w.startTime) * 41.7) * 0.35
+          ) * jitterAmount * intensity;
+          beamFlicker = (cfg.flickerIntensity || 0.4) * intensity;
+        }
+      }
+
+      if (gameSettings.reduceFlicker) {
+        beamJitter *= 0.25;
+        beamFlicker *= 0.2;
+      }
+
+      return { driftMultiplier: driftMult, speedMultiplier: speedMult, beamRangeMultiplier: beamRangeMult, beamJitter: beamJitter, beamFlicker: beamFlicker, fogOpacity: fogOpacity, hasWeather: hasWeather };
+    }
+
     function drawReplayScene() {
       const renderState = ReplayPlayer.getCurrentRenderState();
       if (!renderState) {
@@ -4660,17 +7784,29 @@
       }
       const meta = ReplayPlayer.getMeta();
       const levelData = meta ? meta.levelData : getCurrentLevelData();
+      const replayEvents = ReplayPlayer.getEvents();
+      const replayTime = ReplayPlayer.getCurrentTime();
+      const weatherConfig = levelData.weather || {};
+      const wm = computeReplayWeatherModifiers(replayEvents, replayTime, weatherConfig);
 
       const harbor = levelData.harbor || { x: 900, top: 70, bottom: 530 };
 
-      ctx.clearRect(0, 0, 960, 600);
-      const sea = ctx.createLinearGradient(0, 0, 960, 600);
-      sea.addColorStop(0, "#08222f");
-      sea.addColorStop(1, "#061017");
-      ctx.fillStyle = sea;
-      ctx.fillRect(0, 0, 960, 600);
-      ctx.strokeStyle = "rgba(140,190,190,.12)";
-      for (let x = 0; x < 960; x += 60) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 80, 600); ctx.stroke(); }
+      fillSeaBackground();
+
+      if (wm.driftMultiplier > 1.01) {
+        const windIntensity = (wm.driftMultiplier - 1) * 2;
+        ctx.strokeStyle = "rgba(180, 220, 230, " + (0.08 * windIntensity) + ")";
+        ctx.lineWidth = 1;
+        const time = Date.now() / 1000;
+        for (let i = 0; i < 15; i++) {
+          const y = (i * 43 + time * 30 * windIntensity) % 600;
+          const x = ((i * 73) % 960 + time * 80 * windIntensity) % 960;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + 20 + windIntensity * 15, y + 2);
+          ctx.stroke();
+        }
+      }
 
       for (const fog of levelData.fog) {
         const g = ctx.createRadialGradient(fog.x, fog.y, 10, fog.x, fog.y, fog.r);
@@ -4679,6 +7815,17 @@
         ctx.fillStyle = g;
         ctx.beginPath(); ctx.arc(fog.x, fog.y, fog.r, 0, Math.PI * 2); ctx.fill();
       }
+
+      if (wm.fogOpacity > 0.01) {
+        const fogAlpha = wm.fogOpacity * 0.6;
+        const fogGrad = ctx.createRadialGradient(480, 300, 100, 480, 300, 600);
+        fogGrad.addColorStop(0, "rgba(200, 210, 210, 0)");
+        fogGrad.addColorStop(0.5, "rgba(180, 190, 190, " + (fogAlpha * 0.5) + ")");
+        fogGrad.addColorStop(1, "rgba(160, 170, 175, " + fogAlpha + ")");
+        ctx.fillStyle = fogGrad;
+        ctx.fillRect(0, 0, 960, 600);
+      }
+
       for (const rock of levelData.rocks) {
         ctx.fillStyle = "#273a3a";
         ctx.beginPath(); ctx.arc(rock.x, rock.y, rock.r, 0, Math.PI * 2); ctx.fill();
@@ -4691,19 +7838,34 @@
       ctx.fillStyle = "rgba(135, 212, 229, .3)";
       ctx.fillRect(harbor.x - 20, harbor.top, 20, harborH);
 
+      const beamAlpha = 0.24 * (1 - wm.beamFlicker * 0.5);
+      const beamRange = 780 * wm.beamRangeMultiplier;
+
       ctx.save();
       ctx.translate(lighthouse.x, lighthouse.y);
-      ctx.rotate(renderState.beamAngle);
-      ctx.fillStyle = "rgba(247,220,125,.24)";
+      ctx.rotate(renderState.beamAngle + wm.beamJitter);
+      ctx.fillStyle = "rgba(247,220,125," + beamAlpha + ")";
       ctx.beginPath();
       const w = renderState.beamWide ? 0.42 : 0.22;
       ctx.moveTo(0, 0);
-      ctx.arc(0, 0, 780, -w, w);
+      ctx.arc(0, 0, beamRange, -w, w);
       ctx.closePath();
       ctx.fill();
       ctx.restore();
-      ctx.fillStyle = "#e7c46a";
+
+      const lighthouseIntensity = 1 - wm.beamFlicker * 0.3;
+      ctx.fillStyle = "rgba(231, 196, 106, " + lighthouseIntensity + ")";
       ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, 18, 0, Math.PI * 2); ctx.fill();
+
+      if (wm.beamFlicker > 0.01) {
+        const glowSize = 25 + wm.beamFlicker * 20;
+        const glowAlpha = 0.3 + wm.beamFlicker * 0.4;
+        const glow = ctx.createRadialGradient(lighthouse.x, lighthouse.y, 5, lighthouse.x, lighthouse.y, glowSize);
+        glow.addColorStop(0, "rgba(255, 240, 180, " + glowAlpha + ")");
+        glow.addColorStop(1, "rgba(255, 240, 180, 0)");
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(lighthouse.x, lighthouse.y, glowSize, 0, Math.PI * 2); ctx.fill();
+      }
 
       for (const boat of renderState.boats) {
         const dx = boat.x - lighthouse.x;
@@ -4711,7 +7873,7 @@
         const ang = Math.atan2(dy, dx);
         let diff = Math.atan2(Math.sin(ang - renderState.beamAngle), Math.cos(ang - renderState.beamAngle));
         const bw = renderState.beamWide ? 0.42 : 0.22;
-        const boatInBeam = Math.abs(diff) < bw && Math.hypot(dx, dy) < 760;
+        const boatInBeam = Math.abs(diff) < bw && Math.hypot(dx, dy) < beamRange;
 
         ctx.save();
         ctx.translate(boat.x, boat.y);
@@ -4719,6 +7881,20 @@
         ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-10, -8); ctx.lineTo(-6, 8); ctx.closePath(); ctx.fill();
         ctx.fillStyle = "#e2685d"; ctx.fillRect(-18, -18, 36 * (boat.lit / 4), 4);
         ctx.restore();
+      }
+
+      if (wm.hasWeather) {
+        const activeLabels = [];
+        if (wm.driftMultiplier > 1.01) activeLabels.push("🌬️海风");
+        if (wm.fogOpacity > 0.01 || wm.beamRangeMultiplier < 0.99) activeLabels.push("🌫️浓雾");
+        if (wm.beamFlicker > 0.01) activeLabels.push("⚡闪烁");
+        if (activeLabels.length > 0) {
+          ctx.fillStyle = "rgba(13,29,37,.75)";
+          ctx.fillRect(8, 565, 14 + activeLabels.join(" ").length * 13, 28);
+          ctx.font = "13px Arial";
+          ctx.fillStyle = "#e7c46a";
+          ctx.fillText("天气: " + activeLabels.join(" "), 16, 584);
+        }
       }
 
       if (!ReplayPlayer.isPlaying() && ReplayPlayer.getCurrentTime() > 0 && ReplayPlayer.getCurrentTime() < ReplayPlayer.getDuration() - 0.05) {
@@ -4744,17 +7920,17 @@
         return;
       }
       if (state === "playing") {
+        state = "paused";
         gameSettings = loadSettings();
         applySettings();
-        state = "paused";
         updatePauseHint();
         if (ReplayRecorder.isRecording()) {
           ReplayRecorder.recordEvent("pause", {});
         }
       } else if (state === "paused") {
+        state = "playing";
         gameSettings = loadSettings();
         applySettings();
-        state = "playing";
         updatePauseHint();
         if (ReplayRecorder.isRecording()) {
           ReplayRecorder.recordEvent("resume", {});
@@ -4817,8 +7993,18 @@
           }
           if (playtestLevel) {
             playtestLevel = LevelData.normalizeLevel(editorLevel);
+            resetLevel();
+          } else if (isCampaignMode()) {
+            const progress = CampaignStore.loadProgress();
+            if (progress.currentLevelIndex > 0) {
+              score = progress.totalScore;
+            } else {
+              score = 0;
+            }
+            resetCampaignLevel();
+          } else {
+            resetLevel();
           }
-          resetLevel();
         }
       }
     });
@@ -4892,6 +8078,128 @@
       harborBottomValue.textContent = editorLevel.harbor.bottom;
     });
 
+    function ensureWeatherObj(type) {
+      if (!editorLevel.weather) editorLevel.weather = {};
+      if (!editorLevel.weather[type]) editorLevel.weather[type] = {};
+      return editorLevel.weather[type];
+    }
+
+    function toggleWeatherConfig(type, toggleEl, paramsEl) {
+      const cfg = ensureWeatherObj(type);
+      cfg.enabled = !cfg.enabled;
+      toggleEl.classList.toggle("on", cfg.enabled);
+      paramsEl.classList.toggle("hidden", !cfg.enabled);
+      if (cfg.enabled) {
+        const defaults = WeatherSystem.getWeatherTypes()[type].defaultConfig;
+        for (const key in defaults) {
+          if (cfg[key] === undefined) cfg[key] = defaults[key];
+        }
+        syncWeatherConfigToUI();
+      }
+    }
+
+    weatherSeaBreezeHeader.addEventListener("click", function(e) {
+      if (e.target === weatherSeaBreezeToggle || weatherSeaBreezeToggle.contains(e.target)) return;
+      toggleWeatherConfig("seaBreeze", weatherSeaBreezeToggle, weatherSeaBreezeParams);
+    });
+    weatherSeaBreezeToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("seaBreeze", weatherSeaBreezeToggle, weatherSeaBreezeParams);
+    });
+
+    weatherDenseFogHeader.addEventListener("click", function(e) {
+      if (e.target === weatherDenseFogToggle || weatherDenseFogToggle.contains(e.target)) return;
+      toggleWeatherConfig("denseFog", weatherDenseFogToggle, weatherDenseFogParams);
+    });
+    weatherDenseFogToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("denseFog", weatherDenseFogToggle, weatherDenseFogParams);
+    });
+
+    weatherLighthouseFlashHeader.addEventListener("click", function(e) {
+      if (e.target === weatherLighthouseFlashToggle || weatherLighthouseFlashToggle.contains(e.target)) return;
+      toggleWeatherConfig("lighthouseFlash", weatherLighthouseFlashToggle, weatherLighthouseFlashParams);
+    });
+    weatherLighthouseFlashToggle.addEventListener("click", function(e) {
+      e.stopPropagation();
+      toggleWeatherConfig("lighthouseFlash", weatherLighthouseFlashToggle, weatherLighthouseFlashParams);
+    });
+
+    document.getElementById("sbMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").minDuration = v;
+      document.getElementById("sbMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("sbMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").maxDuration = v;
+      document.getElementById("sbMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("sbMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").minCooldown = v;
+      document.getElementById("sbMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("sbMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("seaBreeze").maxCooldown = v;
+      document.getElementById("sbMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("sbDriftRange").addEventListener("input", function() {
+      const v = Number(this.value) / 10; ensureWeatherObj("seaBreeze").driftMultiplier = v;
+      document.getElementById("sbDriftVal").textContent = v.toFixed(1);
+    });
+    document.getElementById("sbSpeedRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("seaBreeze").speedMultiplier = v;
+      document.getElementById("sbSpeedVal").textContent = v.toFixed(2);
+    });
+
+    document.getElementById("dfMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").minDuration = v;
+      document.getElementById("dfMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("dfMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").maxDuration = v;
+      document.getElementById("dfMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("dfMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").minCooldown = v;
+      document.getElementById("dfMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("dfMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("denseFog").maxCooldown = v;
+      document.getElementById("dfMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("dfRangeRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("denseFog").beamRangeMultiplier = v;
+      document.getElementById("dfRangeVal").textContent = v.toFixed(2);
+    });
+    document.getElementById("dfOpacityRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("denseFog").fogOpacity = v;
+      document.getElementById("dfOpacityVal").textContent = v.toFixed(2);
+    });
+
+    document.getElementById("lfMinDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").minDuration = v;
+      document.getElementById("lfMinDurVal").textContent = v + "s";
+    });
+    document.getElementById("lfMaxDurRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").maxDuration = v;
+      document.getElementById("lfMaxDurVal").textContent = v + "s";
+    });
+    document.getElementById("lfMinCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").minCooldown = v;
+      document.getElementById("lfMinCoolVal").textContent = v + "s";
+    });
+    document.getElementById("lfMaxCoolRange").addEventListener("input", function() {
+      const v = Number(this.value); ensureWeatherObj("lighthouseFlash").maxCooldown = v;
+      document.getElementById("lfMaxCoolVal").textContent = v + "s";
+    });
+    document.getElementById("lfJitterRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("lighthouseFlash").jitterAmount = v;
+      document.getElementById("lfJitterVal").textContent = v.toFixed(2);
+    });
+    document.getElementById("lfFlickerRange").addEventListener("input", function() {
+      const v = Number(this.value) / 100; ensureWeatherObj("lighthouseFlash").flickerIntensity = v;
+      document.getElementById("lfFlickerVal").textContent = v.toFixed(2);
+    });
+
     selectedRadiusRange.addEventListener("input", function() {
       if (!editorSelected) return;
       const { type, index } = editorSelected;
@@ -4946,6 +8254,7 @@
     let exportSelectedLevelIds = [];
     let currentImportPack = null;
     let currentDuplicateStrategy = "skip";
+    let importSelectedLevelIndices = [];
 
     function showExportPackOverlay(preselectedLevelId) {
       exportPackName.value = "";
@@ -5033,6 +8342,9 @@
       confirmImportBtn.disabled = true;
       currentImportPack = null;
       currentDuplicateStrategy = "skip";
+      importSelectedLevelIndices = [];
+      importLevelList.innerHTML = "";
+      importSelectedCount.textContent = "0 个";
       document.querySelectorAll(".duplicate-option").forEach(function(opt) {
         opt.classList.toggle("selected", opt.getAttribute("data-duplicate") === "skip");
       });
@@ -5043,6 +8355,84 @@
     function hideImportPackOverlay() {
       packImportOverlay.classList.add("hidden");
       currentImportPack = null;
+      importSelectedLevelIndices = [];
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text == null ? "" : String(text);
+      return div.innerHTML;
+    }
+
+    function renderImportLevelList(pack) {
+      importLevelList.innerHTML = "";
+      const levels = pack.levels || [];
+      const levelBests = pack.levelBests || {};
+      const duplicates = LevelPack.findDuplicates(levels);
+      const duplicateMap = {};
+      duplicates.forEach(function(d) {
+        if (d.packLevel && d.packLevel.id) duplicateMap[d.packLevel.id] = true;
+        if (d.packLevel && d.packLevel.name) {
+          const key = "__name__:" + d.packLevel.name;
+          duplicateMap[key] = true;
+        }
+      });
+
+      if (levels.length === 0) {
+        importLevelList.innerHTML = '<div style="text-align:center;color:#879aa0;padding:20px;">关卡包中没有关卡</div>';
+        importSelectedCount.textContent = "0 个";
+        confirmImportBtn.disabled = true;
+        return;
+      }
+
+      levels.forEach(function(lvl, idx) {
+        const item = document.createElement("div");
+        item.className = "level-item";
+        item.style.cursor = "pointer";
+        const isSelected = importSelectedLevelIndices.indexOf(idx) >= 0;
+        const best = levelBests[lvl.id] || 0;
+        const rockCount = (lvl.rocks || []).length;
+        const fogCount = (lvl.fog || []).length;
+        const weatherSummary = LevelPack.getWeatherSummary(lvl);
+        const isDuplicate = (lvl.id && duplicateMap[lvl.id]) || duplicateMap["__name__:" + lvl.name];
+        const duplicateBadge = isDuplicate ? ' <span style="color:#e7c46a;font-size:11px;">⚠️ 重复</span>' : "";
+        const levelName = escapeHtml(lvl.name || "未命名关卡");
+
+        item.innerHTML =
+          '<span style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">' +
+            '<input type="checkbox" ' + (isSelected ? "checked" : "") + ' data-idx="' + idx + '" style="margin:2px 0 0 0;">' +
+            '<span style="min-width:0;">' +
+              '<span class="level-name" style="display:block;">' + levelName + duplicateBadge + '</span>' +
+              '<span style="display:block;font-size:11px;color:#879aa0;margin-top:2px;line-height:1.5;">' +
+                '🚢 ' + lvl.boats + ' 艘 · 🪨 ' + rockCount + ' 个 · 🌫️ ' + fogCount + ' 个 · ' + weatherSummary +
+              '</span>' +
+            '</span>' +
+          '</span>' +
+          '<span class="level-best">' + (best > 0 ? best + " 分" : "无记录") + '</span>';
+        item.onclick = function(e) {
+          if (e.target.tagName !== "INPUT") {
+            const cb = item.querySelector('input[type="checkbox"]');
+            cb.checked = !cb.checked;
+          }
+          toggleImportLevelSelection(idx);
+        };
+        importLevelList.appendChild(item);
+      });
+
+      importSelectedCount.textContent = importSelectedLevelIndices.length + " 个";
+      confirmImportBtn.disabled = importSelectedLevelIndices.length === 0;
+    }
+
+    function toggleImportLevelSelection(idx) {
+      const i = importSelectedLevelIndices.indexOf(idx);
+      if (i >= 0) {
+        importSelectedLevelIndices.splice(i, 1);
+      } else {
+        importSelectedLevelIndices.push(idx);
+      }
+      if (currentImportPack) {
+        renderImportLevelList(currentImportPack);
+      }
     }
 
     function updateImportPackInfo(pack) {
@@ -5060,8 +8450,10 @@
         importDuplicateWarning.classList.add("hidden");
       }
 
+      importSelectedLevelIndices = pack.levels ? pack.levels.map(function(_, i) { return i; }) : [];
+      renderImportLevelList(pack);
+
       importPackInfo.classList.remove("hidden");
-      confirmImportBtn.disabled = false;
     }
 
     function handleImportParseResult(result) {
@@ -5082,8 +8474,14 @@
 
     function performImport() {
       if (!currentImportPack) return;
+      if (importSelectedLevelIndices.length === 0) {
+        importPackError.textContent = "请至少选择一个关卡";
+        importPackError.classList.remove("hidden");
+        importPackSuccess.classList.add("hidden");
+        return;
+      }
 
-      const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy);
+      const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy, importSelectedLevelIndices);
 
       if (!result.success) {
         importPackError.textContent = result.message + "：" + (result.errors || []).join("；");
@@ -5112,6 +8510,10 @@
 
       updateGlobalBest();
       renderLevelCards();
+      renderChapterCards();
+      updateCustomChapterCard();
+      renderCustomLevelPicker();
+      renderCustomSelectedLevels();
 
       setTimeout(function() {
         hideImportPackOverlay();
@@ -5187,6 +8589,20 @@
 
     cancelImportBtn.addEventListener("click", function() {
       hideImportPackOverlay();
+    });
+
+    selectAllImportBtn.addEventListener("click", function() {
+      if (currentImportPack && currentImportPack.levels) {
+        importSelectedLevelIndices = currentImportPack.levels.map(function(_, i) { return i; });
+        renderImportLevelList(currentImportPack);
+      }
+    });
+
+    deselectAllImportBtn.addEventListener("click", function() {
+      importSelectedLevelIndices = [];
+      if (currentImportPack) {
+        renderImportLevelList(currentImportPack);
+      }
     });
 
     importFromTextBtn.addEventListener("click", function() {
@@ -5269,11 +8685,110 @@
     voyageLogBtn.onclick = showVoyageLogPanel;
     backFromVoyageLogBtn.onclick = hideVoyageLogPanel;
     clearVoyageLogBtn.onclick = function() {
-      if (confirm("确定要清空全部航海日志吗？\n\n此操作不会影响成就、统计、关卡解锁和最佳分。")) {
+      if (confirm("确定要清空全部战绩记录吗？\n\n此操作同时会清空所有回放数据，不会影响成就、统计、关卡解锁和最佳分。")) {
         VoyageLogStore.clearAll();
+        ReplayStore.clearAll();
         renderVoyageLogList();
-        alert("航海日志已清空。");
+        alert("战绩记录和回放数据已清空。");
       }
+    };
+    const closeLogDetailBtn = document.getElementById("closeLogDetailBtn");
+    if (closeLogDetailBtn) {
+      closeLogDetailBtn.onclick = hideLogDetail;
+    }
+    const logDetailModal = document.getElementById("logDetailModal");
+    if (logDetailModal) {
+      logDetailModal.addEventListener("click", function(e) {
+        if (e.target === logDetailModal) {
+          hideLogDetail();
+        }
+      });
+    }
+    campaignBtn.onclick = showCampaignSelectPanel;
+    backFromCampaignBtn.onclick = function() {
+      campaignState = "idle";
+      score = 0;
+      showMainMenu();
+    };
+    resumeCampaignBtn.onclick = function() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+      if (info && info.campaignSaveState === "failed") {
+        alert("战役已失败，无法继续。请选择重开或放弃。");
+        return;
+      }
+      resumeCampaign();
+    };
+    restartCampaignBtn.onclick = restartCampaign;
+    abandonCampaignBtn.onclick = abandonCampaignFromSave;
+    resetCampaignProgressBtn.onclick = function() {
+      if (confirm("确定要重置全部战役进度和奖励吗？\n\n此操作不会影响单关模式的成就、统计和最佳分。")) {
+        CampaignStore.resetAllProgress();
+        CampaignStore.resetAllRewards();
+        renderChapterCards();
+        alert("战役进度已重置。");
+      }
+    };
+    campaignQuitBtn.onclick = function() {
+      if (confirm("确定要退出当前战役吗？\n\n当前进度会被保存，可以下次继续。")) {
+        campaignState = "idle";
+        score = 0;
+        showCampaignSelectPanel();
+      }
+    };
+    campaignSettlementNextBtn.onclick = function() {
+      campaignState = "idle";
+      score = 0;
+      CampaignStore.clearProgress();
+      showCampaignSelectPanel();
+    };
+    campaignRetryFromBeginningBtn.onclick = function() {
+      const progress = CampaignStore.loadProgress();
+      const chapterId = progress.chapterId;
+      CampaignStore.clearProgress();
+      score = 0;
+      startCampaignChapter(chapterId);
+    };
+    campaignFailBackBtn.onclick = function() {
+      campaignState = "idle";
+      score = 0;
+      CampaignStore.clearProgress();
+      showCampaignSelectPanel();
+    };
+    backFromChapterIntroBtn.onclick = function() {
+      showCampaignSelectPanel();
+    };
+    startChapterFromIntroBtn.onclick = function() {
+      const chapter = CampaignConfig.getChapterById(startingChapterId);
+      if (chapter) {
+        startCampaignChapter(chapter.id);
+      }
+    };
+    customChapterCard.onclick = function() {
+      const existing = CampaignConfig.loadCustomChapter();
+      const hasInvalid = CampaignConfig.hasInvalidCustomLevels();
+      const invalidCount = CampaignConfig.getCustomChapterInvalidLevelIds().length;
+
+      if (existing && CampaignStore.isChapterUnlocked("chapter_custom")) {
+        let message = "已存在自定义航线「" + existing.name + "」。\n\n";
+        if (hasInvalid) {
+          message += "⚠️ 注意：有 " + invalidCount + " 个关卡已失效，开始战役时将自动跳过。\n\n";
+        }
+        message += "确定 = 直接开始上次航线\n取消 = 重新编排";
+        const action = confirm(message);
+        if (action) {
+          startCampaignChapter("chapter_custom");
+        } else {
+          openCustomChapterEditor();
+        }
+      } else {
+        openCustomChapterEditor();
+      }
+    };
+    confirmCustomChapterBtn.onclick = function() {
+      confirmAndStartCustomChapter();
+    };
+    cancelCustomChapterBtn.onclick = function() {
+      closeCustomChapterEditor();
     };
     if (logFilterResult) {
       logFilterResult.onchange = function() {
@@ -5313,6 +8828,31 @@
       saveSettings();
       applySettings();
     };
+    invertRotationToggle.onclick = function() {
+      gameSettings.invertRotation = !gameSettings.invertRotation;
+      saveSettings();
+      applySettings();
+    };
+    reduceFlickerToggle.onclick = function() {
+      gameSettings.reduceFlicker = !gameSettings.reduceFlicker;
+      saveSettings();
+      applySettings();
+    };
+    highContrastSeaToggle.onclick = function() {
+      gameSettings.highContrastSea = !gameSettings.highContrastSea;
+      saveSettings();
+      applySettings();
+    };
+    muteOnPauseToggle.onclick = function() {
+      gameSettings.muteOnPause = !gameSettings.muteOnPause;
+      saveSettings();
+      applySettings();
+    };
+    replayAutoPauseToggle.onclick = function() {
+      gameSettings.replayAutoPause = !gameSettings.replayAutoPause;
+      saveSettings();
+      applySettings();
+    };
     gameSettingsBtn.onclick = openGameSettings;
     closeSettingsBtn.onclick = closeGameSettings;
     modalSoundToggle.onclick = function() {
@@ -5332,6 +8872,31 @@
     };
     modalPauseHintToggle.onclick = function() {
       gameSettings.pauseHint = !gameSettings.pauseHint;
+      saveSettings();
+      applySettings();
+    };
+    modalInvertRotationToggle.onclick = function() {
+      gameSettings.invertRotation = !gameSettings.invertRotation;
+      saveSettings();
+      applySettings();
+    };
+    modalReduceFlickerToggle.onclick = function() {
+      gameSettings.reduceFlicker = !gameSettings.reduceFlicker;
+      saveSettings();
+      applySettings();
+    };
+    modalHighContrastSeaToggle.onclick = function() {
+      gameSettings.highContrastSea = !gameSettings.highContrastSea;
+      saveSettings();
+      applySettings();
+    };
+    modalMuteOnPauseToggle.onclick = function() {
+      gameSettings.muteOnPause = !gameSettings.muteOnPause;
+      saveSettings();
+      applySettings();
+    };
+    modalReplayAutoPauseToggle.onclick = function() {
+      gameSettings.replayAutoPause = !gameSettings.replayAutoPause;
       saveSettings();
       applySettings();
     };
@@ -5355,6 +8920,15 @@
       if (state === "playing" && currentLogId && logWeatherEventsSeen.indexOf(ev.type) === -1) {
         logWeatherEventsSeen.push(ev.type);
       }
+      if (state === "playing" && currentLogId) {
+        const currentTime = performance.now() / 1000 - levelStartTime;
+        logWeatherTimeline.push({
+          event: "start",
+          type: ev.type,
+          time: currentTime,
+          duration: ev.event.duration
+        });
+      }
       if (ReplayRecorder.isRecording()) {
         ReplayRecorder.recordEvent("weatherStart", {
           type: ev.type,
@@ -5363,6 +8937,14 @@
       }
     });
     WeatherSystem.on("end", function(ev) {
+      if (state === "playing" && currentLogId) {
+        const currentTime = performance.now() / 1000 - levelStartTime;
+        logWeatherTimeline.push({
+          event: "end",
+          type: ev.type,
+          time: currentTime
+        });
+      }
       if (ReplayRecorder.isRecording()) {
         ReplayRecorder.recordEvent("weatherEnd", {
           type: ev.type
