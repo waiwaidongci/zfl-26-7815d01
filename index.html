@@ -969,6 +969,8 @@
     .chapter-card.locked { opacity: .45; cursor: not-allowed; }
     .chapter-card.active { border-color: #e7c46a; background: #1a3947; }
     .chapter-card.completed { border-color: #3d6a78; }
+    .chapter-card.has-warning { border-color: #e2685d; }
+    .chapter-card.has-warning:hover:not(.locked):not(.active) { border-color: #e2685d; }
     .chapter-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
     .chapter-card h3 { margin: 0; font-size: 15px; color: #eef6f2; }
     .chapter-card.locked h3 { color: #879aa0; }
@@ -1033,6 +1035,7 @@
 
     .custom-chapter-area { margin-bottom: 12px; }
     .custom-chapter-area .chapter-card:hover { border-color: #e7c46a; transform: translateY(-2px); }
+    .custom-chapter-area .chapter-card.has-warning:hover { border-color: #e2685d; transform: translateY(-2px); }
 
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } .log-list { max-height: 40vh; } }
   </style>
@@ -2429,9 +2432,44 @@
         return null;
       }
 
+      function loadRawCustomChapterData() {
+        try {
+          const stored = localStorage.getItem(CUSTOM_CHAPTER_KEY);
+          if (stored) {
+            const data = JSON.parse(stored);
+            return {
+              levelIds: data.levelIds || [],
+              name: data.name || "自定义航线"
+            };
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function getCustomChapterInvalidLevelIds() {
+        const raw = loadRawCustomChapterData();
+        if (!raw) return [];
+        return (raw.levelIds || []).filter(function(id) {
+          return LevelData.getLevelById(id) == null;
+        });
+      }
+
+      function getTotalBoatsForLevelIds(levelIds) {
+        let total = 0;
+        (levelIds || []).forEach(function(id) {
+          const lvl = LevelData.getLevelById(id);
+          if (lvl) total += (lvl.boats || 0);
+        });
+        return total;
+      }
+
       function hasCustomChapter() {
         const ch = loadCustomChapter();
         return ch !== null && ch.levels.length > 0;
+      }
+
+      function hasInvalidCustomLevels() {
+        return getCustomChapterInvalidLevelIds().length > 0;
       }
 
       return {
@@ -2442,7 +2480,11 @@
         createCustomChapter,
         saveCustomChapter,
         loadCustomChapter,
-        hasCustomChapter
+        loadRawCustomChapterData,
+        hasCustomChapter,
+        hasInvalidCustomLevels,
+        getCustomChapterInvalidLevelIds,
+        getTotalBoatsForLevelIds
       };
     })();
 
@@ -5350,15 +5392,50 @@
 
     function updateCustomChapterCard() {
       const existingChapter = CampaignConfig.loadCustomChapter();
+      const hasInvalid = CampaignConfig.hasInvalidCustomLevels();
+      const invalidIds = CampaignConfig.getCustomChapterInvalidLevelIds();
+      const rawData = CampaignConfig.loadRawCustomChapterData();
+      const totalIds = rawData && rawData.levelIds ? rawData.levelIds.length : 0;
+      const totalBoats = existingChapter ? CampaignConfig.getTotalBoatsForLevelIds(existingChapter.levels) : 0;
+
       if (existingChapter) {
-        customChapterCard.className = "chapter-card completed";
+        const isCompleted = CampaignStore.isChapterCompleted("chapter_custom");
+        customChapterCard.className = "chapter-card" + (isCompleted ? " completed" : "") + (hasInvalid ? " has-warning" : "");
+        customChapterCard.style.borderStyle = "solid";
+
+        let statusIcon = "🎯";
+        if (isCompleted) statusIcon = "✅";
+        if (hasInvalid) statusIcon = "⚠️";
+
+        let descText = existingChapter.levels.length + " 个关卡";
+        if (hasInvalid) {
+          descText += '（<span style="color:#e2685d;">' + invalidIds.length + ' 个失效</span>）';
+        }
+        descText += ' · 生命 ❤️ ×' + existingChapter.startingLives;
+        descText += ' · 船只 🚢 ×' + totalBoats;
+
+        let metaText = "点击重新编排或直接开始";
+        if (hasInvalid) {
+          metaText = '<span style="color:#e2685d;">⚠️ 部分关卡已失效，点击清理或重新编排</span>';
+        }
+
         customChapterCard.innerHTML =
           '<div class="chapter-card-header">' +
             '<h3>🧭 ' + existingChapter.name + '</h3>' +
-            '<span class="chapter-status-icon">✅</span>' +
+            '<span class="chapter-status-icon">' + statusIcon + '</span>' +
           '</div>' +
-          '<div class="chapter-desc">' + existingChapter.levels.length + ' 个自定义关卡 · 生命 ❤️ ×' + existingChapter.startingLives + '</div>' +
-          '<div class="chapter-meta" style="font-size:12px;color:#e7c46a;margin-top:6px;">点击重新编排或直接开始</div>';
+          '<div class="chapter-desc">' + descText + '</div>' +
+          '<div class="chapter-meta" style="font-size:12px;margin-top:6px;">' + metaText + '</div>';
+      } else if (rawData && totalIds > 0) {
+        customChapterCard.className = "chapter-card has-warning";
+        customChapterCard.style.borderStyle = "solid";
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 ' + (rawData.name || "自定义航线") + '</h3>' +
+            '<span class="chapter-status-icon">⚠️</span>' +
+          '</div>' +
+          '<div class="chapter-desc" style="color:#e2685d;">全部 ' + totalIds + ' 个关卡已失效</div>' +
+          '<div class="chapter-meta" style="font-size:12px;color:#e2685d;margin-top:6px;">点击重新编排航线</div>';
       } else {
         customChapterCard.className = "chapter-card";
         customChapterCard.style.borderStyle = "dashed";
@@ -5375,10 +5452,10 @@
       customChapterEditor.classList.remove("hidden");
       customSelectedLevelIds = [];
 
-      const existing = CampaignConfig.loadCustomChapter();
-      if (existing) {
-        customChapterNameInput.value = existing.name;
-        customSelectedLevelIds = existing.levels.slice();
+      const rawData = CampaignConfig.loadRawCustomChapterData();
+      if (rawData) {
+        customChapterNameInput.value = rawData.name || "自定义航线";
+        customSelectedLevelIds = (rawData.levelIds || []).slice();
       }
 
       renderCustomLevelPicker();
@@ -5431,20 +5508,67 @@
         return;
       }
 
-      let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      let validCount = 0;
+      let invalidCount = 0;
+      let totalBoats = 0;
+
+      let html = '<div style="display:flex;flex-direction:column;gap:4px;">';
       customSelectedLevelIds.forEach(function(id, idx) {
         const lvl = LevelData.getLevelById(id);
-        const name = lvl ? lvl.name : id;
-        html += '<div style="background:#142f3a;border:1px solid #24414b;border-radius:4px;padding:4px 8px;font-size:11px;color:#eef6f2;display:flex;align-items:center;gap:4px;">' +
-          '<span style="color:#e7c46a;">' + (idx + 1) + '.</span> ' + name +
-          '<span style="color:#e2685d;cursor:pointer;margin-left:2px;" data-remove="' + id + '" title="移除">✕</span>' +
+        const isValid = lvl != null;
+        if (isValid) {
+          validCount++;
+          totalBoats += (lvl.boats || 0);
+        } else {
+          invalidCount++;
+        }
+        const name = isValid ? lvl.name : (id || "未知关卡");
+        const isFirst = idx === 0;
+        const isLast = idx === customSelectedLevelIds.length - 1;
+
+        const borderColor = isValid ? "#24414b" : "#e2685d";
+        const bgColor = isValid ? "#142f3a" : "rgba(226,104,93,.1)";
+        const textColor = isValid ? "#eef6f2" : "#e2685d";
+
+        html += '<div style="background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:4px;padding:5px 8px;font-size:12px;color:' + textColor + ';display:flex;align-items:center;gap:6px;">' +
+          '<span style="color:#e7c46a;font-size:11px;min-width:22px;">' + (idx + 1) + '.</span>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+            (isValid ? "" : "⚠️ ") + name +
+            (isValid ? '<span style="color:#879aa0;font-size:10px;margin-left:6px;">🚢×' + (lvl.boats || 0) + '</span>' : '<span style="color:#e2685d;font-size:10px;margin-left:6px;">已失效</span>') +
+          '</span>' +
+          '<span style="display:flex;gap:2px;align-items:center;">' +
+            (isFirst ? '<span style="color:#3a5058;font-size:11px;cursor:not-allowed;padding:0 3px;">↑</span>' : '<span style="color:#879aa0;font-size:11px;cursor:pointer;padding:0 3px;" data-moveup="' + idx + '" title="上移">↑</span>') +
+            (isLast ? '<span style="color:#3a5058;font-size:11px;cursor:not-allowed;padding:0 3px;">↓</span>' : '<span style="color:#879aa0;font-size:11px;cursor:pointer;padding:0 3px;" data-movedown="' + idx + '" title="下移">↓</span>') +
+            '<span style="color:#e2685d;cursor:pointer;padding:0 3px;margin-left:2px;" data-remove="' + id + '" title="移除">✕</span>' +
+          '</span>' +
         '</div>';
       });
       html += '</div>';
-      html += '<div style="font-size:11px;color:#879aa0;margin-top:6px;">共 ' + customSelectedLevelIds.length + ' 关 · 生命 ❤️ ×' + Math.max(1, Math.min(5, Math.ceil(customSelectedLevelIds.length / 2))) + '</div>';
+
+      const validLevelIds = customSelectedLevelIds.filter(function(id) { return LevelData.getLevelById(id) != null; });
+      const startingLives = Math.max(1, Math.min(5, Math.ceil(validLevelIds.length / 2)));
+
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;">';
+      html += '<div style="color:#879aa0;">';
+      html += '共 ' + customSelectedLevelIds.length + ' 关';
+      if (invalidCount > 0) {
+        html += '（<span style="color:#e2685d;">' + invalidCount + ' 个失效</span>）';
+      }
+      html += '</div>';
+      html += '<div style="color:#879aa0;">';
+      html += '生命 ❤️ ×' + startingLives + ' · 船只 🚢 ×' + totalBoats;
+      html += '</div>';
+      html += '</div>';
+
+      if (invalidCount > 0) {
+        html += '<div style="margin-top:8px;">' +
+          '<button id="cleanupInvalidBtn" class="danger" style="width:100%;font-size:12px;padding:6px 10px;">🧹 一键清理失效关卡（' + invalidCount + '）</button>' +
+        '</div>';
+      }
+
       customSelectedLevels.innerHTML = html;
 
-      confirmCustomChapterBtn.disabled = false;
+      confirmCustomChapterBtn.disabled = validCount === 0;
 
       customSelectedLevels.querySelectorAll("[data-remove]").forEach(function(el) {
         el.onclick = function(e) {
@@ -5456,10 +5580,53 @@
           renderCustomSelectedLevels();
         };
       });
+
+      customSelectedLevels.querySelectorAll("[data-moveup]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const idx = parseInt(el.getAttribute("data-moveup"), 10);
+          if (idx > 0) {
+            const tmp = customSelectedLevelIds[idx];
+            customSelectedLevelIds[idx] = customSelectedLevelIds[idx - 1];
+            customSelectedLevelIds[idx - 1] = tmp;
+            renderCustomSelectedLevels();
+          }
+        };
+      });
+
+      customSelectedLevels.querySelectorAll("[data-movedown]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const idx = parseInt(el.getAttribute("data-movedown"), 10);
+          if (idx < customSelectedLevelIds.length - 1) {
+            const tmp = customSelectedLevelIds[idx];
+            customSelectedLevelIds[idx] = customSelectedLevelIds[idx + 1];
+            customSelectedLevelIds[idx + 1] = tmp;
+            renderCustomSelectedLevels();
+          }
+        };
+      });
+
+      const cleanupBtn = document.getElementById("cleanupInvalidBtn");
+      if (cleanupBtn) {
+        cleanupBtn.onclick = function() {
+          customSelectedLevelIds = customSelectedLevelIds.filter(function(id) {
+            return LevelData.getLevelById(id) != null;
+          });
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+      }
     }
 
     function confirmAndStartCustomChapter() {
-      if (customSelectedLevelIds.length === 0) return;
+      const validLevelIds = customSelectedLevelIds.filter(function(id) {
+        return LevelData.getLevelById(id) != null;
+      });
+      if (validLevelIds.length === 0) {
+        alert("请至少选择一个有效关卡。");
+        return;
+      }
 
       const name = customChapterNameInput.value.trim() || "自定义航线";
       CampaignConfig.saveCustomChapter(customSelectedLevelIds.slice(), name);
@@ -5503,14 +5670,31 @@
         weatherIcons = chapter.difficulty === "hard" ? "🌬️🌫️⚡" : chapter.difficulty === "normal" ? "🌬️🌫️" : "🌤️";
       }
 
+      const totalBoats = chapter.isCustom ? CampaignConfig.getTotalBoatsForLevelIds(chapter.levels) : null;
+      const hasInvalid = chapter.isCustom && CampaignConfig.hasInvalidCustomLevels();
+      const invalidCount = hasInvalid ? CampaignConfig.getCustomChapterInvalidLevelIds().length : 0;
+
+      let invalidWarningHtml = "";
+      if (hasInvalid) {
+        invalidWarningHtml = '<div style="background:rgba(226,104,93,.1);border:1px solid #e2685d;border-radius:4px;padding:8px 10px;margin-bottom:10px;font-size:12px;color:#e2685d;">' +
+          '⚠️ 注意：航线中有 ' + invalidCount + ' 个关卡已失效，已自动跳过。' +
+        '</div>';
+      }
+
+      let statsLine = '<b>关卡数：</b>' + chapter.levels.length + ' 关 · ' +
+        '<b>初始生命：</b>❤️ ×' + chapter.startingLives + ' · ' +
+        '<b>天气：</b>' + weatherIcons;
+      if (totalBoats != null) {
+        statsLine += ' · <b>船只总数：</b>🚢 ×' + totalBoats;
+      }
+
       overlayText.innerHTML =
         '<div class="campaign-chapter-intro" style="text-align:left;padding:14px;margin:12px -4px 4px;border-left:3px solid #e7c46a;">' +
           '<div class="chapter-intro-title" style="font-size:15px;color:#e7c46a;font-weight:700;margin-bottom:8px;">章节说明</div>' +
+          invalidWarningHtml +
           '<div class="chapter-intro-desc" style="font-size:13px;color:#a8bbc0;line-height:1.6;margin-bottom:10px;">' + chapter.description + '</div>' +
           '<div class="chapter-intro-levels" style="font-size:12px;color:#879aa0;">' +
-            '<b>关卡数：</b>' + chapter.levels.length + ' 关 · ' +
-            '<b>初始生命：</b>❤️ ×' + chapter.startingLives + ' · ' +
-            '<b>天气：</b>' + weatherIcons +
+            statsLine +
           '</div>' +
         '</div>' +
         '<div style="font-size:12px;color:#879aa0;margin-top:8px;">💡 上一关的剩余船只和得分表现会影响下一关的初始条件。完美通关可获得额外加成！</div>';
@@ -8302,8 +8486,16 @@
     };
     customChapterCard.onclick = function() {
       const existing = CampaignConfig.loadCustomChapter();
+      const hasInvalid = CampaignConfig.hasInvalidCustomLevels();
+      const invalidCount = CampaignConfig.getCustomChapterInvalidLevelIds().length;
+
       if (existing && CampaignStore.isChapterUnlocked("chapter_custom")) {
-        const action = confirm("已存在自定义航线「" + existing.name + "」。\n\n确定 = 直接开始上次航线\n取消 = 重新编排");
+        let message = "已存在自定义航线「" + existing.name + "」。\n\n";
+        if (hasInvalid) {
+          message += "⚠️ 注意：有 " + invalidCount + " 个关卡已失效，开始战役时将自动跳过。\n\n";
+        }
+        message += "确定 = 直接开始上次航线\n取消 = 重新编排";
+        const action = confirm(message);
         if (action) {
           startCampaignChapter("chapter_custom");
         } else {
