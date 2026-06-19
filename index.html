@@ -106,6 +106,51 @@
     .pack-modal .duplicate-option .option-label { font-size: 14px; color: #eef6f2; }
     .pack-modal .duplicate-option .option-desc { font-size: 12px; color: #879aa0; margin-top: 2px; }
 
+    .profile-modal { width: min(620px, calc(100% - 28px)); max-height: calc(100vh - 56px); overflow-y: auto; }
+    .profile-modal h2 { margin: 0 0 8px; font-size: 20px; }
+    .profile-modal .profile-subtitle { color: #879aa0; font-size: 13px; margin: 0 0 14px; }
+    .profile-modal .profile-info { background: #0a1f27; border-radius: 6px; padding: 12px; margin: 10px 0; }
+    .profile-modal .profile-info-row { display: grid; grid-template-columns: 100px 1fr; gap: 8px; padding: 4px 0; font-size: 13px; }
+    .profile-modal .profile-info-row .label { color: #879aa0; }
+    .profile-modal .profile-info-row .value { color: #eef6f2; word-break: break-all; }
+    .profile-modal textarea { width: 100%; background: #0a1f27; border: 1px solid #24414b; border-radius: 6px; padding: 8px 10px; color: #eef6f2; font-size: 13px; font-family: monospace; resize: vertical; min-height: 80px; }
+    .profile-modal input[type="text"] { margin: 6px 0; }
+    .profile-modal .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .profile-modal .btn-row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .profile-modal .error-msg { color: #e2685d; font-size: 13px; margin: 8px 0; padding: 8px; background: rgba(226,104,93,.1); border-radius: 6px; border-left: 3px solid #e2685d; }
+    .profile-modal .success-msg { color: #7dd69b; font-size: 13px; margin: 8px 0; padding: 8px; background: rgba(125,214,155,.1); border-radius: 6px; border-left: 3px solid #7dd69b; }
+
+    .category-section { margin: 14px 0; }
+    .category-section-title { font-size: 14px; color: #e7c46a; font-weight: 700; margin-bottom: 8px; }
+    .category-list { background: #0a1f27; border-radius: 6px; padding: 6px; }
+    .category-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-radius: 6px; cursor: pointer; transition: background .15s; border: 1px solid transparent; }
+    .category-item:hover { background: #0f2a33; }
+    .category-item.selected { background: #142f3a; border-color: #e7c46a; }
+    .category-item input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; accent-color: #e7c46a; }
+    .category-item-content { flex: 1; min-width: 0; }
+    .category-item-header { display: flex; align-items: center; gap: 6px; }
+    .category-item-icon { font-size: 16px; }
+    .category-item-name { font-size: 14px; color: #eef6f2; font-weight: 600; }
+    .category-item-count { font-size: 12px; color: #879aa0; margin-left: auto; }
+    .category-item-desc { font-size: 12px; color: #879aa0; margin-top: 2px; }
+
+    .diff-preview { margin: 14px 0; max-height: 260px; overflow-y: auto; background: #0a1f27; border-radius: 6px; padding: 10px; }
+    .diff-category { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #142f3a; }
+    .diff-category:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .diff-category-header { display: flex; align-items: center; gap: 6px; font-size: 14px; color: #eef6f2; font-weight: 600; margin-bottom: 6px; }
+    .diff-stat-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; font-size: 12px; }
+    .diff-stat { padding: 2px 8px; border-radius: 4px; background: #142f3a; }
+    .diff-stat.add { color: #7dd69b; }
+    .diff-stat.overwrite { color: #e7c46a; }
+    .diff-stat.skip { color: #879aa0; }
+    .diff-stat.merge { color: #7ac0e8; }
+    .diff-items-list { font-size: 12px; color: #a8bbc0; margin: 4px 0 0 4px; padding-left: 12px; border-left: 2px solid #24414b; }
+    .diff-items-list li { margin: 2px 0; list-style: none; }
+    .diff-note { font-size: 12px; color: #7ac0e8; margin-top: 4px; padding: 6px 8px; background: rgba(122,192,232,.08); border-radius: 4px; }
+
+    .settings-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #24414b; }
+    .settings-actions button { margin: 0; }
+
     .replay-controls {
       position: absolute;
       bottom: 16px;
@@ -1112,6 +1157,10 @@
           <span class="settings-label">回放自动暂停</span>
           <div id="replayAutoPauseToggle" class="toggle"></div>
         </div>
+        <div class="settings-actions">
+          <button id="profileExportBtn" class="secondary">📤 导出档案</button>
+          <button id="profileImportBtn" class="secondary">📥 导入档案</button>
+        </div>
         <button id="backFromSettingsBtn" class="secondary back-btn">返回</button>
       </div>
 
@@ -1879,6 +1928,92 @@
           </div>
         </div>
       </div>
+
+      <div class="overlay hidden" id="profileExportOverlay">
+        <div class="panel profile-modal">
+          <h2>📤 导出玩家档案</h2>
+          <p class="profile-subtitle">将你的游戏进度、成就、关卡等数据打包导出为文件，可在其他设备导入或用作备份。</p>
+          <div class="editor-section">
+            <div class="editor-section-title">玩家名称（可选）</div>
+            <input type="text" id="profileExportName" placeholder="未命名玩家档案" maxlength="30">
+          </div>
+          <div class="category-section">
+            <div class="category-section-title">选择要导出的数据类别 <span style="float:right;font-size:12px;color:#879aa0;font-weight:normal;" id="profileExportSelectedCount">0 / 10 类</span></div>
+            <div class="category-list" id="profileExportCategoryList"></div>
+            <div class="editor-btn-row" style="margin-top: 8px;">
+              <button class="secondary" id="profileSelectAllExportBtn">全选</button>
+              <button class="secondary" id="profileDeselectAllExportBtn">全不选</button>
+            </div>
+          </div>
+          <div id="profileExportError" class="error-msg hidden"></div>
+          <div class="btn-row">
+            <button class="secondary" id="profileCancelExportBtn">取消</button>
+            <button id="profileConfirmExportBtn" disabled>导出文件</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="overlay hidden" id="profileImportOverlay">
+        <div class="panel profile-modal">
+          <h2>📥 导入玩家档案</h2>
+          <p class="profile-subtitle">从文件或文本导入玩家档案数据，导入前可预览变更并选择要导入的类别。</p>
+          <div id="profileImportStep1">
+            <div class="editor-section-title">选择导入方式</div>
+            <div class="editor-btn-row" style="margin-bottom: 8px;">
+              <button class="secondary" id="profileImportFromTextBtn">从文本粘贴</button>
+              <button class="secondary" id="profileImportFromFileBtn">选择文件</button>
+            </div>
+            <input type="file" id="profileImportFileInput" accept=".json,application/json" style="display:none;">
+            <div id="profileImportTextSection" class="hidden">
+              <div class="editor-section-title">粘贴档案数据</div>
+              <textarea id="profileImportTextarea" placeholder="在此粘贴玩家档案 JSON 数据..."></textarea>
+              <button id="profileParseImportTextBtn" style="margin-top: 8px;">解析数据</button>
+            </div>
+          </div>
+          <div id="profileImportStep2" class="hidden">
+            <div class="profile-info">
+              <div class="profile-info-row">
+                <span class="label">玩家</span>
+                <span class="value" id="profileImportPlayerName">-</span>
+              </div>
+              <div class="profile-info-row">
+                <span class="label">导出时间</span>
+                <span class="value" id="profileImportExportedAt">-</span>
+              </div>
+              <div class="profile-info-row">
+                <span class="label">游戏版本</span>
+                <span class="value" id="profileImportGameVersion">-</span>
+              </div>
+              <div class="profile-info-row">
+                <span class="label">格式版本</span>
+                <span class="value" id="profileImportFormatVersion">-</span>
+              </div>
+              <div class="profile-info-row">
+                <span class="label">包含类别</span>
+                <span class="value" id="profileImportCategoryCount">-</span>
+              </div>
+            </div>
+            <div class="category-section">
+              <div class="category-section-title">选择要导入的数据类别 <span style="float:right;font-size:12px;color:#879aa0;font-weight:normal;" id="profileImportSelectedCount">0 / 10 类</span></div>
+              <div class="category-list" id="profileImportCategoryList"></div>
+              <div class="editor-btn-row" style="margin-top: 8px;">
+                <button class="secondary" id="profileSelectAllImportBtn">全选</button>
+                <button class="secondary" id="profileDeselectAllImportBtn">全不选</button>
+              </div>
+            </div>
+            <div class="category-section">
+              <div class="category-section-title">变更预览</div>
+              <div class="diff-preview" id="profileDiffPreview"></div>
+            </div>
+          </div>
+          <div id="profileImportError" class="error-msg hidden"></div>
+          <div id="profileImportSuccess" class="success-msg hidden"></div>
+          <div class="btn-row">
+            <button class="secondary" id="profileCancelImportBtn">取消</button>
+            <button id="profileConfirmImportBtn" disabled>确认导入</button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
   <script>
@@ -2272,6 +2407,13 @@
         const existingBests = LevelData.loadLevelBests();
         const newBests = Object.assign({}, existingBests);
 
+        const packSourceInfo = {
+          packName: pack.packName || "",
+          author: pack.author || "",
+          description: pack.description || "",
+          importedAt: Date.now()
+        };
+
         const levelsToImport = selectedLevelIndices && selectedLevelIndices.length > 0
           ? pack.levels.filter(function(_, idx) { return selectedLevelIndices.indexOf(idx) >= 0; })
           : pack.levels;
@@ -2294,6 +2436,7 @@
               normalized.id = existingId;
               existingCustoms[dupIdx] = normalized;
               overwrittenLevels.push(normalized.name);
+              ProfileStore.setLevelPackSource(existingId, packSourceInfo);
 
               if (pack.levelBests && Object.prototype.hasOwnProperty.call(pack.levelBests, packLvl.id)) {
                 newBests[existingId] = Number(pack.levelBests[packLvl.id]);
@@ -2304,6 +2447,7 @@
               normalized.name = normalized.name + " (导入)";
               existingCustoms.push(normalized);
               renamedLevels.push(normalized.name);
+              ProfileStore.setLevelPackSource(newId, packSourceInfo);
 
               if (pack.levelBests && pack.levelBests[packLvl.id]) {
                 newBests[newId] = Number(pack.levelBests[packLvl.id]);
@@ -2315,6 +2459,7 @@
             }
             existingCustoms.push(normalized);
             importedLevels.push(normalized.name);
+            ProfileStore.setLevelPackSource(normalized.id, packSourceInfo);
 
             if (pack.levelBests && pack.levelBests[packLvl.id]) {
               newBests[normalized.id] = Number(pack.levelBests[packLvl.id]);
@@ -2400,6 +2545,754 @@
         exportPackToFile: exportPackToFile,
         parsePackFromText: parsePackFromText,
         readPackFromFile: readPackFromFile
+      };
+    })();
+
+    // ===================== ProfileStore 模块：玩家档案导入导出 =====================
+    const ProfileStore = (function() {
+      const PROFILE_FORMAT_VERSION = 1;
+      const GAME_VERSION = "1.0.0";
+      const LEVEL_PACK_SOURCES_KEY = "zfl26LevelPackSources";
+      const PROFILE_TYPE = "player_profile";
+
+      const CATEGORIES = {
+        customLevels: {
+          key: "customLevels",
+          label: "自定义关卡",
+          icon: "🗺️",
+          description: "玩家创建的所有自定义关卡"
+        },
+        levelPackSources: {
+          key: "levelPackSources",
+          label: "关卡包来源信息",
+          icon: "📦",
+          description: "每个自定义关卡所属关卡包的来源追踪"
+        },
+        levelBests: {
+          key: "levelBests",
+          label: "单关最佳分",
+          icon: "🏆",
+          description: "每个关卡的历史最佳得分记录"
+        },
+        campaignProgress: {
+          key: "campaignProgress",
+          label: "战役进度",
+          icon: "⚔️",
+          description: "战役章节通关进度和当前战役状态"
+        },
+        campaignRewards: {
+          key: "campaignRewards",
+          label: "战役奖励",
+          icon: "🎖️",
+          description: "战役解锁的荣誉称号等奖励"
+        },
+        achievements: {
+          key: "achievements",
+          label: "成就",
+          icon: "🏅",
+          description: "已解锁的成就及解锁时间"
+        },
+        stats: {
+          key: "stats",
+          label: "统计",
+          icon: "📊",
+          description: "游戏累计统计数据（护送、胜率等）"
+        },
+        voyageLogs: {
+          key: "voyageLogs",
+          label: "航海日志",
+          icon: "📜",
+          description: "每一次航行的详细战绩记录"
+        },
+        replays: {
+          key: "replays",
+          label: "回放摘要",
+          icon: "🎬",
+          description: "所有对局回放数据（含帧级状态）"
+        },
+        customChapter: {
+          key: "customChapter",
+          label: "最近自定义航线",
+          icon: "🧭",
+          description: "玩家编排的自定义战役航线"
+        }
+      };
+
+      const CATEGORY_ORDER = [
+        "customLevels", "levelPackSources", "levelBests",
+        "campaignProgress", "campaignRewards", "achievements",
+        "stats", "voyageLogs", "replays", "customChapter"
+      ];
+
+      function getAllCategories() {
+        return CATEGORY_ORDER.map(function(k) { return Object.assign({ key: k }, CATEGORIES[k]); });
+      }
+
+      function loadLevelPackSources() {
+        try {
+          const stored = localStorage.getItem(LEVEL_PACK_SOURCES_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {};
+      }
+
+      function saveLevelPackSources(sources) {
+        localStorage.setItem(LEVEL_PACK_SOURCES_KEY, JSON.stringify(sources || {}));
+      }
+
+      function setLevelPackSource(levelId, sourceInfo) {
+        const sources = loadLevelPackSources();
+        if (sourceInfo) {
+          sources[levelId] = Object.assign({}, sourceInfo, { linkedAt: Date.now() });
+        } else {
+          delete sources[levelId];
+        }
+        saveLevelPackSources(sources);
+      }
+
+      function getAllReplays() {
+        const replays = {};
+        const prefix = "zfl26Replay_";
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf(prefix) === 0) {
+            try {
+              const id = key.substring(prefix.length);
+              const data = localStorage.getItem(key);
+              if (data) replays[id] = JSON.parse(data);
+            } catch (e) {}
+          }
+        }
+        return replays;
+      }
+
+      function collectExportData(selectedCategories) {
+        const cats = selectedCategories || CATEGORY_ORDER;
+        const data = {};
+
+        if (cats.indexOf("customLevels") >= 0) {
+          data.customLevels = LevelData.loadCustomLevels();
+        }
+        if (cats.indexOf("levelPackSources") >= 0) {
+          data.levelPackSources = loadLevelPackSources();
+        }
+        if (cats.indexOf("levelBests") >= 0) {
+          data.levelBests = LevelData.loadLevelBests();
+          data.builtinUnlocked = LevelData.loadBuiltinUnlocked();
+          data.globalBest = LevelData.loadGlobalBest();
+        }
+        if (cats.indexOf("campaignProgress") >= 0) {
+          data.campaignProgress = CampaignStore.loadProgress();
+        }
+        if (cats.indexOf("campaignRewards") >= 0) {
+          data.campaignRewards = CampaignStore.loadRewards();
+        }
+        if (cats.indexOf("achievements") >= 0) {
+          data.achievements = AchievementRules.loadUnlocked();
+        }
+        if (cats.indexOf("stats") >= 0) {
+          data.stats = StatsStore.getAll();
+        }
+        if (cats.indexOf("voyageLogs") >= 0) {
+          data.voyageLogs = VoyageLogStore.loadAll();
+        }
+        if (cats.indexOf("replays") >= 0) {
+          data.replays = getAllReplays();
+        }
+        if (cats.indexOf("customChapter") >= 0) {
+          data.customChapter = CampaignConfig.loadRawCustomChapterData();
+        }
+
+        return data;
+      }
+
+      function createProfile(playerName, selectedCategories) {
+        return {
+          formatVersion: PROFILE_FORMAT_VERSION,
+          gameVersion: GAME_VERSION,
+          type: PROFILE_TYPE,
+          exportedAt: Date.now(),
+          playerName: playerName || "",
+          categories: selectedCategories || CATEGORY_ORDER.slice(),
+          data: collectExportData(selectedCategories)
+        };
+      }
+
+      function validateProfile(profile) {
+        const errors = [];
+        if (!profile || typeof profile !== "object") {
+          return { valid: false, errors: ["档案不是有效的 JSON 对象"] };
+        }
+        if (profile.type !== PROFILE_TYPE) {
+          errors.push("文件类型不正确，期望玩家档案 (type: player_profile)");
+        }
+        if (typeof profile.formatVersion !== "number") {
+          errors.push("缺少 formatVersion 字段");
+        } else if (profile.formatVersion > PROFILE_FORMAT_VERSION) {
+          errors.push("档案格式版本过新 (v" + profile.formatVersion + ")，当前游戏支持 v" + PROFILE_FORMAT_VERSION + "，请更新游戏");
+        }
+        if (!profile.data || typeof profile.data !== "object") {
+          errors.push("缺少 data 数据字段");
+        }
+        return { valid: errors.length === 0, errors: errors };
+      }
+
+      function analyzeDiff(profile) {
+        const result = {};
+        const data = profile.data || {};
+
+        if (data.customLevels && Array.isArray(data.customLevels)) {
+          const existing = LevelData.loadCustomLevels();
+          const existingIds = existing.map(function(l) { return l.id; });
+          const existingNames = existing.map(function(l) { return l.name; });
+          const added = [];
+          const overwritten = [];
+          data.customLevels.forEach(function(lvl) {
+            if (lvl.id && existingIds.indexOf(lvl.id) >= 0) {
+              overwritten.push(lvl.name || lvl.id);
+            } else if (lvl.name && existingNames.indexOf(lvl.name) >= 0) {
+              overwritten.push(lvl.name);
+            } else {
+              added.push(lvl.name || lvl.id || "未命名关卡");
+            }
+          });
+          result.customLevels = {
+            total: data.customLevels.length,
+            added: added,
+            overwritten: overwritten,
+            skipped: [],
+            action: added.length > 0 || overwritten.length > 0 ? "merge" : "skip"
+          };
+        }
+
+        if (data.levelPackSources && typeof data.levelPackSources === "object") {
+          const existing = loadLevelPackSources();
+          const existingKeys = Object.keys(existing);
+          const importKeys = Object.keys(data.levelPackSources);
+          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
+          const overwritten = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
+          result.levelPackSources = {
+            total: importKeys.length,
+            added: added,
+            overwritten: overwritten,
+            skipped: [],
+            action: "merge"
+          };
+        }
+
+        if (data.levelBests && typeof data.levelBests === "object") {
+          const existing = LevelData.loadLevelBests();
+          const existingKeys = Object.keys(existing);
+          const importKeys = Object.keys(data.levelBests);
+          const added = [];
+          const overwritten = [];
+          const skipped = [];
+          importKeys.forEach(function(k) {
+            const importedScore = Number(data.levelBests[k] || 0);
+            const existingScore = Number(existing[k] || 0);
+            if (existingKeys.indexOf(k) < 0) {
+              added.push(k);
+            } else if (importedScore > existingScore) {
+              overwritten.push(k + " (" + existingScore + " → " + importedScore + ")");
+            } else {
+              skipped.push(k + " (当前: " + existingScore + " ≥ 导入: " + importedScore + ")");
+            }
+          });
+          result.levelBests = {
+            total: importKeys.length,
+            added: added,
+            overwritten: overwritten,
+            skipped: skipped,
+            action: "merge"
+          };
+        }
+
+        if (data.campaignProgress && typeof data.campaignProgress === "object") {
+          const existing = CampaignStore.loadProgress();
+          const existingChapters = Object.keys(existing.chapterProgress || {});
+          const importChapters = Object.keys(data.campaignProgress.chapterProgress || {});
+          const added = importChapters.filter(function(k) { return existingChapters.indexOf(k) < 0; });
+          const overwritten = [];
+          importChapters.forEach(function(k) {
+            if (existingChapters.indexOf(k) >= 0) {
+              const ex = existing.chapterProgress[k] || {};
+              const im = data.campaignProgress.chapterProgress[k] || {};
+              const exBest = ex.bestScore || 0;
+              const imBest = im.bestScore || 0;
+              if (imBest > exBest) {
+                overwritten.push(k + " (最佳分: " + exBest + " → " + imBest + ")");
+              }
+            }
+          });
+          result.campaignProgress = {
+            total: importChapters.length + (data.campaignProgress.currentChapterId ? 1 : 0),
+            added: added,
+            overwritten: overwritten,
+            skipped: [],
+            action: data.campaignProgress.currentChapterId ? "overwrite" : "merge"
+          };
+        }
+
+        if (data.campaignRewards && typeof data.campaignRewards === "object") {
+          const existing = CampaignStore.loadRewards();
+          const existingTitles = existing.titles || [];
+          const importTitles = (data.campaignRewards.titles || []).map(function(t) {
+            return typeof t === "string" ? t : (t.name || JSON.stringify(t));
+          });
+          const added = importTitles.filter(function(t) { return existingTitles.indexOf(t) < 0; });
+          result.campaignRewards = {
+            total: importTitles.length,
+            added: added,
+            overwritten: [],
+            skipped: importTitles.length - added.length,
+            action: "merge"
+          };
+        }
+
+        if (data.achievements && typeof data.achievements === "object") {
+          const existing = AchievementRules.loadUnlocked();
+          const existingKeys = Object.keys(existing);
+          const importKeys = Object.keys(data.achievements);
+          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
+          result.achievements = {
+            total: importKeys.length,
+            added: added,
+            overwritten: [],
+            skipped: importKeys.length - added.length,
+            action: "merge"
+          };
+        }
+
+        if (data.stats && typeof data.stats === "object") {
+          result.stats = {
+            total: Object.keys(data.stats).length,
+            added: [],
+            overwritten: [],
+            skipped: [],
+            action: "merge",
+            note: "统计数据将按最大值与累加智能合并（如最大连败取较大值，累计护送取累加值）"
+          };
+        }
+
+        if (data.voyageLogs && Array.isArray(data.voyageLogs)) {
+          const existing = VoyageLogStore.loadAll();
+          const existingIds = existing.map(function(l) { return l.id; });
+          const added = [];
+          const skipped = [];
+          data.voyageLogs.forEach(function(log) {
+            if (log.id && existingIds.indexOf(log.id) >= 0) {
+              skipped.push(log.id);
+            } else {
+              added.push((log.levelName || "未知关卡") + " - " + (log.result === "win" ? "胜利" : "失败"));
+            }
+          });
+          result.voyageLogs = {
+            total: data.voyageLogs.length,
+            added: added,
+            overwritten: [],
+            skipped: skipped,
+            action: "merge"
+          };
+        }
+
+        if (data.replays && typeof data.replays === "object") {
+          const existingKeys = Object.keys(getAllReplays());
+          const importKeys = Object.keys(data.replays);
+          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
+          result.replays = {
+            total: importKeys.length,
+            added: added,
+            overwritten: [],
+            skipped: importKeys.length - added.length,
+            action: "merge"
+          };
+        }
+
+        if (data.customChapter && typeof data.customChapter === "object") {
+          const existing = CampaignConfig.loadRawCustomChapterData();
+          const willOverwrite = !!(existing && existing.levelIds && existing.levelIds.length > 0);
+          result.customChapter = {
+            total: 1,
+            added: willOverwrite ? [] : ["新建自定义航线"],
+            overwritten: willOverwrite ? [existing.name || "当前自定义航线"] : [],
+            skipped: [],
+            action: willOverwrite ? "overwrite" : "add"
+          };
+        }
+
+        return result;
+      }
+
+      function mergeStats(existingStats, importedStats) {
+        const merged = Object.assign({}, existingStats);
+        const numericMax = ["fastestClearTime", "maxLossStreak"];
+        const numericSum = [
+          "totalEscorted", "perfectWins", "narrowBeamWins",
+          "campaignCompletions", "campaignNoDamageCompletions",
+          "customRouteCompletions", "fogWins", "flashEscortSuccess",
+          "currentLossStreak"
+        ];
+
+        numericMax.forEach(function(key) {
+          if (importedStats[key] != null) {
+            if (merged[key] == null) {
+              merged[key] = importedStats[key];
+            } else if (key === "fastestClearTime") {
+              if (importedStats[key] < merged[key]) merged[key] = importedStats[key];
+            } else {
+              if (importedStats[key] > merged[key]) merged[key] = importedStats[key];
+            }
+          }
+        });
+
+        numericSum.forEach(function(key) {
+          if (importedStats[key] != null) {
+            merged[key] = (merged[key] || 0) + (importedStats[key] || 0);
+          }
+        });
+
+        if (importedStats.weatherWins) {
+          merged.weatherWins = merged.weatherWins || {};
+          ["seaBreeze", "denseFog", "lighthouseFlash"].forEach(function(k) {
+            if (importedStats.weatherWins[k] != null) {
+              merged.weatherWins[k] = (merged.weatherWins[k] || 0) + (importedStats.weatherWins[k] || 0);
+            }
+          });
+        }
+
+        if (importedStats.failReasons) {
+          merged.failReasons = merged.failReasons || {};
+          ["top", "bottom", "unlit", "rock"].forEach(function(k) {
+            if (importedStats.failReasons[k] != null) {
+              merged.failReasons[k] = (merged.failReasons[k] || 0) + (importedStats.failReasons[k] || 0);
+            }
+          });
+        }
+
+        return merged;
+      }
+
+      function mergeCampaignProgress(existing, imported) {
+        const merged = Object.assign({}, existing);
+        merged.chapterProgress = Object.assign({}, existing.chapterProgress || {});
+
+        if (imported.chapterProgress) {
+          Object.keys(imported.chapterProgress).forEach(function(chId) {
+            const im = imported.chapterProgress[chId];
+            const ex = merged.chapterProgress[chId];
+            if (!ex) {
+              merged.chapterProgress[chId] = Object.assign({}, im);
+            } else {
+              const mergedCh = Object.assign({}, ex, im);
+              mergedCh.bestScore = Math.max(ex.bestScore || 0, im.bestScore || 0);
+              mergedCh.completed = ex.completed || im.completed;
+              mergedCh.completedAt = ex.completedAt || im.completedAt;
+              if (im.lastRun && (!ex.lastRun || (im.lastRun.score || 0) > (ex.lastRun.score || 0))) {
+                mergedCh.lastRun = im.lastRun;
+              }
+              merged.chapterProgress[chId] = mergedCh;
+            }
+          });
+        }
+
+        if (imported.currentChapterId && imported.campaignSaveState === "playing") {
+          if (!existing.currentChapterId) {
+            merged.currentChapterId = imported.currentChapterId;
+            merged.currentLevelIndex = imported.currentLevelIndex;
+            merged.totalScore = imported.totalScore;
+            merged.lives = imported.lives;
+            merged.startingLives = imported.startingLives;
+            merged.carryOver = imported.carryOver;
+            merged.currentRun = imported.currentRun;
+            merged.campaignSaveState = imported.campaignSaveState;
+            merged.lastSavedAt = imported.lastSavedAt;
+          }
+        }
+
+        return merged;
+      }
+
+      function snapshotAllData() {
+        const snapshot = {};
+        const keys = [
+          "zfl26CustomLevels", "zfl26LevelBests", "zfl26BuiltinUnlocked", "zfl26Best",
+          "zfl26CampaignProgress", "zfl26CampaignRewards",
+          "zfl26Achievements", "zfl26Stats", "zfl26VoyageLogs",
+          "zfl26CustomChapter", LEVEL_PACK_SOURCES_KEY
+        ];
+        keys.forEach(function(k) {
+          snapshot[k] = localStorage.getItem(k);
+        });
+        const replayKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf("zfl26Replay_") === 0) {
+            replayKeys.push(key);
+            snapshot[key] = localStorage.getItem(key);
+          }
+        }
+        snapshot._replayKeys = replayKeys;
+        return snapshot;
+      }
+
+      function restoreSnapshot(snapshot) {
+        try {
+          Object.keys(snapshot).forEach(function(k) {
+            if (k === "_replayKeys") return;
+            if (snapshot[k] === null || snapshot[k] === undefined) {
+              localStorage.removeItem(k);
+            } else {
+              localStorage.setItem(k, snapshot[k]);
+            }
+          });
+          const prefix = "zfl26Replay_";
+          const replayKeysInSnapshot = snapshot._replayKeys || [];
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.indexOf(prefix) === 0 && replayKeysInSnapshot.indexOf(key) < 0) {
+              localStorage.removeItem(key);
+            }
+          }
+          return true;
+        } catch (e) {
+          console.error("Failed to restore snapshot:", e);
+          return false;
+        }
+      }
+
+      function importProfile(profile, selectedCategories) {
+        const validation = validateProfile(profile);
+        if (!validation.valid) {
+          return { success: false, errors: validation.errors };
+        }
+
+        const cats = selectedCategories || (profile.categories || CATEGORY_ORDER);
+        const data = profile.data || {};
+        const snapshot = snapshotAllData();
+        const results = {};
+
+        try {
+          if (cats.indexOf("customLevels") >= 0 && data.customLevels) {
+            const existing = LevelData.loadCustomLevels();
+            const existingIds = existing.map(function(l) { return l.id; });
+            const existingNames = existing.map(function(l) { return l.name; });
+            const imported = [];
+            const overwritten = [];
+            const newSources = loadLevelPackSources();
+
+            data.customLevels.forEach(function(packLvl) {
+              const normalized = LevelData.normalizeLevel(packLvl);
+              const dupIdx = existing.findIndex(function(e) {
+                return (normalized.id && e.id === normalized.id) ||
+                       (normalized.name && e.name === normalized.name);
+              });
+
+              if (dupIdx >= 0) {
+                const existingId = existing[dupIdx].id;
+                normalized.id = existingId;
+                existing[dupIdx] = normalized;
+                overwritten.push(normalized.name);
+                if (data.levelPackSources && data.levelPackSources[packLvl.id]) {
+                  newSources[existingId] = data.levelPackSources[packLvl.id];
+                }
+              } else {
+                if (!normalized.id || !LevelData.isCustomLevel(normalized.id)) {
+                  normalized.id = "custom_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+                }
+                existing.push(normalized);
+                imported.push(normalized.name);
+                if (data.levelPackSources && data.levelPackSources[packLvl.id]) {
+                  newSources[normalized.id] = data.levelPackSources[packLvl.id];
+                }
+              }
+            });
+
+            LevelData.saveCustomLevels(existing);
+            if (cats.indexOf("levelPackSources") >= 0) {
+              saveLevelPackSources(newSources);
+            }
+            results.customLevels = { imported: imported, overwritten: overwritten };
+          }
+
+          if (cats.indexOf("levelPackSources") >= 0 && data.levelPackSources && cats.indexOf("customLevels") < 0) {
+            const sources = loadLevelPackSources();
+            Object.keys(data.levelPackSources).forEach(function(lvlId) {
+              sources[lvlId] = data.levelPackSources[lvlId];
+            });
+            saveLevelPackSources(sources);
+            results.levelPackSources = { imported: Object.keys(data.levelPackSources) };
+          }
+
+          if (cats.indexOf("levelBests") >= 0) {
+            if (data.levelBests) {
+              const existing = LevelData.loadLevelBests();
+              Object.keys(data.levelBests).forEach(function(k) {
+                const imScore = Number(data.levelBests[k] || 0);
+                const exScore = Number(existing[k] || 0);
+                if (imScore > exScore) existing[k] = imScore;
+              });
+              localStorage.setItem("zfl26LevelBests", JSON.stringify(existing));
+            }
+            if (data.builtinUnlocked != null) {
+              const cur = LevelData.loadBuiltinUnlocked();
+              LevelData.saveBuiltinUnlocked(Math.max(cur, Number(data.builtinUnlocked)));
+            }
+            if (data.globalBest != null) {
+              const cur = LevelData.loadGlobalBest();
+              LevelData.saveGlobalBest(Math.max(cur, Number(data.globalBest)));
+            }
+            results.levelBests = { merged: true };
+          }
+
+          if (cats.indexOf("campaignProgress") >= 0 && data.campaignProgress) {
+            const existing = CampaignStore.loadProgress();
+            const merged = mergeCampaignProgress(existing, data.campaignProgress);
+            localStorage.setItem("zfl26CampaignProgress", JSON.stringify(merged));
+            results.campaignProgress = { merged: true };
+          }
+
+          if (cats.indexOf("campaignRewards") >= 0 && data.campaignRewards) {
+            const existing = CampaignStore.loadRewards();
+            const mergedTitles = existing.titles ? existing.titles.slice() : [];
+            const importTitles = data.campaignRewards.titles || [];
+            importTitles.forEach(function(t) {
+              const tName = typeof t === "string" ? t : (t.name || JSON.stringify(t));
+              if (mergedTitles.indexOf(tName) < 0) mergedTitles.push(tName);
+            });
+            const mergedUnlockedAt = Object.assign({}, existing.unlockedAt || {}, data.campaignRewards.unlockedAt || {});
+            localStorage.setItem("zfl26CampaignRewards", JSON.stringify({
+              titles: mergedTitles,
+              unlockedAt: mergedUnlockedAt
+            }));
+            results.campaignRewards = { imported: importTitles.length };
+          }
+
+          if (cats.indexOf("achievements") >= 0 && data.achievements) {
+            const existing = AchievementRules.loadUnlocked();
+            const merged = Object.assign({}, existing, data.achievements);
+            localStorage.setItem("zfl26Achievements", JSON.stringify(merged));
+            results.achievements = { imported: Object.keys(data.achievements).length };
+          }
+
+          if (cats.indexOf("stats") >= 0 && data.stats) {
+            const existing = StatsStore.getAll();
+            const merged = mergeStats(existing, data.stats);
+            localStorage.setItem("zfl26Stats", JSON.stringify(merged));
+            results.stats = { merged: true };
+          }
+
+          if (cats.indexOf("voyageLogs") >= 0 && Array.isArray(data.voyageLogs)) {
+            const existing = VoyageLogStore.loadAll();
+            const existingIds = existing.map(function(l) { return l.id; });
+            const mergedLogs = existing.slice();
+            let added = 0;
+            data.voyageLogs.forEach(function(log) {
+              if (!log.id || existingIds.indexOf(log.id) < 0) {
+                mergedLogs.unshift(log);
+                added++;
+              }
+            });
+            localStorage.setItem("zfl26VoyageLogs", JSON.stringify(mergedLogs.slice(0, 500)));
+            results.voyageLogs = { added: added };
+          }
+
+          if (cats.indexOf("replays") >= 0 && data.replays) {
+            const prefix = "zfl26Replay_";
+            const existingKeys = [];
+            for (let i = 0; i < localStorage.length; i++) {
+              const key = localStorage.key(i);
+              if (key && key.indexOf(prefix) === 0) existingKeys.push(key.substring(prefix.length));
+            }
+            let added = 0;
+            Object.keys(data.replays).forEach(function(id) {
+              if (existingKeys.indexOf(id) < 0) {
+                localStorage.setItem(prefix + id, JSON.stringify(data.replays[id]));
+                added++;
+              }
+            });
+            results.replays = { added: added };
+          }
+
+          if (cats.indexOf("customChapter") >= 0 && data.customChapter) {
+            if (data.customChapter.levelIds) {
+              localStorage.setItem("zfl26CustomChapter", JSON.stringify({
+                levelIds: data.customChapter.levelIds,
+                name: data.customChapter.name || "自定义航线"
+              }));
+              results.customChapter = { imported: true };
+            }
+          }
+
+          return { success: true, results: results };
+        } catch (e) {
+          console.error("Import failed, restoring snapshot:", e);
+          restoreSnapshot(snapshot);
+          return { success: false, errors: ["导入失败，已回滚到导入前状态：" + e.message] };
+        }
+      }
+
+      function exportProfileToFile(profile) {
+        const jsonStr = JSON.stringify(profile, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const safeName = (profile.playerName || "玩家").replace(/[^\w\u4e00-\u9fa5]/g, "_");
+        a.download = safeName + ".zfl26profile.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function parseProfileFromText(text) {
+        try {
+          const profile = JSON.parse(text);
+          const validation = validateProfile(profile);
+          if (!validation.valid) {
+            return { success: false, errors: validation.errors };
+          }
+          return { success: true, profile: profile };
+        } catch (e) {
+          return { success: false, errors: ["JSON 解析失败：" + e.message] };
+        }
+      }
+
+      function readProfileFromFile(file) {
+        return new Promise(function(resolve, reject) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const text = e.target.result;
+            const result = parseProfileFromText(text);
+            if (result.success) {
+              resolve(result.profile);
+            } else {
+              reject(result.errors.join("; "));
+            }
+          };
+          reader.onerror = function() { reject("文件读取失败"); };
+          reader.readAsText(file);
+        });
+      }
+
+      return {
+        PROFILE_FORMAT_VERSION: PROFILE_FORMAT_VERSION,
+        GAME_VERSION: GAME_VERSION,
+        CATEGORIES: CATEGORIES,
+        CATEGORY_ORDER: CATEGORY_ORDER,
+        getAllCategories: getAllCategories,
+        loadLevelPackSources: loadLevelPackSources,
+        saveLevelPackSources: saveLevelPackSources,
+        setLevelPackSource: setLevelPackSource,
+        createProfile: createProfile,
+        validateProfile: validateProfile,
+        analyzeDiff: analyzeDiff,
+        importProfile: importProfile,
+        exportProfileToFile: exportProfileToFile,
+        parseProfileFromText: parseProfileFromText,
+        readProfileFromFile: readProfileFromFile,
+        snapshotAllData: snapshotAllData,
+        restoreSnapshot: restoreSnapshot
       };
     })();
 
@@ -3550,6 +4443,8 @@
 
       return {
         achievements,
+        loadUnlocked,
+        saveUnlocked,
         isUnlocked,
         checkNewAchievements,
         getAllAchievements,
@@ -4731,6 +5626,43 @@
     const cancelImportBtn = document.querySelector("#cancelImportBtn");
     const importPackError = document.querySelector("#importPackError");
     const importPackSuccess = document.querySelector("#importPackSuccess");
+
+    // ===================== 玩家档案导入导出 DOM 引用 =====================
+    const profileExportBtn = document.querySelector("#profileExportBtn");
+    const profileImportBtn = document.querySelector("#profileImportBtn");
+    const profileExportOverlay = document.querySelector("#profileExportOverlay");
+    const profileImportOverlay = document.querySelector("#profileImportOverlay");
+    const profileExportName = document.querySelector("#profileExportName");
+    const profileExportCategoryList = document.querySelector("#profileExportCategoryList");
+    const profileExportSelectedCount = document.querySelector("#profileExportSelectedCount");
+    const profileSelectAllExportBtn = document.querySelector("#profileSelectAllExportBtn");
+    const profileDeselectAllExportBtn = document.querySelector("#profileDeselectAllExportBtn");
+    const profileConfirmExportBtn = document.querySelector("#profileConfirmExportBtn");
+    const profileCancelExportBtn = document.querySelector("#profileCancelExportBtn");
+    const profileExportError = document.querySelector("#profileExportError");
+
+    const profileImportFromTextBtn = document.querySelector("#profileImportFromTextBtn");
+    const profileImportFromFileBtn = document.querySelector("#profileImportFromFileBtn");
+    const profileImportFileInput = document.querySelector("#profileImportFileInput");
+    const profileImportTextSection = document.querySelector("#profileImportTextSection");
+    const profileImportTextarea = document.querySelector("#profileImportTextarea");
+    const profileParseImportTextBtn = document.querySelector("#profileParseImportTextBtn");
+    const profileImportStep1 = document.querySelector("#profileImportStep1");
+    const profileImportStep2 = document.querySelector("#profileImportStep2");
+    const profileImportPlayerName = document.querySelector("#profileImportPlayerName");
+    const profileImportExportedAt = document.querySelector("#profileImportExportedAt");
+    const profileImportGameVersion = document.querySelector("#profileImportGameVersion");
+    const profileImportFormatVersion = document.querySelector("#profileImportFormatVersion");
+    const profileImportCategoryCount = document.querySelector("#profileImportCategoryCount");
+    const profileImportCategoryList = document.querySelector("#profileImportCategoryList");
+    const profileImportSelectedCount = document.querySelector("#profileImportSelectedCount");
+    const profileSelectAllImportBtn = document.querySelector("#profileSelectAllImportBtn");
+    const profileDeselectAllImportBtn = document.querySelector("#profileDeselectAllImportBtn");
+    const profileDiffPreview = document.querySelector("#profileDiffPreview");
+    const profileConfirmImportBtn = document.querySelector("#profileConfirmImportBtn");
+    const profileCancelImportBtn = document.querySelector("#profileCancelImportBtn");
+    const profileImportError = document.querySelector("#profileImportError");
+    const profileImportSuccess = document.querySelector("#profileImportSuccess");
 
     // ===================== 游戏状态 =====================
     let state = "menu";
@@ -8256,6 +9188,262 @@
     let currentDuplicateStrategy = "skip";
     let importSelectedLevelIndices = [];
 
+    let profileExportSelectedCategories = [];
+    let currentImportProfile = null;
+    let profileImportSelectedCategories = [];
+
+    function refreshAllPanels() {
+      const mainMenuVisible = !mainMenu.classList.contains("hidden");
+      const levelSelectVisible = !levelSelectPanel.classList.contains("hidden");
+      const achievementsVisible = !achievementsPanel.classList.contains("hidden");
+      const campaignVisible = !campaignSelectPanel.classList.contains("hidden");
+      const voyageLogVisible = !voyageLogPanel.classList.contains("hidden");
+
+      if (!levelSelectVisible && !achievementsVisible && !campaignVisible && !voyageLogVisible && !mainMenuVisible) {
+        return;
+      }
+
+      if (levelSelectVisible) {
+        renderLevelCards();
+      }
+      if (achievementsVisible) {
+        renderStats();
+        renderAchievements();
+      }
+      if (campaignVisible) {
+        renderChapterCards();
+      }
+      if (voyageLogVisible) {
+        renderVoyageLogFilters();
+        renderVoyageLogList();
+      }
+
+      const bestText = document.querySelector("#bestText");
+      if (bestText) bestText.textContent = LevelData.loadGlobalBest();
+    }
+
+    function countExportProfileCategories() {
+      const counts = {};
+      const data = ProfileStore.createProfile("", ProfileStore.CATEGORY_ORDER).data;
+      if (data.customLevels) counts.customLevels = data.customLevels.length;
+      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
+      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length + (data.builtinUnlocked ? 1 : 0);
+      if (data.campaignProgress) {
+        const cp = data.campaignProgress;
+        counts.campaignProgress = Object.keys(cp.chapterProgress || {}).length + (cp.currentChapterId ? 1 : 0);
+      }
+      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
+      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
+      if (data.stats) counts.stats = Object.keys(data.stats).length;
+      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
+      if (data.replays) counts.replays = Object.keys(data.replays).length;
+      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      return counts;
+    }
+
+    function renderProfileCategoryList(containerEl, selectedCats, onChange, counts) {
+      containerEl.innerHTML = "";
+      const allCats = ProfileStore.getAllCategories();
+      allCats.forEach(function(cat) {
+        const isSelected = selectedCats.indexOf(cat.key) >= 0;
+        const count = counts && counts[cat.key] != null ? counts[cat.key] : null;
+        const countText = count != null ? (" · " + count + " 项") : "";
+        const item = document.createElement("div");
+        item.className = "category-item" + (isSelected ? " selected" : "");
+        item.innerHTML =
+          '<input type="checkbox" ' + (isSelected ? "checked" : "") + ' data-cat="' + cat.key + '">' +
+          '<div class="category-item-content">' +
+            '<div class="category-item-header">' +
+              '<span class="category-item-icon">' + cat.icon + '</span>' +
+              '<span class="category-item-name">' + cat.label + '</span>' +
+              '<span class="category-item-count">' + countText + '</span>' +
+            '</div>' +
+            '<div class="category-item-desc">' + cat.description + '</div>' +
+          '</div>';
+        item.onclick = function(e) {
+          if (e.target.tagName !== "INPUT") {
+            const cb = item.querySelector('input[type="checkbox"]');
+            cb.checked = !cb.checked;
+          }
+          onChange(cat.key);
+        };
+        containerEl.appendChild(item);
+      });
+    }
+
+    function updateProfileSelectionCount(el, selectedCats) {
+      el.textContent = selectedCats.length + " / " + ProfileStore.CATEGORY_ORDER.length + " 类";
+    }
+
+    function toggleProfileExportCategory(catKey) {
+      const idx = profileExportSelectedCategories.indexOf(catKey);
+      if (idx >= 0) {
+        profileExportSelectedCategories.splice(idx, 1);
+      } else {
+        profileExportSelectedCategories.push(catKey);
+      }
+      const counts = countExportProfileCategories();
+      renderProfileCategoryList(profileExportCategoryList, profileExportSelectedCategories, toggleProfileExportCategory, counts);
+      updateProfileSelectionCount(profileExportSelectedCount, profileExportSelectedCategories);
+      profileConfirmExportBtn.disabled = profileExportSelectedCategories.length === 0;
+    }
+
+    function toggleProfileImportCategory(catKey) {
+      const idx = profileImportSelectedCategories.indexOf(catKey);
+      if (idx >= 0) {
+        profileImportSelectedCategories.splice(idx, 1);
+      } else {
+        profileImportSelectedCategories.push(catKey);
+      }
+      const data = currentImportProfile ? currentImportProfile.data : {};
+      const counts = {};
+      if (data.customLevels) counts.customLevels = data.customLevels.length;
+      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
+      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
+      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
+      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
+      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
+      if (data.stats) counts.stats = Object.keys(data.stats).length;
+      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
+      if (data.replays) counts.replays = Object.keys(data.replays).length;
+      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
+      updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
+      profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
+      renderProfileDiffPreview();
+    }
+
+    function renderProfileDiffPreview() {
+      if (!currentImportProfile) {
+        profileDiffPreview.innerHTML = '<div style="text-align:center;color:#879aa0;padding:20px;">暂无档案加载中...</div>';
+        return;
+      }
+
+      const diff = ProfileStore.analyzeDiff(currentImportProfile);
+      const allCats = ProfileStore.getAllCategories();
+      let html = "";
+
+      allCats.forEach(function(cat) {
+        if (!diff[cat.key]) return;
+        if (profileImportSelectedCategories.indexOf(cat.key) < 0) return;
+        const d = diff[cat.key];
+        const addedCount = (d.added || []).length;
+        const overCount = (d.overwritten || []).length;
+        const skipCount = typeof d.skipped instanceof Array ? d.skipped.length : (typeof d.skipped || 0);
+
+        html += '<div class="diff-category">';
+        html += '<div class="diff-category-header">';
+        html += '<span>' + cat.icon + '</span>';
+        html += '<span>' + cat.label + '</span>';
+        html += '</div>';
+        html += '<div class="diff-stat-row">';
+        html += '<span class="diff-stat">共 ' + d.total + ' 项</span>';
+        if (addedCount > 0) html += '<span class="diff-stat add">➕ 新增 ' + addedCount + '</span>';
+        if (overCount > 0) html += '<span class="diff-stat overwrite">🔄 覆盖 ' + overCount + '</span>';
+        if (skipCount > 0) html += '<span class="diff-stat skip">⏭ 跳过 ' + skipCount + '</span>';
+        html += '</div>';
+
+        if (d.note) {
+          html += '<div class="diff-note">' + d.note + '</div>';
+        }
+
+        let itemsHtml = '';
+        const maxShow = 5;
+        if (d.added && d.added.length > 0) {
+          const toShow = d.added.slice(0, maxShow);
+          const extra = d.added.length - toShow.length;
+          itemsHtml += '<li style="color:#7dd69b">新增：' + toShow.map(function(s) { return escapeHtml(String(s)); }).join("、") + (extra > 0 ? " 等 " + d.added.length + " 项" : "") + '</li>';
+        }
+        if (d.overwritten && d.overwritten.length > 0) {
+          const toShow = d.overwritten.slice(0, maxShow);
+          const extra = d.overwritten.length - toShow.length;
+          itemsHtml += '<li style="color:#e7c46a">覆盖：' + toShow.map(function(s) { return escapeHtml(String(s)); }).join("、") + (extra > 0 ? " 等 " + d.overwritten.length + " 项" : "") + '</li>';
+        }
+        if (d.skipped instanceof Array && d.skipped.length > 0) {
+          const toShow = d.skipped.slice(0, maxShow);
+          const extra = d.skipped.length - toShow.length;
+          itemsHtml += '<li style="color:#879aa0">跳过：' + toShow.map(function(s) { return escapeHtml(String(s)); }).join("、") + (extra > 0 ? " 等 " + d.skipped.length + " 项" : "") + '</li>';
+        }
+        if (itemsHtml) {
+          html += '<ul class="diff-items-list">' + itemsHtml + '</ul>';
+        }
+
+        html += '</div>';
+      });
+
+      if (!html) {
+        html = '<div style="text-align:center;color:#879aa0;padding:20px;">请选择要导入的数据类别</div>';
+      }
+
+      profileDiffPreview.innerHTML = html;
+    }
+
+    function showProfileExportOverlay() {
+      profileExportName.value = "";
+      profileExportError.classList.add("hidden");
+      profileExportSelectedCategories = ProfileStore.CATEGORY_ORDER.slice();
+      const counts = countExportProfileCategories();
+      renderProfileCategoryList(profileExportCategoryList, profileExportSelectedCategories, toggleProfileExportCategory, counts, false);
+      updateProfileSelectionCount(profileExportSelectedCount, profileExportSelectedCategories);
+      profileConfirmExportBtn.disabled = profileExportSelectedCategories.length === 0;
+      profileExportOverlay.classList.remove("hidden");
+    }
+
+    function hideProfileExportOverlay() {
+      profileExportOverlay.classList.add("hidden");
+      profileExportSelectedCategories = [];
+    }
+
+    function showProfileImportOverlay() {
+      profileImportError.classList.add("hidden");
+      profileImportSuccess.classList.add("hidden");
+      profileImportStep1.classList.remove("hidden");
+      profileImportStep2.classList.add("hidden");
+      profileImportTextSection.classList.add("hidden");
+      profileImportTextarea.value = "";
+      profileImportFileInput.value = "";
+      profileConfirmImportBtn.disabled = true;
+      currentImportProfile = null;
+      profileImportSelectedCategories = [];
+      profileDiffPreview.innerHTML = "";
+      profileImportOverlay.classList.remove("hidden");
+    }
+
+    function hideProfileImportOverlay() {
+      profileImportOverlay.classList.add("hidden");
+      currentImportProfile = null;
+      profileImportSelectedCategories = [];
+    }
+
+    function handleProfileParsed(profile) {
+      currentImportProfile = profile;
+      const data = profile.data || {};
+      profileImportPlayerName.textContent = profile.playerName || "(未命名玩家)";
+      profileImportExportedAt.textContent = formatDateTime(profile.exportedAt);
+      profileImportGameVersion.textContent = profile.gameVersion || "-";
+      profileImportFormatVersion.textContent = "v" + (profile.formatVersion || "-");
+      const availableCats = profile.categories || ProfileStore.CATEGORY_ORDER.filter(function(k) { return data[k] != null; });
+      profileImportCategoryCount.textContent = availableCats.length + " 类";
+      profileImportSelectedCategories = availableCats.slice();
+      const counts = {};
+      if (data.customLevels) counts.customLevels = data.customLevels.length;
+      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
+      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
+      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
+      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
+      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
+      if (data.stats) counts.stats = Object.keys(data.stats).length;
+      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
+      if (data.replays) counts.replays = Object.keys(data.replays).length;
+      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts, true);
+      updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
+      profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
+      profileImportStep1.classList.add("hidden");
+      profileImportStep2.classList.remove("hidden");
+      renderProfileDiffPreview();
+    }
+
     function showExportPackOverlay(preselectedLevelId) {
       exportPackName.value = "";
       exportPackAuthor.value = "";
@@ -8660,6 +9848,184 @@
         const radio = opt.querySelector('input[type="radio"]');
         if (radio) radio.checked = true;
       });
+    });
+
+    profileExportBtn.addEventListener("click", function() {
+      showProfileExportOverlay();
+    });
+
+    profileImportBtn.addEventListener("click", function() {
+      showProfileImportOverlay();
+    });
+
+    profileCancelExportBtn.addEventListener("click", function() {
+      hideProfileExportOverlay();
+    });
+
+    profileSelectAllExportBtn.addEventListener("click", function() {
+      profileExportSelectedCategories = ProfileStore.CATEGORY_ORDER.slice();
+      const counts = countExportProfileCategories();
+      renderProfileCategoryList(profileExportCategoryList, profileExportSelectedCategories, toggleProfileExportCategory, counts);
+      updateProfileSelectionCount(profileExportSelectedCount, profileExportSelectedCategories);
+      profileConfirmExportBtn.disabled = profileExportSelectedCategories.length === 0;
+    });
+
+    profileDeselectAllExportBtn.addEventListener("click", function() {
+      profileExportSelectedCategories = [];
+      const counts = countExportProfileCategories();
+      renderProfileCategoryList(profileExportCategoryList, profileExportSelectedCategories, toggleProfileExportCategory, counts);
+      updateProfileSelectionCount(profileExportSelectedCount, profileExportSelectedCategories);
+      profileConfirmExportBtn.disabled = true;
+    });
+
+    profileConfirmExportBtn.addEventListener("click", function() {
+      if (profileExportSelectedCategories.length === 0) {
+        profileExportError.textContent = "请至少选择一类数据";
+        profileExportError.classList.remove("hidden");
+        return;
+      }
+      profileExportError.classList.add("hidden");
+      const playerName = profileExportName.value.trim();
+      const profile = ProfileStore.createProfile(playerName, profileExportSelectedCategories);
+      ProfileStore.exportProfileToFile(profile);
+      hideProfileExportOverlay();
+    });
+
+    profileExportOverlay.addEventListener("click", function(e) {
+      if (e.target === profileExportOverlay) {
+        hideProfileExportOverlay();
+      }
+    });
+
+    profileCancelImportBtn.addEventListener("click", function() {
+      hideProfileImportOverlay();
+    });
+
+    profileImportFromTextBtn.addEventListener("click", function() {
+      profileImportTextSection.classList.remove("hidden");
+    });
+
+    profileImportFromFileBtn.addEventListener("click", function() {
+      profileImportFileInput.click();
+    });
+
+    profileImportFileInput.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      profileImportError.classList.add("hidden");
+      ProfileStore.readProfileFromFile(file).then(function(profile) {
+        handleProfileParsed(profile);
+      }).catch(function(err) {
+        profileImportError.textContent = err;
+        profileImportError.classList.remove("hidden");
+      });
+      profileImportFileInput.value = "";
+    });
+
+    profileParseImportTextBtn.addEventListener("click", function() {
+      const text = profileImportTextarea.value.trim();
+      if (!text) {
+        profileImportError.textContent = "请粘贴玩家档案数据";
+        profileImportError.classList.remove("hidden");
+        return;
+      }
+      profileImportError.classList.add("hidden");
+      const result = ProfileStore.parseProfileFromText(text);
+      if (!result.success) {
+        profileImportError.textContent = result.errors.join("; ");
+        profileImportError.classList.remove("hidden");
+        return;
+      }
+      handleProfileParsed(result.profile);
+    });
+
+    profileSelectAllImportBtn.addEventListener("click", function() {
+      if (!currentImportProfile) return;
+      const data = currentImportProfile.data || {};
+      profileImportSelectedCategories = ProfileStore.CATEGORY_ORDER.filter(function(k) { return data[k] != null; });
+      const counts = {};
+      if (data.customLevels) counts.customLevels = data.customLevels.length;
+      if (data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
+      if (data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
+      if (data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
+      if (data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
+      if (data.achievements) counts.achievements = Object.keys(data.achievements).length;
+      if (data.stats) counts.stats = Object.keys(data.stats).length;
+      if (data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
+      if (data.replays) counts.replays = Object.keys(data.replays).length;
+      if (data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
+      updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
+      profileConfirmImportBtn.disabled = profileImportSelectedCategories.length === 0;
+      renderProfileDiffPreview();
+    });
+
+    profileDeselectAllImportBtn.addEventListener("click", function() {
+      profileImportSelectedCategories = [];
+      const data = currentImportProfile ? currentImportProfile.data : {};
+      const counts = {};
+      if (data && data.customLevels) counts.customLevels = data.customLevels.length;
+      if (data && data.levelPackSources) counts.levelPackSources = Object.keys(data.levelPackSources).length;
+      if (data && data.levelBests) counts.levelBests = Object.keys(data.levelBests).length;
+      if (data && data.campaignProgress) counts.campaignProgress = Object.keys(data.campaignProgress.chapterProgress || {}).length;
+      if (data && data.campaignRewards) counts.campaignRewards = (data.campaignRewards.titles || []).length;
+      if (data && data.achievements) counts.achievements = Object.keys(data.achievements).length;
+      if (data && data.stats) counts.stats = Object.keys(data.stats).length;
+      if (data && data.voyageLogs) counts.voyageLogs = data.voyageLogs.length;
+      if (data && data.replays) counts.replays = Object.keys(data.replays).length;
+      if (data && data.customChapter) counts.customChapter = (data.customChapter.levelIds || []).length > 0 ? 1 : 0;
+      renderProfileCategoryList(profileImportCategoryList, profileImportSelectedCategories, toggleProfileImportCategory, counts);
+      updateProfileSelectionCount(profileImportSelectedCount, profileImportSelectedCategories);
+      profileConfirmImportBtn.disabled = true;
+      renderProfileDiffPreview();
+    });
+
+    profileConfirmImportBtn.addEventListener("click", function() {
+      if (!currentImportProfile || profileImportSelectedCategories.length === 0) {
+        profileImportError.textContent = "请选择要导入的数据类别";
+        profileImportError.classList.remove("hidden");
+        return;
+      }
+      profileImportError.classList.add("hidden");
+      profileImportSuccess.classList.add("hidden");
+
+      const result = ProfileStore.importProfile(currentImportProfile, profileImportSelectedCategories);
+      if (!result.success) {
+        profileImportError.textContent = result.errors.join("; ");
+        profileImportError.classList.remove("hidden");
+        return;
+      }
+
+      const results = result.results || {};
+      let msg = "导入成功！\n\n";
+      ProfileStore.CATEGORY_ORDER.forEach(function(key) {
+        if (results[key]) {
+          const cat = ProfileStore.CATEGORIES[key];
+          msg += cat.icon + " " + cat.label + "：";
+          if (results[key].imported != null) msg += "导入 " + results[key].imported + " 项";
+          else if (results[key].added != null) msg += "新增 " + results[key].added + " 项";
+          else if (results[key].merged) msg += "已合并";
+          else msg += "已处理";
+          msg += "\n";
+        }
+      });
+
+      AchievementRules.checkNewAchievements();
+      refreshAllPanels();
+
+      profileImportSuccess.textContent = msg;
+      profileImportSuccess.classList.remove("hidden");
+      profileConfirmImportBtn.disabled = true;
+
+      setTimeout(function() {
+        hideProfileImportOverlay();
+      }, 3000);
+    });
+
+    profileImportOverlay.addEventListener("click", function(e) {
+      if (e.target === profileImportOverlay) {
+        hideProfileImportOverlay();
+      }
     });
 
     updateGlobalBest();

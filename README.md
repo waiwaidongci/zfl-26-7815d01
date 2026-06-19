@@ -163,6 +163,212 @@
 - 导入时会校验版本，版本过新需要更新游戏
 - 低版本关卡包可在高版本游戏中正常导入
 
+## 玩家档案导入导出
+
+支持将完整玩家档案打包导出为文件，或从他人分享的档案文件中选择性导入数据。导入过程完全原子化——失败时自动回滚到导入前状态，不会破坏本地已有存档。
+
+### 导出玩家档案
+
+1. 进入「游戏设置」界面
+2. 点击「📤 导出档案」按钮
+3. （可选）填写玩家名称，便于识别档案归属
+4. 勾选要导出的数据类别（默认全选），共 10 类：
+   - 🗺️ 自定义关卡
+   - 📦 关卡包来源信息
+   - 🏆 单关最佳分
+   - ⚔️ 战役进度
+   - 🎖️ 战役奖励
+   - 🏅 成就
+   - 📊 统计
+   - 📜 航海日志
+   - 🎬 回放摘要
+   - 🧭 最近自定义航线
+5. 点击「导出文件」，浏览器自动下载 `.zfl26profile.json` 文件
+
+### 导入玩家档案
+
+1. 进入「游戏设置」界面
+2. 点击「📥 导入档案」按钮
+3. 选择导入方式：
+   - **从文本粘贴**：粘贴档案 JSON 数据后点击「解析数据」
+   - **选择文件**：选择本地 `.zfl26profile.json` 文件
+4. 解析成功后查看档案信息：玩家名、导出时间、游戏版本、格式版本、包含类别数
+5. **变更预览**：界面会显示每类数据的处理方式：
+   - ➕ **新增**：本地不存在的数据项
+   - 🔄 **覆盖**：本地已有但导入版本更优的数据（如更高的最佳分）
+   - ⏭ **跳过**：本地数据不逊于导入版本的数据
+   - 🔀 **合并**：统计数据按最大值与累加智能合并
+6. 勾选要导入的数据类别（可只导入其中几类）
+7. 点击「确认导入」完成
+8. 导入成功后，关卡选择、战役面板、成就统计、航海日志、战绩分析等所有面板会立即刷新并读取到一致的新数据
+
+### 导入原子性保证
+
+- 导入开始前，系统会对全部本地存档数据创建完整快照
+- 导入过程中任何类别出现错误，立即触发回滚，所有数据恢复到快照状态
+- 只有全部类别的数据写入成功后，导入才算完成
+- 失败时会显示具体错误信息，本地数据不受任何影响
+
+### 智能合并策略
+
+不同数据类别采用不同的合并策略，确保导入不损失已有成果：
+
+| 数据类别 | 合并策略 |
+|---------|---------|
+| 自定义关卡 | 同 ID/同名覆盖，否则新增 |
+| 单关最佳分 | 取两者较高值 |
+| 战役章节最佳分 | 取两者较高值 |
+| 战役通关标记 | 逻辑或（任意一方已通关即保留通关） |
+| 战役奖励称号 | 去重合并 |
+| 成就解锁 | 逻辑或合并 |
+| 统计（累计护送等） | 数值累加 |
+| 统计（最大连败、最快通关） | 取最优值 |
+| 天气胜场/失败原因 | 数值累加 |
+| 航海日志 | 按 ID 去重合并 |
+| 回放数据 | 按 ID 去重合并 |
+| 自定义航线 | 导入覆盖本地 |
+
+### 玩家档案格式
+
+档案为标准 JSON 格式，文件后缀 `.zfl26profile.json`：
+
+```json
+{
+  "formatVersion": 1,
+  "gameVersion": "1.0.0",
+  "type": "player_profile",
+  "exportedAt": 1234567890123,
+  "playerName": "灯塔守望者",
+  "categories": [
+    "customLevels", "levelPackSources", "levelBests",
+    "campaignProgress", "campaignRewards", "achievements",
+    "stats", "voyageLogs", "replays", "customChapter"
+  ],
+  "data": {
+    "customLevels": [
+      {
+        "id": "custom_xxx",
+        "name": "我的关卡",
+        "boats": 3,
+        "boatStartY": 130,
+        "boatSpread": 330,
+        "rocks": [],
+        "fog": [],
+        "harbor": { "x": 900, "top": 70, "bottom": 530 },
+        "weather": {
+          "seaBreeze": { "enabled": false },
+          "denseFog": { "enabled": false },
+          "lighthouseFlash": { "enabled": false }
+        }
+      }
+    ],
+    "levelPackSources": {
+      "custom_xxx": {
+        "packName": "某关卡包",
+        "author": "作者",
+        "description": "",
+        "importedAt": 1234567890123,
+        "linkedAt": 1234567890123
+      }
+    },
+    "levelBests": { "custom_xxx": 1000, "builtin_0": 800 },
+    "builtinUnlocked": 3,
+    "globalBest": 1500,
+    "campaignProgress": {
+      "currentChapterId": null,
+      "currentLevelIndex": 0,
+      "totalScore": 0,
+      "lives": 3,
+      "startingLives": 3,
+      "carryOver": null,
+      "chapterProgress": {
+        "chapter_coast": {
+          "completed": true,
+          "completedAt": 1234567890123,
+          "bestScore": 3000
+        }
+      },
+      "currentRun": null,
+      "lastFailReason": null,
+      "lastFailReasonText": null,
+      "campaignSaveState": null,
+      "lastSavedAt": null
+    },
+    "campaignRewards": {
+      "titles": ["海岸线守望者"],
+      "unlockedAt": { "海岸线守望者": 1234567890123 }
+    },
+    "achievements": {
+      "first_escort": 1234567890123
+    },
+    "stats": {
+      "totalEscorted": 10,
+      "perfectWins": 2,
+      "narrowBeamWins": 1,
+      "fastestClearTime": 45.5,
+      "currentLossStreak": 0,
+      "maxLossStreak": 3,
+      "campaignCompletions": 1,
+      "campaignNoDamageCompletions": 0,
+      "customRouteCompletions": 0,
+      "fogWins": 0,
+      "flashEscortSuccess": 0,
+      "weatherWins": { "seaBreeze": 0, "denseFog": 0, "lighthouseFlash": 0 },
+      "failReasons": { "top": 0, "bottom": 0, "unlit": 1, "rock": 0 }
+    },
+    "voyageLogs": [
+      {
+        "id": "log_xxx",
+        "levelId": "builtin_0",
+        "levelName": "初夜启航",
+        "isCustom": false,
+        "isCampaign": false,
+        "campaignChapterId": null,
+        "campaignChapterName": "",
+        "startTime": 1234567890123,
+        "endTime": 1234567900123,
+        "duration": 45.5,
+        "result": "win",
+        "score": 800,
+        "failReason": null,
+        "failReasonText": "",
+        "weatherEvents": [],
+        "weatherTimeline": [],
+        "boatLosses": [],
+        "watchedReplay": false,
+        "replayDataId": null
+      }
+    ],
+    "replays": {
+      "replay_xxx": {
+        "meta": {
+          "version": 1,
+          "levelId": "builtin_0",
+          "created": 1234567890123,
+          "finalScore": 800,
+          "outcome": "win",
+          "duration": 45.5
+        },
+        "frames": [],
+        "events": []
+      }
+    },
+    "customChapter": {
+      "levelIds": ["custom_xxx", "builtin_0"],
+      "name": "我的冒险航线"
+    }
+  }
+}
+```
+
+### 数据迁移说明
+
+- **浏览器/设备迁移**：在旧设备导出档案 → 在新设备导入档案，可完整迁移所有游戏进度
+- **格式版本兼容**：低版本档案可在高版本游戏中正常导入；版本过新时会提示升级游戏
+- **部分迁移**：导入时可只勾选需要的类别，例如只迁移自定义关卡而保留本地成就
+- **存档备份**：定期导出档案作为备份，可防止浏览器清理 localStorage 导致进度丢失
+- **与关卡包的关系**：玩家档案包含自定义关卡数据，也包含每一关来自哪个关卡包的来源信息；导入关卡包时会自动记录来源，导出档案时一并带出
+
 ## 成就与统计系统
 
 成就系统会自动追踪护航、战役和天气表现，所有数据保存在本地 `localStorage` 中。旧版本统计会在读取时自动补齐新增字段，既保留已有成就进度，也支持新增的战役、天气和失败原因数据。点击「重置成就与统计」会清空成就解锁状态，并把统计重置为包含新增字段的完整默认结构。
