@@ -765,6 +765,9 @@
 
     .campaign-overlay { width: min(520px, calc(100% - 28px)); }
 
+    .custom-chapter-area { margin-bottom: 12px; }
+    .custom-chapter-area .chapter-card:hover { border-color: #e7c46a; transform: translateY(-2px); }
+
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } .log-list { max-height: 40vh; } }
   </style>
 </head>
@@ -1027,6 +1030,38 @@
           <span class="campaign-progress-info" id="campaignProgressInfo">已通关 0/3 章</span>
         </div>
         <div id="chapterCards" class="chapter-list"></div>
+        <div class="campaign-header" style="margin-top:18px;">
+          <span class="campaign-title">自定义航线</span>
+          <span class="campaign-progress-info" style="font-size:11px;color:#879aa0;">用自定义关卡编排专属战役</span>
+        </div>
+        <div id="customChapterArea" class="custom-chapter-area">
+          <div id="customChapterCard" class="chapter-card" style="border-style:dashed;">
+            <div class="chapter-card-header">
+              <h3>🧭 自定义航线</h3>
+              <span class="chapter-status-icon">➕</span>
+            </div>
+            <div class="chapter-desc">选择自定义关卡，编排你的专属连续挑战航线。</div>
+          </div>
+        </div>
+        <div id="customChapterEditor" class="hidden" style="background:#0a1f27;border-radius:8px;padding:14px;margin:8px 0;">
+          <div style="font-size:14px;color:#e7c46a;font-weight:700;margin-bottom:8px;">编排自定义航线</div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">航线名称</label>
+            <input type="text" id="customChapterNameInput" value="自定义航线" maxlength="20" style="width:100%;background:#142f3a;border:1px solid #24414b;border-radius:4px;padding:6px 10px;color:#eef6f2;font-size:13px;">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">选择关卡（点击添加/移除）</label>
+            <div id="customLevelPicker" style="max-height:200px;overflow-y:auto;"></div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#879aa0;display:block;margin-bottom:4px;">已选关卡</label>
+            <div id="customSelectedLevels" style="min-height:30px;"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button id="confirmCustomChapterBtn" class="primary" style="flex:1;">确认并开始</button>
+            <button id="cancelCustomChapterBtn" class="secondary" style="flex:1;">取消</button>
+          </div>
+        </div>
         <div class="reset-section">
           <div class="section-title" style="margin-top:0;font-size:14px;color:#e7c46a;font-weight:700;">数据管理</div>
           <p class="reset-hint">重置战役进度会清除所有章节通关记录和奖励，但不会影响单关最佳分和成就。</p>
@@ -1885,11 +1920,16 @@
         }
       ];
 
+      const CUSTOM_CHAPTER_KEY = "zfl26CustomChapter";
+
       function getAllChapters() {
         return chapters;
       }
 
       function getChapterById(id) {
+        if (id === "chapter_custom") {
+          return loadCustomChapter();
+        }
         return chapters.find(c => c.id === id);
       }
 
@@ -1898,15 +1938,66 @@
       }
 
       function getDifficultyLabel(difficulty) {
-        const labels = { easy: "简单", normal: "普通", hard: "困难" };
+        const labels = { easy: "简单", normal: "普通", hard: "困难", "custom": "自定义" };
         return labels[difficulty] || difficulty;
+      }
+
+      function createCustomChapter(levelIds, name) {
+        const safeIds = (levelIds || []).filter(function(id) {
+          return LevelData.getLevelById(id) != null;
+        });
+        if (safeIds.length === 0) return null;
+
+        return {
+          id: "chapter_custom",
+          name: name || "自定义航线",
+          description: "由你亲手编排的连续挑战航线，将自定义关卡串联成独特冒险。",
+          levels: safeIds,
+          reward: {
+            type: "title",
+            name: "自由航路开拓者",
+            description: "完成自定义航线章节解锁"
+          },
+          startingLives: Math.max(1, Math.min(5, Math.ceil(safeIds.length / 2))),
+          difficulty: "custom",
+          isCustom: true
+        };
+      }
+
+      function saveCustomChapter(levelIds, name) {
+        try {
+          localStorage.setItem(CUSTOM_CHAPTER_KEY, JSON.stringify({
+            levelIds: levelIds,
+            name: name || "自定义航线"
+          }));
+        } catch (e) {}
+      }
+
+      function loadCustomChapter() {
+        try {
+          const stored = localStorage.getItem(CUSTOM_CHAPTER_KEY);
+          if (stored) {
+            const data = JSON.parse(stored);
+            return createCustomChapter(data.levelIds, data.name);
+          }
+        } catch (e) {}
+        return null;
+      }
+
+      function hasCustomChapter() {
+        const ch = loadCustomChapter();
+        return ch !== null && ch.levels.length > 0;
       }
 
       return {
         getAllChapters,
         getChapterById,
         getChapterIndex,
-        getDifficultyLabel
+        getDifficultyLabel,
+        createCustomChapter,
+        saveCustomChapter,
+        loadCustomChapter,
+        hasCustomChapter
       };
     })();
 
@@ -2041,16 +2132,18 @@
         progress.carryOver = null;
 
         saveProgress(progress);
-        return { progress: progress, reward: reward };
+        return { progress: progress, reward: reward, chapterId: chapterId };
       }
 
       function failChapter() {
         const progress = loadProgress();
+        const failedChapterId = progress.currentChapterId;
         progress.currentChapterId = null;
         progress.currentLevelIndex = 0;
         progress.currentRun = null;
         progress.carryOver = null;
         progress.lives = 3;
+        progress._lastFailedChapterId = failedChapterId;
         saveProgress(progress);
         return progress;
       }
@@ -3597,13 +3690,19 @@
     const campaignScoreText = document.querySelector("#campaignScoreText");
     const campaignArrivedText = document.querySelector("#campaignArrivedText");
     const campaignQuitBtn = document.querySelector("#campaignQuitBtn");
-    const campaignRetryBtn = document.querySelector("#campaignRetryBtn");
-    const campaignNextLevelBtn = document.querySelector("#campaignNextLevelBtn");
     const campaignSettlementNextBtn = document.querySelector("#campaignSettlementNextBtn");
     const campaignRetryFromBeginningBtn = document.querySelector("#campaignRetryFromBeginningBtn");
     const campaignFailBackBtn = document.querySelector("#campaignFailBackBtn");
     const backFromChapterIntroBtn = document.querySelector("#backFromChapterIntroBtn");
     const startChapterFromIntroBtn = document.querySelector("#startChapterFromIntroBtn");
+    const customChapterCard = document.querySelector("#customChapterCard");
+    const customChapterArea = document.querySelector("#customChapterArea");
+    const customChapterEditor = document.querySelector("#customChapterEditor");
+    const customChapterNameInput = document.querySelector("#customChapterNameInput");
+    const customLevelPicker = document.querySelector("#customLevelPicker");
+    const customSelectedLevels = document.querySelector("#customSelectedLevels");
+    const confirmCustomChapterBtn = document.querySelector("#confirmCustomChapterBtn");
+    const cancelCustomChapterBtn = document.querySelector("#cancelCustomChapterBtn");
 
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
@@ -4128,6 +4227,137 @@
 
         chapterCards.appendChild(card);
       });
+
+      updateCustomChapterCard();
+    }
+
+    let customSelectedLevelIds = [];
+
+    function updateCustomChapterCard() {
+      const existingChapter = CampaignConfig.loadCustomChapter();
+      if (existingChapter) {
+        customChapterCard.className = "chapter-card completed";
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 ' + existingChapter.name + '</h3>' +
+            '<span class="chapter-status-icon">✅</span>' +
+          '</div>' +
+          '<div class="chapter-desc">' + existingChapter.levels.length + ' 个自定义关卡 · 生命 ❤️ ×' + existingChapter.startingLives + '</div>' +
+          '<div class="chapter-meta" style="font-size:12px;color:#e7c46a;margin-top:6px;">点击重新编排或直接开始</div>';
+      } else {
+        customChapterCard.className = "chapter-card";
+        customChapterCard.style.borderStyle = "dashed";
+        customChapterCard.innerHTML =
+          '<div class="chapter-card-header">' +
+            '<h3>🧭 自定义航线</h3>' +
+            '<span class="chapter-status-icon">➕</span>' +
+          '</div>' +
+          '<div class="chapter-desc">选择自定义关卡，编排你的专属连续挑战航线。</div>';
+      }
+    }
+
+    function openCustomChapterEditor() {
+      customChapterEditor.classList.remove("hidden");
+      customSelectedLevelIds = [];
+
+      const existing = CampaignConfig.loadCustomChapter();
+      if (existing) {
+        customChapterNameInput.value = existing.name;
+        customSelectedLevelIds = existing.levels.slice();
+      }
+
+      renderCustomLevelPicker();
+      renderCustomSelectedLevels();
+    }
+
+    function closeCustomChapterEditor() {
+      customChapterEditor.classList.add("hidden");
+    }
+
+    function renderCustomLevelPicker() {
+      const allLevels = LevelData.getAllLevels();
+      customLevelPicker.innerHTML = "";
+
+      if (allLevels.length === 0) {
+        customLevelPicker.innerHTML = '<div style="text-align:center;color:#879aa0;padding:10px;font-size:12px;">还没有可用关卡。请先在关卡编辑器中创建。</div>';
+        return;
+      }
+
+      allLevels.forEach(function(lvl) {
+        const isSelected = customSelectedLevelIds.indexOf(lvl.id) >= 0;
+        const item = document.createElement("div");
+        item.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:6px 10px;margin:3px 0;border-radius:4px;cursor:pointer;font-size:12px;" +
+          (isSelected ? "background:rgba(125,214,155,.15);border:1px solid rgba(125,214,155,.3);" : "background:#142f3a;border:1px solid #24414b;");
+        item.innerHTML =
+          '<span style="color:' + (isSelected ? "#7dd69b" : "#eef6f2") + ';">' +
+            (LevelData.isCustomLevel(lvl.id) ? "📝" : "🗺️") + " " + lvl.name +
+          '</span>' +
+          '<span style="color:' + (isSelected ? "#7dd69b" : "#879aa0") + ';font-size:11px;">' +
+            (isSelected ? "✓ 已选" : "点击添加") +
+          '</span>';
+        item.onclick = function() {
+          const idx = customSelectedLevelIds.indexOf(lvl.id);
+          if (idx >= 0) {
+            customSelectedLevelIds.splice(idx, 1);
+          } else {
+            customSelectedLevelIds.push(lvl.id);
+          }
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+        customLevelPicker.appendChild(item);
+      });
+    }
+
+    function renderCustomSelectedLevels() {
+      if (customSelectedLevelIds.length === 0) {
+        customSelectedLevels.innerHTML = '<div style="text-align:center;color:#879aa0;font-size:12px;padding:8px;">尚未选择关卡</div>';
+        confirmCustomChapterBtn.disabled = true;
+        return;
+      }
+
+      let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;">';
+      customSelectedLevelIds.forEach(function(id, idx) {
+        const lvl = LevelData.getLevelById(id);
+        const name = lvl ? lvl.name : id;
+        html += '<div style="background:#142f3a;border:1px solid #24414b;border-radius:4px;padding:4px 8px;font-size:11px;color:#eef6f2;display:flex;align-items:center;gap:4px;">' +
+          '<span style="color:#e7c46a;">' + (idx + 1) + '.</span> ' + name +
+          '<span style="color:#e2685d;cursor:pointer;margin-left:2px;" data-remove="' + id + '" title="移除">✕</span>' +
+        '</div>';
+      });
+      html += '</div>';
+      html += '<div style="font-size:11px;color:#879aa0;margin-top:6px;">共 ' + customSelectedLevelIds.length + ' 关 · 生命 ❤️ ×' + Math.max(1, Math.min(5, Math.ceil(customSelectedLevelIds.length / 2))) + '</div>';
+      customSelectedLevels.innerHTML = html;
+
+      confirmCustomChapterBtn.disabled = false;
+
+      customSelectedLevels.querySelectorAll("[data-remove]").forEach(function(el) {
+        el.onclick = function(e) {
+          e.stopPropagation();
+          const removeId = el.getAttribute("data-remove");
+          const ridx = customSelectedLevelIds.indexOf(removeId);
+          if (ridx >= 0) customSelectedLevelIds.splice(ridx, 1);
+          renderCustomLevelPicker();
+          renderCustomSelectedLevels();
+        };
+      });
+    }
+
+    function confirmAndStartCustomChapter() {
+      if (customSelectedLevelIds.length === 0) return;
+
+      const name = customChapterNameInput.value.trim() || "自定义航线";
+      CampaignConfig.saveCustomChapter(customSelectedLevelIds.slice(), name);
+
+      const chapter = CampaignConfig.loadCustomChapter();
+      if (!chapter) {
+        alert("创建自定义航线失败，请重试。");
+        return;
+      }
+
+      closeCustomChapterEditor();
+      updateCustomChapterCard();
+      startCampaignChapter("chapter_custom");
     }
 
     function showChapterIntro(chapterId) {
@@ -4178,6 +4408,10 @@
       achievementsPanel.classList.add("hidden");
       voyageLogPanel.classList.add("hidden");
       campaignPlayPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
+      customChapterEditor.classList.add("hidden");
       campaignSelectPanel.classList.remove("hidden");
       state = "campaignSelect";
       cursorHint.classList.add("hidden");
@@ -4198,6 +4432,9 @@
       achievementsPanel.classList.add("hidden");
       voyageLogPanel.classList.add("hidden");
       campaignSelectPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
       campaignPlayPanel.classList.remove("hidden");
     }
 
@@ -4275,11 +4512,27 @@
       const chapter = progress.currentChapterId ? CampaignConfig.getChapterById(progress.currentChapterId) : null;
       const levelData = CampaignStore.getCurrentLevelData();
 
-      if (!chapter || !levelData) {
+      if (!chapter) {
         alert("战役数据异常，请返回重新开始。");
         abandonCampaign();
         return;
       }
+
+      if (!levelData) {
+        const fallbackLevelId = chapter.levels[progress.currentLevelIndex];
+        const fallbackData = LevelData.getLevelById(fallbackLevelId);
+        if (!fallbackData) {
+          alert("关卡数据缺失，请返回重新开始。");
+          abandonCampaign();
+          return;
+        }
+      }
+
+      const effectiveLevelData = levelData || LevelData.getLevelById(chapter.levels[progress.currentLevelIndex]);
+
+      score = progress.totalScore;
+      levelScore = score;
+      campaignLevelStartScore = score;
 
       const carryOver = progress.carryOver;
       currentBattleModifiers = CampaignStore.calculateBattleModifiers(carryOver);
@@ -4294,18 +4547,16 @@
 
       currentLevelId = chapter.levels[progress.currentLevelIndex];
       playtestLevel = null;
-      campaignLevelStartScore = score;
-      levelScore = score;
 
-      const harbor = levelData.harbor || { x: 900, top: 70, bottom: 530 };
+      const harbor = effectiveLevelData.harbor || { x: 900, top: 70, bottom: 530 };
       const difficulty = progress.currentLevelIndex;
 
-      boats = Array.from({ length: levelData.boats }, function(_, i) {
-        const startY = levelData.boatStartY != null ? levelData.boatStartY : 130;
-        const spread = levelData.boatSpread != null ? levelData.boatSpread : 330;
+      boats = Array.from({ length: effectiveLevelData.boats }, function(_, i) {
+        const startY = effectiveLevelData.boatStartY != null ? effectiveLevelData.boatStartY : 130;
+        const spread = effectiveLevelData.boatSpread != null ? effectiveLevelData.boatSpread : 330;
         return {
           x: 40 - i * 42,
-          y: startY + i * (spread / Math.max(1, levelData.boats - 1)),
+          y: startY + i * (spread / Math.max(1, effectiveLevelData.boats - 1)),
           speed: (26 + difficulty * 8 + i * 3) * campaignBoatSpeedMultiplier,
           drift: (i % 2 ? 1 : -1) * (12 + difficulty * 3),
           lit: 3.2,
@@ -4328,7 +4579,7 @@
       updatePauseHint();
       updateCampaignHud();
 
-      const modifiedWeather = JSON.parse(JSON.stringify(levelData.weather || {}));
+      const modifiedWeather = JSON.parse(JSON.stringify(effectiveLevelData.weather || {}));
       if (campaignWeatherMultiplier !== 1) {
         for (const wt in modifiedWeather) {
           if (modifiedWeather[wt] && modifiedWeather[wt].enabled) {
@@ -4344,7 +4595,7 @@
 
       const logEntry = VoyageLogStore.createEntry({
         levelId: currentLevelId,
-        levelName: levelData.name || "",
+        levelName: effectiveLevelData.name || "",
         isCustom: LevelData.isCustomLevel(currentLevelId),
         startTime: Date.now(),
         result: null
@@ -4352,7 +4603,7 @@
       const saved = VoyageLogStore.addEntry(logEntry);
       currentLogId = saved.id;
 
-      ReplayRecorder.start(levelData, currentLevelId, {
+      ReplayRecorder.start(effectiveLevelData, currentLevelId, {
         beamAngle: beamAngle,
         beamWide: beamWide,
         score: score,
@@ -4370,10 +4621,10 @@
       const chapter = progress.currentChapterId ? CampaignConfig.getChapterById(progress.currentChapterId) : null;
       const levelData = getCurrentLevelData();
 
-      if (!chapter || !levelData) return;
+      if (!chapter) return;
 
-      const currentLevelScore = Math.round((score - campaignLevelStartScore) * campaignScoreMultiplier);
-      const carryOver = CampaignStore.generateCarryOverData(boats, currentLevelScore, levelData, true);
+      const currentLevelScore = score - campaignLevelStartScore;
+      const carryOver = CampaignStore.generateCarryOverData(boats, currentLevelScore, levelData || { boats: boats.length }, true);
 
       const updated = CampaignStore.completeLevel(currentLevelScore, "win", carryOver);
       score = updated.totalScore;
@@ -4456,9 +4707,8 @@
       const result = CampaignStore.completeChapter();
       if (!result) return;
 
-      const { progress, reward } = result;
-      const chapter = CampaignConfig.getChapterById(result.progress.chapterProgress[result.progress.chapterProgress.length - 1] ?
-        Object.keys(result.progress.chapterProgress).pop() : null);
+      const { progress, reward, chapterId } = result;
+      const chapter = CampaignConfig.getChapterById(chapterId);
 
       state = "campaignSettlement";
 
@@ -4572,7 +4822,7 @@
 
       overlayBtn.textContent = "🔄 重新开始";
       overlayBtn.onclick = function() {
-        const lastChapterId = progress.currentRun ? progress.currentRun.chapterId : null;
+        const lastChapterId = progress._lastFailedChapterId;
         campaignState = "idle";
         if (lastChapterId && CampaignStore.isChapterUnlocked(lastChapterId)) {
           startCampaignChapter(lastChapterId);
@@ -6314,20 +6564,6 @@
         showCampaignSelectPanel();
       }
     };
-    campaignRetryBtn.onclick = function() {
-      const progress = CampaignStore.loadProgress();
-      if (progress.currentLevelIndex > 0) {
-        score = progress.totalScore;
-      } else {
-        score = 0;
-      }
-      resetCampaignLevel();
-    };
-    campaignNextLevelBtn.onclick = function() {
-      const progress = CampaignStore.loadProgress();
-      score = progress.totalScore;
-      resetCampaignLevel();
-    };
     campaignSettlementNextBtn.onclick = function() {
       campaignState = "idle";
       score = 0;
@@ -6355,6 +6591,25 @@
       if (chapter) {
         startCampaignChapter(chapter.id);
       }
+    };
+    customChapterCard.onclick = function() {
+      const existing = CampaignConfig.loadCustomChapter();
+      if (existing && CampaignStore.isChapterUnlocked("chapter_custom")) {
+        const action = confirm("已存在自定义航线「" + existing.name + "」。\n\n确定 = 直接开始上次航线\n取消 = 重新编排");
+        if (action) {
+          startCampaignChapter("chapter_custom");
+        } else {
+          openCustomChapterEditor();
+        }
+      } else {
+        openCustomChapterEditor();
+      }
+    };
+    confirmCustomChapterBtn.onclick = function() {
+      confirmAndStartCustomChapter();
+    };
+    cancelCustomChapterBtn.onclick = function() {
+      closeCustomChapterEditor();
     };
     if (logFilterResult) {
       logFilterResult.onchange = function() {
