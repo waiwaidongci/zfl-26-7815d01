@@ -1778,6 +1778,14 @@
             <div id="importDuplicateWarning" class="hidden" style="color:#e7c46a;font-size:13px;margin:8px 0;">
               ⚠️ 检测到 <span id="importDuplicateCount">0</span> 个重复关卡
             </div>
+            <div class="editor-section">
+              <div class="editor-section-title">选择要导入的关卡 <span style="float:right;font-size:12px;color:#879aa0;font-weight:normal;" id="importSelectedCount">0 个</span></div>
+              <div class="level-list" id="importLevelList"></div>
+              <div class="editor-btn-row" style="margin-top: 8px;">
+                <button class="secondary" id="selectAllImportBtn">全选</button>
+                <button class="secondary" id="deselectAllImportBtn">全不选</button>
+              </div>
+            </div>
           </div>
           <div id="importPackError" class="error-msg hidden"></div>
           <div id="importPackSuccess" class="success-msg hidden"></div>
@@ -2150,7 +2158,17 @@
         return duplicates;
       }
 
-      function importPack(pack, duplicateStrategy) {
+      function getWeatherSummary(level) {
+        const labels = [];
+        if (level.weather) {
+          if (level.weather.seaBreeze && level.weather.seaBreeze.enabled) labels.push("🌬️海风");
+          if (level.weather.denseFog && level.weather.denseFog.enabled) labels.push("🌫️浓雾");
+          if (level.weather.lighthouseFlash && level.weather.lighthouseFlash.enabled) labels.push("⚡闪烁");
+        }
+        return labels.length > 0 ? labels.join(" ") : "🌤️晴朗";
+      }
+
+      function importPack(pack, duplicateStrategy, selectedLevelIndices) {
         const validation = validatePack(pack);
         if (!validation.valid) {
           return {
@@ -2170,7 +2188,11 @@
         const existingBests = LevelData.loadLevelBests();
         const newBests = Object.assign({}, existingBests);
 
-        pack.levels.forEach(function(packLvl) {
+        const levelsToImport = selectedLevelIndices && selectedLevelIndices.length > 0
+          ? pack.levels.filter(function(_, idx) { return selectedLevelIndices.indexOf(idx) >= 0; })
+          : pack.levels;
+
+        levelsToImport.forEach(function(packLvl) {
           const normalized = LevelData.normalizeLevel(packLvl);
           const dupIdx = existingCustoms.findIndex(function(existing) {
             if (normalized.id && existing.id === normalized.id) return true;
@@ -2289,6 +2311,7 @@
         createPack: createPack,
         validatePack: validatePack,
         findDuplicates: findDuplicates,
+        getWeatherSummary: getWeatherSummary,
         importPack: importPack,
         exportPackToFile: exportPackToFile,
         parsePackFromText: parsePackFromText,
@@ -4452,6 +4475,10 @@
     const importPackVersion = document.querySelector("#importPackVersion");
     const importDuplicateWarning = document.querySelector("#importDuplicateWarning");
     const importDuplicateCount = document.querySelector("#importDuplicateCount");
+    const importLevelList = document.querySelector("#importLevelList");
+    const importSelectedCount = document.querySelector("#importSelectedCount");
+    const selectAllImportBtn = document.querySelector("#selectAllImportBtn");
+    const deselectAllImportBtn = document.querySelector("#deselectAllImportBtn");
     const confirmImportBtn = document.querySelector("#confirmImportBtn");
     const cancelImportBtn = document.querySelector("#cancelImportBtn");
     const importPackError = document.querySelector("#importPackError");
@@ -7764,6 +7791,7 @@
     let exportSelectedLevelIds = [];
     let currentImportPack = null;
     let currentDuplicateStrategy = "skip";
+    let importSelectedLevelIndices = [];
 
     function showExportPackOverlay(preselectedLevelId) {
       exportPackName.value = "";
@@ -7851,6 +7879,9 @@
       confirmImportBtn.disabled = true;
       currentImportPack = null;
       currentDuplicateStrategy = "skip";
+      importSelectedLevelIndices = [];
+      importLevelList.innerHTML = "";
+      importSelectedCount.textContent = "0 个";
       document.querySelectorAll(".duplicate-option").forEach(function(opt) {
         opt.classList.toggle("selected", opt.getAttribute("data-duplicate") === "skip");
       });
@@ -7861,6 +7892,77 @@
     function hideImportPackOverlay() {
       packImportOverlay.classList.add("hidden");
       currentImportPack = null;
+      importSelectedLevelIndices = [];
+    }
+
+    function renderImportLevelList(pack) {
+      importLevelList.innerHTML = "";
+      const levels = pack.levels || [];
+      const levelBests = pack.levelBests || {};
+      const duplicates = LevelPack.findDuplicates(levels);
+      const duplicateMap = {};
+      duplicates.forEach(function(d) {
+        if (d.packLevel && d.packLevel.id) duplicateMap[d.packLevel.id] = true;
+        if (d.packLevel && d.packLevel.name) {
+          const key = "__name__:" + d.packLevel.name;
+          duplicateMap[key] = true;
+        }
+      });
+
+      if (levels.length === 0) {
+        importLevelList.innerHTML = '<div style="text-align:center;color:#879aa0;padding:20px;">关卡包中没有关卡</div>';
+        importSelectedCount.textContent = "0 个";
+        confirmImportBtn.disabled = true;
+        return;
+      }
+
+      levels.forEach(function(lvl, idx) {
+        const item = document.createElement("div");
+        item.className = "level-item";
+        item.style.cursor = "pointer";
+        const isSelected = importSelectedLevelIndices.indexOf(idx) >= 0;
+        const best = levelBests[lvl.id] || 0;
+        const rockCount = (lvl.rocks || []).length;
+        const fogCount = (lvl.fog || []).length;
+        const weatherSummary = LevelPack.getWeatherSummary(lvl);
+        const isDuplicate = (lvl.id && duplicateMap[lvl.id]) || duplicateMap["__name__:" + lvl.name];
+        const duplicateBadge = isDuplicate ? ' <span style="color:#e7c46a;font-size:11px;">⚠️ 重复</span>' : "";
+
+        item.innerHTML =
+          '<span style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">' +
+            '<input type="checkbox" ' + (isSelected ? "checked" : "") + ' data-idx="' + idx + '" style="margin:2px 0 0 0;">' +
+            '<span style="min-width:0;">' +
+              '<span class="level-name" style="display:block;">' + lvl.name + duplicateBadge + '</span>' +
+              '<span style="display:block;font-size:11px;color:#879aa0;margin-top:2px;line-height:1.5;">' +
+                '🚢 ' + lvl.boats + ' 艘 · 🪨 ' + rockCount + ' 个 · 🌫️ ' + fogCount + ' 个 · ' + weatherSummary +
+              '</span>' +
+            '</span>' +
+          '</span>' +
+          '<span class="level-best">' + (best > 0 ? best + " 分" : "无记录") + '</span>';
+        item.onclick = function(e) {
+          if (e.target.tagName !== "INPUT") {
+            const cb = item.querySelector('input[type="checkbox"]');
+            cb.checked = !cb.checked;
+          }
+          toggleImportLevelSelection(idx);
+        };
+        importLevelList.appendChild(item);
+      });
+
+      importSelectedCount.textContent = importSelectedLevelIndices.length + " 个";
+      confirmImportBtn.disabled = importSelectedLevelIndices.length === 0;
+    }
+
+    function toggleImportLevelSelection(idx) {
+      const i = importSelectedLevelIndices.indexOf(idx);
+      if (i >= 0) {
+        importSelectedLevelIndices.splice(i, 1);
+      } else {
+        importSelectedLevelIndices.push(idx);
+      }
+      if (currentImportPack) {
+        renderImportLevelList(currentImportPack);
+      }
     }
 
     function updateImportPackInfo(pack) {
@@ -7878,8 +7980,10 @@
         importDuplicateWarning.classList.add("hidden");
       }
 
+      importSelectedLevelIndices = pack.levels ? pack.levels.map(function(_, i) { return i; }) : [];
+      renderImportLevelList(pack);
+
       importPackInfo.classList.remove("hidden");
-      confirmImportBtn.disabled = false;
     }
 
     function handleImportParseResult(result) {
@@ -7900,8 +8004,14 @@
 
     function performImport() {
       if (!currentImportPack) return;
+      if (importSelectedLevelIndices.length === 0) {
+        importPackError.textContent = "请至少选择一个关卡";
+        importPackError.classList.remove("hidden");
+        importPackSuccess.classList.add("hidden");
+        return;
+      }
 
-      const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy);
+      const result = LevelPack.importPack(currentImportPack, currentDuplicateStrategy, importSelectedLevelIndices);
 
       if (!result.success) {
         importPackError.textContent = result.message + "：" + (result.errors || []).join("；");
@@ -7930,6 +8040,10 @@
 
       updateGlobalBest();
       renderLevelCards();
+      renderChapterCards();
+      updateCustomChapterCard();
+      renderCustomLevelPicker();
+      renderCustomSelectedLevels();
 
       setTimeout(function() {
         hideImportPackOverlay();
@@ -8005,6 +8119,20 @@
 
     cancelImportBtn.addEventListener("click", function() {
       hideImportPackOverlay();
+    });
+
+    selectAllImportBtn.addEventListener("click", function() {
+      if (currentImportPack && currentImportPack.levels) {
+        importSelectedLevelIndices = currentImportPack.levels.map(function(_, i) { return i; });
+        renderImportLevelList(currentImportPack);
+      }
+    });
+
+    deselectAllImportBtn.addEventListener("click", function() {
+      importSelectedLevelIndices = [];
+      if (currentImportPack) {
+        renderImportLevelList(currentImportPack);
+      }
     });
 
     importFromTextBtn.addEventListener("click", function() {
