@@ -1025,6 +1025,33 @@
       <div id="campaignSelectPanel" class="hidden campaign-panel">
         <h1>航线战役</h1>
         <p>连续夜晚挑战，将多个关卡串联成史诗航程。上一关的表现将影响下一关的初始条件，通关解锁专属奖励。</p>
+
+        <div id="unfinishedCampaignArea" class="hidden" style="margin-bottom:18px;">
+          <div class="campaign-header">
+            <span class="campaign-title">⚓ 进行中的战役</span>
+            <span class="campaign-progress-info" id="unfinishedCampaignStatus">未完成</span>
+          </div>
+          <div id="unfinishedCampaignCard" class="chapter-card" style="border-color:#e7c46a;background:rgba(231,196,106,.08);">
+            <div class="chapter-card-header">
+              <h3 id="unfinishedChapterName">--</h3>
+              <span class="chapter-status-icon" id="unfinishedChapterIcon">⏸</span>
+            </div>
+            <div class="chapter-meta" style="margin-top:8px;">
+              <span>进度</span><b id="unfinishedProgress">0/0</b>
+              <span>生命</span><b id="unfinishedLives">❤️❤️❤️</b>
+              <span>得分</span><b style="color:#7dd69b;" id="unfinishedScore">0</b>
+            </div>
+            <div id="unfinishedFailReason" class="hidden" style="margin-top:8px;font-size:12px;color:#e2685d;">
+              ⚠ <span id="unfinishedFailText">--</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;">
+              <button id="resumeCampaignBtn" class="primary" style="margin:0;font-size:13px;padding:8px 10px;">▶ 继续</button>
+              <button id="restartCampaignBtn" class="secondary" style="margin:0;font-size:13px;padding:8px 10px;">🔄 重开</button>
+              <button id="abandonCampaignBtn" class="danger" style="margin:0;font-size:13px;padding:8px 10px;">✕ 放弃</button>
+            </div>
+          </div>
+        </div>
+
         <div class="campaign-header">
           <span class="campaign-title">战役章节</span>
           <span class="campaign-progress-info" id="campaignProgressInfo">已通关 0/3 章</span>
@@ -2013,7 +2040,11 @@
         lives: 3,
         carryOver: null,
         chapterProgress: {},
-        currentRun: null
+        currentRun: null,
+        lastFailReason: null,
+        lastFailReasonText: null,
+        campaignSaveState: null,
+        lastSavedAt: null
       };
 
       function loadProgress() {
@@ -2072,6 +2103,10 @@
         progress.totalScore = 0;
         progress.lives = chapter.startingLives;
         progress.carryOver = null;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = "playing";
+        progress.lastSavedAt = Date.now();
         progress.currentRun = {
           chapterId: chapterId,
           startTime: Date.now(),
@@ -2130,6 +2165,12 @@
         progress.currentLevelIndex = 0;
         progress.currentRun = null;
         progress.carryOver = null;
+        progress.lives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
 
         saveProgress(progress);
         return { progress: progress, reward: reward, chapterId: chapterId };
@@ -2137,13 +2178,8 @@
 
       function failChapter() {
         const progress = loadProgress();
-        const failedChapterId = progress.currentChapterId;
-        progress.currentChapterId = null;
-        progress.currentLevelIndex = 0;
-        progress.currentRun = null;
-        progress.carryOver = null;
-        progress.lives = 3;
-        progress._lastFailedChapterId = failedChapterId;
+        progress.campaignSaveState = "failed";
+        progress.lastSavedAt = Date.now();
         saveProgress(progress);
         return progress;
       }
@@ -2186,6 +2222,11 @@
         progress.currentRun = null;
         progress.carryOver = null;
         progress.lives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
         saveProgress(progress);
         return progress;
       }
@@ -2300,6 +2341,97 @@
         };
       }
 
+      function saveCampaignState(state, failReason, failReasonText) {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        progress.campaignSaveState = state || "paused";
+        progress.lastSavedAt = Date.now();
+        if (failReason !== undefined) {
+          progress.lastFailReason = failReason;
+        }
+        if (failReasonText !== undefined) {
+          progress.lastFailReasonText = failReasonText;
+        }
+        saveProgress(progress);
+        return progress;
+      }
+
+      function hasUnfinishedCampaign() {
+        const progress = loadProgress();
+        return progress.currentChapterId !== null && progress.currentRun !== null;
+      }
+
+      function getUnfinishedCampaignInfo() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        const chapter = CampaignConfig.getChapterById(progress.currentChapterId);
+        if (!chapter) return null;
+
+        return {
+          chapterId: progress.currentChapterId,
+          chapterName: chapter.name,
+          chapterDifficulty: chapter.difficulty,
+          currentLevelIndex: progress.currentLevelIndex,
+          totalLevels: chapter.levels.length,
+          totalScore: progress.totalScore,
+          lives: progress.lives,
+          lastFailReason: progress.lastFailReason,
+          lastFailReasonText: progress.lastFailReasonText,
+          campaignSaveState: progress.campaignSaveState,
+          lastSavedAt: progress.lastSavedAt,
+          isCustom: chapter.isCustom || false
+        };
+      }
+
+      function abandonAndSave(failReason, failReasonText) {
+        const progress = loadProgress();
+        if (!progress.currentChapterId) return null;
+
+        progress.campaignSaveState = "abandoned";
+        progress.lastFailReason = failReason || "abandoned";
+        progress.lastFailReasonText = failReasonText || "玩家主动退出";
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      function clearCampaignSave() {
+        const progress = loadProgress();
+        progress.currentChapterId = null;
+        progress.currentLevelIndex = 0;
+        progress.currentRun = null;
+        progress.carryOver = null;
+        progress.lives = 3;
+        progress.totalScore = 0;
+        progress.lastFailReason = null;
+        progress.lastFailReasonText = null;
+        progress.campaignSaveState = null;
+        progress.lastSavedAt = null;
+        saveProgress(progress);
+        return progress;
+      }
+
+      function resumeCampaign() {
+        const progress = loadProgress();
+        if (!progress.currentChapterId || !progress.currentRun) return null;
+
+        progress.campaignSaveState = "playing";
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
+      function recordFailReason(failReason, failReasonText) {
+        const progress = loadProgress();
+        progress.lastFailReason = failReason;
+        progress.lastFailReasonText = failReasonText;
+        progress.lastSavedAt = Date.now();
+        saveProgress(progress);
+        return progress;
+      }
+
       return {
         loadProgress,
         saveProgress,
@@ -2324,7 +2456,14 @@
         getCurrentLevelId,
         getCurrentLevelData,
         calculateBattleModifiers,
-        generateCarryOverData
+        generateCarryOverData,
+        saveCampaignState,
+        hasUnfinishedCampaign,
+        getUnfinishedCampaignInfo,
+        abandonAndSave,
+        clearCampaignSave,
+        resumeCampaign,
+        recordFailReason
       };
     })();
 
@@ -3703,6 +3842,19 @@
     const customSelectedLevels = document.querySelector("#customSelectedLevels");
     const confirmCustomChapterBtn = document.querySelector("#confirmCustomChapterBtn");
     const cancelCustomChapterBtn = document.querySelector("#cancelCustomChapterBtn");
+    const unfinishedCampaignArea = document.querySelector("#unfinishedCampaignArea");
+    const unfinishedCampaignCard = document.querySelector("#unfinishedCampaignCard");
+    const unfinishedChapterName = document.querySelector("#unfinishedChapterName");
+    const unfinishedChapterIcon = document.querySelector("#unfinishedChapterIcon");
+    const unfinishedProgress = document.querySelector("#unfinishedProgress");
+    const unfinishedLives = document.querySelector("#unfinishedLives");
+    const unfinishedScore = document.querySelector("#unfinishedScore");
+    const unfinishedFailReason = document.querySelector("#unfinishedFailReason");
+    const unfinishedFailText = document.querySelector("#unfinishedFailText");
+    const unfinishedCampaignStatus = document.querySelector("#unfinishedCampaignStatus");
+    const resumeCampaignBtn = document.querySelector("#resumeCampaignBtn");
+    const restartCampaignBtn = document.querySelector("#restartCampaignBtn");
+    const abandonCampaignBtn = document.querySelector("#abandonCampaignBtn");
 
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
@@ -4164,6 +4316,59 @@
     }
 
     // ===================== 战役模式 UI 控制器 =====================
+    function renderUnfinishedCampaign() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+
+      if (!info) {
+        unfinishedCampaignArea.classList.add("hidden");
+        return;
+      }
+
+      unfinishedCampaignArea.classList.remove("hidden");
+      unfinishedChapterName.textContent = info.chapterName;
+      unfinishedProgress.textContent = (info.currentLevelIndex + 1) + "/" + info.totalLevels;
+      unfinishedScore.textContent = info.totalScore;
+
+      let hearts = "";
+      for (let i = 0; i < info.lives; i++) hearts += "❤️";
+      for (let i = info.lives; i < 3; i++) hearts += "🖤";
+      unfinishedLives.textContent = hearts;
+
+      const saveState = info.campaignSaveState;
+      if (saveState === "failed") {
+        unfinishedCampaignStatus.textContent = "已失败";
+        unfinishedChapterIcon.textContent = "💔";
+        unfinishedCampaignCard.style.borderColor = "#e2685d";
+        unfinishedCampaignCard.style.background = "rgba(226,104,93,.08)";
+        resumeCampaignBtn.disabled = true;
+        resumeCampaignBtn.style.opacity = "0.5";
+        resumeCampaignBtn.style.cursor = "not-allowed";
+      } else if (saveState === "abandoned") {
+        unfinishedCampaignStatus.textContent = "已暂停";
+        unfinishedChapterIcon.textContent = "⏸";
+        unfinishedCampaignCard.style.borderColor = "#e7c46a";
+        unfinishedCampaignCard.style.background = "rgba(231,196,106,.08)";
+        resumeCampaignBtn.disabled = false;
+        resumeCampaignBtn.style.opacity = "1";
+        resumeCampaignBtn.style.cursor = "pointer";
+      } else {
+        unfinishedCampaignStatus.textContent = "进行中";
+        unfinishedChapterIcon.textContent = "▶";
+        unfinishedCampaignCard.style.borderColor = "#3d6a78";
+        unfinishedCampaignCard.style.background = "rgba(61,106,120,.1)";
+        resumeCampaignBtn.disabled = false;
+        resumeCampaignBtn.style.opacity = "1";
+        resumeCampaignBtn.style.cursor = "pointer";
+      }
+
+      if (info.lastFailReasonText) {
+        unfinishedFailReason.classList.remove("hidden");
+        unfinishedFailText.textContent = info.lastFailReasonText;
+      } else {
+        unfinishedFailReason.classList.add("hidden");
+      }
+    }
+
     function renderChapterCards() {
       const chapters = CampaignConfig.getAllChapters();
       const completedCount = CampaignStore.getCompletedCount();
@@ -4416,6 +4621,7 @@
       state = "campaignSelect";
       cursorHint.classList.add("hidden");
       backFromPlaytestBtn.style.display = "none";
+      renderUnfinishedCampaign();
       renderChapterCards();
     }
 
@@ -4505,6 +4711,47 @@
 
       showCampaignPlayPanel();
       resetCampaignLevel();
+    }
+
+    function resumeCampaign() {
+      const progress = CampaignStore.resumeCampaign();
+      if (!progress || !progress.currentChapterId) {
+        alert("没有可继续的战役。");
+        return;
+      }
+
+      campaignState = "playing";
+      campaignWeatherMultiplier = 1;
+      campaignBoatSpeedMultiplier = 1;
+      campaignBeamRangeMultiplier = 1;
+      campaignScoreMultiplier = 1;
+
+      showCampaignPlayPanel();
+      resetCampaignLevel();
+    }
+
+    function restartCampaign() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+      if (!info || !info.chapterId) {
+        alert("没有可重开的战役。");
+        return;
+      }
+
+      if (!confirm("确定要从头开始吗？当前进度将被清除。")) {
+        return;
+      }
+
+      CampaignStore.clearCampaignSave();
+      startCampaignChapter(info.chapterId);
+    }
+
+    function abandonCampaignFromSave() {
+      if (!confirm("确定要放弃这个战役吗？进度将被永久清除。")) {
+        return;
+      }
+
+      CampaignStore.clearCampaignSave();
+      renderUnfinishedCampaign();
     }
 
     function resetCampaignLevel() {
@@ -4688,16 +4935,16 @@
         resetCampaignLevel();
       };
 
-      const abandonBtn = document.createElement("button");
-      abandonBtn.className = "extra-overlay-btn danger";
-      abandonBtn.textContent = "放弃战役";
-      abandonBtn.style.marginTop = "10px";
-      abandonBtn.onclick = function() {
-        if (confirm("确定要放弃当前战役吗？进度将不会保存。")) {
-          abandonCampaign();
+      const quitBtn = document.createElement("button");
+      quitBtn.className = "extra-overlay-btn secondary";
+      quitBtn.textContent = "退出到主菜单";
+      quitBtn.style.marginTop = "10px";
+      quitBtn.onclick = function() {
+        if (confirm("确定要退出到主菜单吗？战役进度会自动保存。")) {
+          quitCampaignToMenu();
         }
       };
-      btnParent.appendChild(abandonBtn);
+      btnParent.appendChild(quitBtn);
 
       overlay.classList.remove("hidden");
     }
@@ -4784,16 +5031,17 @@
         resetCampaignLevel();
       };
 
-      const abandonBtn = document.createElement("button");
-      abandonBtn.className = "extra-overlay-btn danger";
-      abandonBtn.textContent = "放弃战役";
-      abandonBtn.style.marginTop = "10px";
-      abandonBtn.onclick = function() {
-        if (confirm("确定要放弃当前战役吗？进度将不会保存。")) {
-          abandonCampaign();
+      const quitBtn = document.createElement("button");
+      quitBtn.className = "extra-overlay-btn secondary";
+      quitBtn.textContent = "退出到主菜单";
+      quitBtn.style.marginTop = "10px";
+      quitBtn.onclick = function() {
+        if (confirm("确定要退出到主菜单吗？战役进度会自动保存。")) {
+          CampaignStore.recordFailReason(failReason, failReasonText);
+          quitCampaignToMenu();
         }
       };
-      btnParent.appendChild(abandonBtn);
+      btnParent.appendChild(quitBtn);
 
       overlay.classList.remove("hidden");
     }
@@ -4801,6 +5049,7 @@
     function showCampaignFail(failReason, failReasonText) {
       campaignState = "failed";
       CampaignStore.failChapter();
+      CampaignStore.recordFailReason(failReason, failReasonText);
 
       state = "campaignFailed";
 
@@ -4822,10 +5071,10 @@
 
       overlayBtn.textContent = "🔄 重新开始";
       overlayBtn.onclick = function() {
-        const lastChapterId = progress._lastFailedChapterId;
+        const chapterId = progress.currentChapterId;
         campaignState = "idle";
-        if (lastChapterId && CampaignStore.isChapterUnlocked(lastChapterId)) {
-          startCampaignChapter(lastChapterId);
+        if (chapterId && CampaignStore.isChapterUnlocked(chapterId)) {
+          startCampaignChapter(chapterId);
         } else {
           showCampaignSelectPanel();
         }
@@ -4833,11 +5082,12 @@
 
       const backBtn = document.createElement("button");
       backBtn.className = "extra-overlay-btn secondary";
-      backBtn.textContent = "返回章节选择";
+      backBtn.textContent = "返回主菜单";
       backBtn.style.marginTop = "10px";
       backBtn.onclick = function() {
         campaignState = "idle";
-        showCampaignSelectPanel();
+        hideCampaignPlayPanel();
+        showMainMenu();
       };
       btnParent.appendChild(backBtn);
 
@@ -4845,7 +5095,15 @@
     }
 
     function abandonCampaign() {
-      CampaignStore.failChapter();
+      CampaignStore.abandonAndSave("abandoned", "玩家主动放弃");
+      campaignState = "idle";
+      currentBattleModifiers = null;
+      hideCampaignPlayPanel();
+      showMainMenu();
+    }
+
+    function quitCampaignToMenu() {
+      CampaignStore.saveCampaignState("paused");
       campaignState = "idle";
       currentBattleModifiers = null;
       hideCampaignPlayPanel();
@@ -6549,6 +6807,16 @@
       CampaignStore.clearProgress();
       showMainMenu();
     };
+    resumeCampaignBtn.onclick = function() {
+      const info = CampaignStore.getUnfinishedCampaignInfo();
+      if (info && info.campaignSaveState === "failed") {
+        alert("战役已失败，无法继续。请选择重开或放弃。");
+        return;
+      }
+      resumeCampaign();
+    };
+    restartCampaignBtn.onclick = restartCampaign;
+    abandonCampaignBtn.onclick = abandonCampaignFromSave;
     resetCampaignProgressBtn.onclick = function() {
       if (confirm("确定要重置全部战役进度和奖励吗？\n\n此操作不会影响单关模式的成就、统计和最佳分。")) {
         CampaignStore.resetAllProgress();
