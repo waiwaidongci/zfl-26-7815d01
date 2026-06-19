@@ -1,0 +1,23 @@
+{
+  "name": "zfl-26",
+  "version": "1.0.0",
+  "description": "直接打开 `index.html` 即可游玩。方向键旋转光束，空格切换光束宽度，护送所有船只抵达右侧港湾。",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/waiwaidongci/zfl-26-7815d01.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/waiwaidongci/zfl-26-7815d01/issues"
+  },
+  "homepage": "https://github.com/waiwaidongci/zfl-26-7815d01#readme",
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
