@@ -7895,6 +7895,12 @@
       importSelectedLevelIndices = [];
     }
 
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text == null ? "" : String(text);
+      return div.innerHTML;
+    }
+
     function renderImportLevelList(pack) {
       importLevelList.innerHTML = "";
       const levels = pack.levels || [];
@@ -7927,12 +7933,13 @@
         const weatherSummary = LevelPack.getWeatherSummary(lvl);
         const isDuplicate = (lvl.id && duplicateMap[lvl.id]) || duplicateMap["__name__:" + lvl.name];
         const duplicateBadge = isDuplicate ? ' <span style="color:#e7c46a;font-size:11px;">⚠️ 重复</span>' : "";
+        const levelName = escapeHtml(lvl.name || "未命名关卡");
 
         item.innerHTML =
           '<span style="display:flex;align-items:flex-start;gap:8px;flex:1;min-width:0;">' +
             '<input type="checkbox" ' + (isSelected ? "checked" : "") + ' data-idx="' + idx + '" style="margin:2px 0 0 0;">' +
             '<span style="min-width:0;">' +
-              '<span class="level-name" style="display:block;">' + lvl.name + duplicateBadge + '</span>' +
+              '<span class="level-name" style="display:block;">' + levelName + duplicateBadge + '</span>' +
               '<span style="display:block;font-size:11px;color:#879aa0;margin-top:2px;line-height:1.5;">' +
                 '🚢 ' + lvl.boats + ' 艘 · 🪨 ' + rockCount + ' 个 · 🌫️ ' + fogCount + ' 个 · ' + weatherSummary +
               '</span>' +
