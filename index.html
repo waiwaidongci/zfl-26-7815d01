@@ -2840,11 +2840,12 @@
             return typeof t === "string" ? t : (t.name || JSON.stringify(t));
           });
           const added = importTitles.filter(function(t) { return existingTitles.indexOf(t) < 0; });
+          const skipped = importTitles.filter(function(t) { return existingTitles.indexOf(t) >= 0; });
           result.campaignRewards = {
             total: importTitles.length,
             added: added,
             overwritten: [],
-            skipped: importTitles.length - added.length,
+            skipped: skipped,
             action: "merge"
           };
         }
@@ -2854,11 +2855,12 @@
           const existingKeys = Object.keys(existing);
           const importKeys = Object.keys(data.achievements);
           const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
+          const skipped = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
           result.achievements = {
             total: importKeys.length,
             added: added,
             overwritten: [],
-            skipped: importKeys.length - added.length,
+            skipped: skipped,
             action: "merge"
           };
         }
@@ -2899,11 +2901,12 @@
           const existingKeys = Object.keys(getAllReplays());
           const importKeys = Object.keys(data.replays);
           const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
+          const skipped = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
           result.replays = {
             total: importKeys.length,
             added: added,
             overwritten: [],
-            skipped: importKeys.length - added.length,
+            skipped: skipped,
             action: "merge"
           };
         }
@@ -9329,7 +9332,7 @@
         const d = diff[cat.key];
         const addedCount = (d.added || []).length;
         const overCount = (d.overwritten || []).length;
-        const skipCount = typeof d.skipped instanceof Array ? d.skipped.length : (typeof d.skipped || 0);
+        const skipCount = Array.isArray(d.skipped) ? d.skipped.length : Number(d.skipped || 0);
 
         html += '<div class="diff-category">';
         html += '<div class="diff-category-header">';
