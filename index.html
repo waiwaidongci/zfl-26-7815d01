@@ -3950,10 +3950,14 @@
           denseFog: { enabled: false },
           lighthouseFlash: { enabled: false }
         };
+        weather.seaBreeze = weather.seaBreeze || {};
+        weather.denseFog = weather.denseFog || {};
+        weather.lighthouseFlash = weather.lighthouseFlash || {};
+        weather.seaBreeze.enabled = !!challenge.weatherEnabled.seaBreeze;
+        weather.denseFog.enabled = !!challenge.weatherEnabled.denseFog;
+        weather.lighthouseFlash.enabled = !!challenge.weatherEnabled.lighthouseFlash;
 
         if (challenge.weatherEnabled.seaBreeze) {
-          weather.seaBreeze = weather.seaBreeze || {};
-          weather.seaBreeze.enabled = true;
           if (!weather.seaBreeze.minDuration) {
             weather.seaBreeze.minDuration = 8;
             weather.seaBreeze.maxDuration = 16;
@@ -3964,8 +3968,6 @@
           }
         }
         if (challenge.weatherEnabled.denseFog) {
-          weather.denseFog = weather.denseFog || {};
-          weather.denseFog.enabled = true;
           if (!weather.denseFog.minDuration) {
             weather.denseFog.minDuration = 10;
             weather.denseFog.maxDuration = 20;
@@ -3976,8 +3978,6 @@
           }
         }
         if (challenge.weatherEnabled.lighthouseFlash) {
-          weather.lighthouseFlash = weather.lighthouseFlash || {};
-          weather.lighthouseFlash.enabled = true;
           if (!weather.lighthouseFlash.minDuration) {
             weather.lighthouseFlash.minDuration = 5;
             weather.lighthouseFlash.maxDuration = 10;
