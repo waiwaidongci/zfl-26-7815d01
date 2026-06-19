@@ -5119,8 +5119,9 @@
         alert("回放数据已被删除。");
         return;
       }
+      replayData._logId = logId;
       hideVoyageLogPanel();
-      startReplay(replayData);
+      startReplayMode(replayData);
     }
 
     function retryLogLevel(logId) {
