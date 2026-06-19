@@ -4885,6 +4885,7 @@
 
     function handleCampaignLevelLose(failReason, failReasonText) {
       const livesLeft = CampaignStore.loseLife();
+      CampaignStore.recordFailReason(failReason, failReasonText);
 
       if (livesLeft <= 0) {
         showCampaignFail(failReason, failReasonText);
@@ -6804,7 +6805,6 @@
     backFromCampaignBtn.onclick = function() {
       campaignState = "idle";
       score = 0;
-      CampaignStore.clearProgress();
       showMainMenu();
     };
     resumeCampaignBtn.onclick = function() {
