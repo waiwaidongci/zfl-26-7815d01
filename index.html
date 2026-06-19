@@ -3200,6 +3200,7 @@
             const type = ev.type;
             activeEvents.splice(i, 1);
             cooldowns[type] = config[type].minCooldown + Math.random() * (config[type].maxCooldown - config[type].minCooldown);
+            emit("end", { type: type, event: ev });
             emit("changed", getActiveEvents());
           }
         }
@@ -6378,6 +6379,7 @@
       var speedMult = 1;
       var beamRangeMult = 1;
       var fogOpacity = 0;
+      var beamJitter = 0;
       var beamFlicker = 0;
       var hasWeather = false;
 
@@ -6420,11 +6422,16 @@
           beamRangeMult -= (1 - (cfg.beamRangeMultiplier || 0.55)) * intensity;
           fogOpacity += (cfg.fogOpacity || 0.5) * intensity;
         } else if (type === "lighthouseFlash") {
+          var jitterAmount = cfg.jitterAmount || 0.08;
+          beamJitter = (
+            Math.sin((currentTime - w.startTime) * 17.3) * 0.65 +
+            Math.sin((currentTime - w.startTime) * 41.7) * 0.35
+          ) * jitterAmount * intensity;
           beamFlicker = (cfg.flickerIntensity || 0.4) * intensity;
         }
       }
 
-      return { driftMultiplier: driftMult, speedMultiplier: speedMult, beamRangeMultiplier: beamRangeMult, beamJitter: 0, beamFlicker: beamFlicker, fogOpacity: fogOpacity, hasWeather: hasWeather };
+      return { driftMultiplier: driftMult, speedMultiplier: speedMult, beamRangeMultiplier: beamRangeMult, beamJitter: beamJitter, beamFlicker: beamFlicker, fogOpacity: fogOpacity, hasWeather: hasWeather };
     }
 
     function drawReplayScene() {
@@ -6501,7 +6508,7 @@
 
       ctx.save();
       ctx.translate(lighthouse.x, lighthouse.y);
-      ctx.rotate(renderState.beamAngle);
+      ctx.rotate(renderState.beamAngle + wm.beamJitter);
       ctx.fillStyle = "rgba(247,220,125," + beamAlpha + ")";
       ctx.beginPath();
       const w = renderState.beamWide ? 0.42 : 0.22;
