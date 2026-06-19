@@ -1085,6 +1085,57 @@
     .custom-chapter-area .chapter-card:hover { border-color: #e7c46a; transform: translateY(-2px); }
     .custom-chapter-area .chapter-card.has-warning:hover { border-color: #e2685d; transform: translateY(-2px); }
 
+    .daily-challenge-panel { padding-bottom: 16px; }
+    .daily-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .daily-title { font-size: 18px; color: #e7c46a; font-weight: 700; }
+    .daily-date-badge { font-size: 12px; color: #879aa0; background: #142f3a; padding: 4px 10px; border-radius: 4px; }
+    .daily-challenge-card { background: #142f3a; border: 1px solid #385c65; border-radius: 10px; padding: 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
+    .daily-challenge-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #e7c46a, #87d4e5, #e7c46a); }
+    .daily-route-name { font-size: 17px; color: #eef6f2; font-weight: 700; margin-bottom: 8px; }
+    .daily-difficulty-badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 700; margin-left: 8px; vertical-align: middle; }
+    .daily-challenge-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 12px; margin-top: 10px; font-size: 12px; color: #a8bbc0; }
+    .daily-challenge-meta b { color: #eef6f2; font-weight: 600; }
+    .daily-weather-row { grid-column: 1 / -1; margin-top: 4px; }
+    .daily-score-mult { color: #e7c46a; font-weight: 700; font-size: 16px; }
+    .daily-best-area { background: #0a1f27; border-radius: 6px; padding: 10px 12px; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
+    .daily-best-label { font-size: 13px; color: #879aa0; }
+    .daily-best-score { font-size: 22px; color: #e7c46a; font-weight: 800; }
+    .daily-best-attempts { font-size: 11px; color: #6b8086; margin-top: 2px; }
+    .daily-unrun-area { background: rgba(231, 196, 106, .08); border: 1px solid rgba(231, 196, 106, .25); border-radius: 6px; padding: 12px; margin: 10px 0; }
+    .daily-run-progress { font-size: 13px; color: #a8bbc0; margin-top: 6px; }
+    .daily-run-progress b { color: #eef6f2; }
+    .daily-calendar { margin-top: 16px; }
+    .daily-calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .daily-calendar-title { font-size: 14px; color: #e7c46a; font-weight: 700; }
+    .daily-calendar-nav { display: flex; gap: 6px; }
+    .daily-calendar-nav button { width: 30px; height: 30px; border: 0; border-radius: 6px; background: #24414b; color: #eef6f2; font-size: 14px; cursor: pointer; display: grid; place-items: center; padding: 0; margin: 0; }
+    .daily-calendar-nav button:hover { background: #3d6a78; }
+    .daily-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .daily-cal-weekday { text-align: center; font-size: 10px; color: #6b8086; padding: 4px 0; font-weight: 600; }
+    .daily-cal-day { text-align: center; font-size: 11px; padding: 5px 2px; border-radius: 4px; cursor: default; position: relative; }
+    .daily-cal-day.empty { cursor: default; }
+    .daily-cal-day.today { border: 1px solid #e7c46a; font-weight: 700; color: #e7c46a; }
+    .daily-cal-day.completed { background: rgba(125, 214, 155, .15); color: #7dd69b; }
+    .daily-cal-day.completed::after { content: "✓"; position: absolute; bottom: 0; right: 2px; font-size: 7px; }
+    .daily-cal-day.played { background: rgba(231, 196, 106, .1); color: #e7c46a; }
+    .daily-cal-day.future { color: #3d6a78; }
+    .daily-cal-day .cal-score { display: block; font-size: 7px; color: #879aa0; margin-top: 1px; }
+    .daily-stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .daily-stat-card { background: #142f3a; border: 1px solid #24414b; border-radius: 6px; padding: 10px; text-align: center; }
+    .daily-stat-card .stat-icon { font-size: 18px; margin-bottom: 4px; }
+    .daily-stat-card .stat-value { font-size: 18px; color: #eef6f2; font-weight: 700; }
+    .daily-stat-card .stat-label { font-size: 10px; color: #879aa0; margin-top: 2px; }
+    .daily-hud { background: #0a1f27; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; border-left: 3px solid #e7c46a; }
+    .daily-hud-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+    .daily-hud-label { color: #879aa0; }
+    .daily-hud-value { color: #eef6f2; font-weight: 600; }
+    .daily-hud-value.positive { color: #7dd69b; }
+    .daily-hud-value.negative { color: #e2685d; }
+    .daily-hud-value.warning { color: #e7c46a; }
+    .daily-badge { position: absolute; top: 16px; right: 16px; background: rgba(231, 196, 106, .95); color: #15212a; font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 6px; z-index: 15; pointer-events: none; letter-spacing: .5px; }
+    .log-tag.daily { background: rgba(231, 196, 106, .2); color: #e7c46a; }
+    .detail-tag.daily { background: rgba(231, 196, 106, .2); color: #e7c46a; }
+
     @media (max-width: 850px) { .app { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid #24414b; max-height: none; } canvas { max-height: 62vh; } .replay-controls { min-width: calc(100% - 36px); flex-wrap: wrap; } .replay-progress { order: 3; width: 100%; flex-basis: 100%; } .log-list { max-height: 40vh; } }
   </style>
 </head>
@@ -1096,6 +1147,7 @@
         <p>旋转灯塔光束，让小船在暗礁和雾区之间找到安全航道。船只离开光束太久会迷航，撞上暗礁则失败。</p>
         <button id="startBtn">开始第1关</button>
         <button id="campaignBtn" style="background: #3d6a78; color: #eef6f2;">⚔ 航线战役</button>
+        <button id="dailyChallengeBtn" style="background: #8a6914; color: #eef6f2;">📅 每日挑战</button>
         <button id="levelSelectBtn" class="secondary">选择关卡</button>
         <button id="editorBtn" class="secondary">关卡编辑器</button>
         <button id="pauseBtn" class="secondary">暂停</button>
@@ -1280,6 +1332,7 @@
             <option value="builtin">仅内置关卡</option>
             <option value="custom">仅自定义关卡</option>
             <option value="campaign">仅战役模式</option>
+            <option value="daily">仅每日挑战</option>
           </select>
         </div>
         <div class="filter-row">
@@ -1718,6 +1771,166 @@
         <button id="campaignRetryFromBeginningBtn" class="primary">从头再来</button>
         <button id="campaignFailBackBtn" class="secondary back-btn">返回章节选择</button>
       </div>
+
+      <div id="dailyChallengePanel" class="hidden daily-challenge-panel">
+        <h1>📅 每日挑战</h1>
+        <p>每天根据日期种子生成固定航线，关卡由内置规则和你的自定义关卡池组合生成。同一天刷新页面，挑战完全相同！</p>
+
+        <div id="dailyChallengeCard" class="daily-challenge-card">
+          <div class="daily-route-name" id="dailyRouteName">--</div>
+          <div class="daily-challenge-meta">
+            <span>关卡数</span><b id="dailyLevelCount">0</b>
+            <span>生命</span><b id="dailyLives">0</b>
+            <span>计分倍率</span><b class="daily-score-mult" id="dailyScoreMult">1.0x</b>
+            <span>难度</span><b id="dailyDifficulty">--</b>
+            <span class="daily-weather-row">天气组合</span><b id="dailyWeather" class="daily-weather-row">🌤️</b>
+          </div>
+        </div>
+
+        <div class="daily-best-area">
+          <div>
+            <div class="daily-best-label">今日最佳</div>
+            <div class="daily-best-attempts" id="dailyBestAttempts">今日尚未挑战</div>
+          </div>
+          <div class="daily-best-score" id="dailyBestScore">0</div>
+        </div>
+
+        <div id="dailyActiveRunArea" class="daily-unrun-area hidden">
+          <div style="font-size:13px;color:#e7c46a;font-weight:700;">⚓ 进行中的挑战</div>
+          <div class="daily-run-progress">进度：<b id="dailyRunProgress">0/0</b></div>
+          <div class="daily-run-progress">生命：<b id="dailyRunLives">0</b></div>
+          <div class="daily-run-progress">得分：<b id="dailyRunScore" style="color:#7dd69b;">0</b></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;">
+            <button id="dailyResumeBtn" class="primary" style="margin:0;font-size:13px;padding:8px 10px;">▶ 继续</button>
+            <button id="dailyRestartBtn" class="secondary" style="margin:0;font-size:13px;padding:8px 10px;">🔄 重开</button>
+            <button id="dailyAbandonBtn" class="danger" style="margin:0;font-size:13px;padding:8px 10px;">✕ 放弃</button>
+          </div>
+        </div>
+
+        <button id="dailyStartBtn">开始今日挑战</button>
+
+        <div class="daily-stats-row">
+          <div class="daily-stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-value" id="dailyStatStreak">0</div>
+            <div class="stat-label">连续天数</div>
+          </div>
+          <div class="daily-stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="dailyStatTotalCompleted">0</div>
+            <div class="stat-label">累计通关</div>
+          </div>
+          <div class="daily-stat-card">
+            <div class="stat-icon">👑</div>
+            <div class="stat-value" id="dailyStatHighestScore">0</div>
+            <div class="stat-label">历史最高</div>
+          </div>
+        </div>
+
+        <div class="daily-calendar">
+          <div class="daily-calendar-header">
+            <span class="daily-calendar-title" id="dailyCalendarTitle">--</span>
+            <div class="daily-calendar-nav">
+              <button id="dailyCalPrevBtn">◀</button>
+              <button id="dailyCalNextBtn">▶</button>
+            </div>
+          </div>
+          <div id="dailyCalendarGrid" class="daily-calendar-grid"></div>
+        </div>
+
+        <div class="reset-section" style="margin-top:16px;">
+          <div class="section-title" style="margin-top:0;font-size:14px;color:#e7c46a;font-weight:700;">数据管理</div>
+          <p class="reset-hint">重置将清除所有每日挑战历史记录和进行中的挑战，不会影响其他模式的数据。</p>
+          <button id="resetDailyChallengeBtn" class="danger">重置每日挑战</button>
+        </div>
+
+        <button id="backFromDailyBtn" class="secondary back-btn">返回主菜单</button>
+      </div>
+
+      <div id="dailyPlayPanel" class="hidden daily-challenge-panel">
+        <div class="daily-hud">
+          <div class="daily-hud-row">
+            <span class="daily-hud-label">今日航线</span>
+            <span class="daily-hud-value warning" id="dailyHudRouteName">--</span>
+          </div>
+          <div class="daily-hud-row">
+            <span class="daily-hud-label">挑战进度</span>
+            <span class="daily-hud-value" id="dailyHudProgress">0/0</span>
+          </div>
+          <div class="daily-hud-row">
+            <span class="daily-hud-label">累计得分</span>
+            <span class="daily-hud-value positive" id="dailyHudScore">0</span>
+          </div>
+          <div class="daily-hud-row">
+            <span class="daily-hud-label">剩余生命</span>
+            <span class="daily-hud-value" id="dailyHudLives">0</span>
+          </div>
+          <div class="daily-hud-row">
+            <span class="daily-hud-label">计分倍率</span>
+            <span class="daily-hud-value warning" id="dailyHudMultiplier">1.0x</span>
+          </div>
+        </div>
+        <h2>状态</h2>
+        <div class="stat"><span>关卡</span><b id="dailyLevelText">1 / 3</b></div>
+        <div class="stat"><span>本关得分</span><b id="dailyScoreText">0</b></div>
+        <div class="stat"><span>抵达</span><b id="dailyArrivedText">0</b></div>
+        <h2>操作</h2>
+        <div class="keys">
+          <div class="key">← / → 旋转光束</div>
+          <div class="key">空格 切换宽度</div>
+          <div class="key">P 暂停</div>
+          <div class="key">R 重开本关</div>
+        </div>
+        <button id="dailyPauseBtn" class="secondary">暂停</button>
+        <button id="dailyQuitBtn" class="danger">退出挑战</button>
+      </div>
+
+      <div id="dailySettlementPanel" class="hidden campaign-panel campaign-settlement">
+        <div class="settlement-icon">🏆</div>
+        <h1>每日挑战通关！</h1>
+        <p id="dailySettlementRouteName" style="color:#e7c46a;font-weight:700;">--</p>
+        <div class="settlement-stats">
+          <div class="settlement-stat">
+            <span class="settlement-label">最终得分</span>
+            <span class="settlement-value positive" id="dailySettlementScore">0</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">剩余生命</span>
+            <span class="settlement-value" id="dailySettlementLives">0</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">计分倍率</span>
+            <span class="settlement-value warning" id="dailySettlementMultiplier">1.0x</span>
+          </div>
+          <div class="settlement-stat">
+            <span class="settlement-label">今日最佳</span>
+            <span class="settlement-value" style="color:#e7c46a;" id="dailySettlementBest">0</span>
+          </div>
+        </div>
+        <div id="dailySettlementNewRecord" class="hidden" style="background:rgba(231,196,106,.15);border:1px solid rgba(231,196,106,.3);border-radius:6px;padding:12px;margin:12px 0;text-align:center;">
+          <div style="font-size:18px;color:#e7c46a;font-weight:800;">🎉 新纪录！</div>
+        </div>
+        <button id="dailySettlementBackBtn" class="primary">返回每日挑战</button>
+      </div>
+
+      <div id="dailyFailPanel" class="hidden campaign-panel campaign-fail-panel">
+        <div class="fail-icon">💀</div>
+        <h1>每日挑战失败</h1>
+        <p class="fail-reason" id="dailyFailReason">生命已耗尽</p>
+        <div class="fail-stats">
+          <div class="fail-stat">
+            <span>完成关卡</span>
+            <b id="dailyFailCompleted">0</b>
+          </div>
+          <div class="fail-stat">
+            <span>累计得分</span>
+            <b id="dailyFailScore">0</b>
+          </div>
+        </div>
+        <p class="fail-hint">明日再来，灯塔守望者永不言弃！</p>
+        <button id="dailyRetryBtn" class="primary">重新挑战</button>
+        <button id="dailyFailBackBtn" class="secondary back-btn">返回每日挑战</button>
+      </div>
     </aside>
 
     <main class="game">
@@ -1727,6 +1940,7 @@
         <div class="weather-status" id="weatherStatus"></div>
         <div class="canvas-cursor-hint hidden" id="cursorHint"></div>
         <div class="replay-badge hidden" id="replayBadge">回 放 模 式</div>
+        <div class="daily-badge hidden" id="dailyBadge">📅 每 日 挑 战</div>
         <div class="replay-controls hidden" id="replayControls">
           <button class="replay-btn" id="replayBackBtn" title="后退5秒">⏪</button>
           <button class="replay-btn primary" id="replayPlayBtn" title="播放/暂停">▶</button>
@@ -2615,13 +2829,19 @@
           label: "最近自定义航线",
           icon: "🧭",
           description: "玩家编排的自定义战役航线"
+        },
+        dailyChallenge: {
+          key: "dailyChallenge",
+          label: "每日挑战记录",
+          icon: "📅",
+          description: "每日挑战历史记录、当日最佳分和进行中的挑战"
         }
       };
 
       const CATEGORY_ORDER = [
         "customLevels", "levelPackSources", "levelBests",
         "campaignProgress", "campaignRewards", "achievements",
-        "stats", "voyageLogs", "replays", "customChapter"
+        "stats", "voyageLogs", "replays", "customChapter", "dailyChallenge"
       ];
 
       function getAllCategories() {
@@ -2702,6 +2922,12 @@
         if (cats.indexOf("customChapter") >= 0) {
           data.customChapter = CampaignConfig.loadRawCustomChapterData();
         }
+        if (cats.indexOf("dailyChallenge") >= 0) {
+          data.dailyChallenge = {
+            history: DailyChallengeStore.loadHistory(),
+            current: localStorage.getItem("zfl26DailyChallengeCurrent") || null
+          };
+        }
 
         return data;
       }
@@ -2737,6 +2963,44 @@
         return { valid: errors.length === 0, errors: errors };
       }
 
+      function getLevelDisplayName(levelId) {
+        if (!levelId) return "未知关卡";
+        try {
+          const lvl = LevelData.getLevelById(levelId);
+          if (lvl && lvl.name) return lvl.name;
+        } catch (e) {}
+        return levelId;
+      }
+
+      function getChapterDisplayName(chapterId) {
+        if (!chapterId) return "未知章节";
+        if (chapterId === "chapter_custom") return "自定义航线";
+        try {
+          const ch = CampaignConfig.getChapterById(chapterId);
+          if (ch && ch.name) return ch.name;
+        } catch (e) {}
+        return chapterId;
+      }
+
+      function getAchievementDisplayName(achievementId) {
+        if (!achievementId) return "未知成就";
+        try {
+          const list = AchievementRules.achievements || [];
+          const ach = list.find(function(a) { return a.id === achievementId; });
+          if (ach) return (ach.icon || "🏅") + " " + ach.name;
+        } catch (e) {}
+        return achievementId;
+      }
+
+      function describeReplayData(id, data) {
+        if (!data || !data.meta) return "回放 " + (id || "");
+        const m = data.meta;
+        const levelName = getLevelDisplayName(m.levelId);
+        const outcome = m.outcome === "win" ? "胜利" : (m.outcome === "lose" ? "失败" : "进行中");
+        const score = m.finalScore != null ? (m.finalScore + " 分") : "";
+        return [levelName, outcome, score].filter(Boolean).join(" · ");
+      }
+
       function analyzeDiff(profile) {
         const result = {};
         const data = profile.data || {};
@@ -2769,8 +3033,19 @@
           const existing = loadLevelPackSources();
           const existingKeys = Object.keys(existing);
           const importKeys = Object.keys(data.levelPackSources);
-          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
-          const overwritten = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
+          const added = [];
+          const overwritten = [];
+          importKeys.forEach(function(k) {
+            const src = data.levelPackSources[k] || {};
+            const levelName = getLevelDisplayName(k);
+            const packLabel = src.packName ? ("来自关卡包「" + src.packName + "」") : "来源信息";
+            const desc = levelName + " — " + packLabel;
+            if (existingKeys.indexOf(k) < 0) {
+              added.push(desc);
+            } else {
+              overwritten.push(desc);
+            }
+          });
           result.levelPackSources = {
             total: importKeys.length,
             added: added,
@@ -2790,12 +3065,13 @@
           importKeys.forEach(function(k) {
             const importedScore = Number(data.levelBests[k] || 0);
             const existingScore = Number(existing[k] || 0);
+            const levelName = getLevelDisplayName(k);
             if (existingKeys.indexOf(k) < 0) {
-              added.push(k);
+              added.push(levelName + " (" + importedScore + " 分)");
             } else if (importedScore > existingScore) {
-              overwritten.push(k + " (" + existingScore + " → " + importedScore + ")");
+              overwritten.push(levelName + " (" + existingScore + " → " + importedScore + ")");
             } else {
-              skipped.push(k + " (当前: " + existingScore + " ≥ 导入: " + importedScore + ")");
+              skipped.push(levelName + " (当前: " + existingScore + " ≥ 导入: " + importedScore + ")");
             }
           });
           result.levelBests = {
@@ -2811,16 +3087,27 @@
           const existing = CampaignStore.loadProgress();
           const existingChapters = Object.keys(existing.chapterProgress || {});
           const importChapters = Object.keys(data.campaignProgress.chapterProgress || {});
-          const added = importChapters.filter(function(k) { return existingChapters.indexOf(k) < 0; });
+          const added = [];
           const overwritten = [];
+          const skipped = [];
           importChapters.forEach(function(k) {
-            if (existingChapters.indexOf(k) >= 0) {
+            const chName = getChapterDisplayName(k);
+            if (existingChapters.indexOf(k) < 0) {
+              const im = data.campaignProgress.chapterProgress[k] || {};
+              const imBest = im.bestScore || 0;
+              const extras = [];
+              if (im.completed) extras.push("已通关");
+              if (imBest > 0) extras.push("最佳 " + imBest + " 分");
+              added.push(chName + (extras.length > 0 ? " (" + extras.join("、") + ")" : ""));
+            } else {
               const ex = existing.chapterProgress[k] || {};
               const im = data.campaignProgress.chapterProgress[k] || {};
               const exBest = ex.bestScore || 0;
               const imBest = im.bestScore || 0;
               if (imBest > exBest) {
-                overwritten.push(k + " (最佳分: " + exBest + " → " + imBest + ")");
+                overwritten.push(chName + " (最佳分: " + exBest + " → " + imBest + ")");
+              } else {
+                skipped.push(chName + " (最佳分: 当前 " + exBest + " ≥ 导入 " + imBest + ")");
               }
             }
           });
@@ -2828,7 +3115,7 @@
             total: importChapters.length + (data.campaignProgress.currentChapterId ? 1 : 0),
             added: added,
             overwritten: overwritten,
-            skipped: [],
+            skipped: skipped,
             action: data.campaignProgress.currentChapterId ? "overwrite" : "merge"
           };
         }
@@ -2854,8 +3141,16 @@
           const existing = AchievementRules.loadUnlocked();
           const existingKeys = Object.keys(existing);
           const importKeys = Object.keys(data.achievements);
-          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
-          const skipped = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
+          const added = [];
+          const skipped = [];
+          importKeys.forEach(function(k) {
+            const displayName = getAchievementDisplayName(k);
+            if (existingKeys.indexOf(k) < 0) {
+              added.push(displayName);
+            } else {
+              skipped.push(displayName);
+            }
+          });
           result.achievements = {
             total: importKeys.length,
             added: added,
@@ -2882,10 +3177,14 @@
           const added = [];
           const skipped = [];
           data.voyageLogs.forEach(function(log) {
+            const levelName = log.levelName || getLevelDisplayName(log.levelId) || "未知关卡";
+            const resultLabel = log.result === "win" ? "胜利" : (log.result === "lose" ? "失败" : "进行中");
+            const scoreLabel = log.score != null ? (log.score + " 分") : "";
+            const desc = [levelName, resultLabel, scoreLabel].filter(Boolean).join(" · ");
             if (log.id && existingIds.indexOf(log.id) >= 0) {
-              skipped.push(log.id);
+              skipped.push(desc);
             } else {
-              added.push((log.levelName || "未知关卡") + " - " + (log.result === "win" ? "胜利" : "失败"));
+              added.push(desc);
             }
           });
           result.voyageLogs = {
@@ -2900,8 +3199,16 @@
         if (data.replays && typeof data.replays === "object") {
           const existingKeys = Object.keys(getAllReplays());
           const importKeys = Object.keys(data.replays);
-          const added = importKeys.filter(function(k) { return existingKeys.indexOf(k) < 0; });
-          const skipped = importKeys.filter(function(k) { return existingKeys.indexOf(k) >= 0; });
+          const added = [];
+          const skipped = [];
+          importKeys.forEach(function(k) {
+            const desc = describeReplayData(k, data.replays[k]);
+            if (existingKeys.indexOf(k) < 0) {
+              added.push(desc);
+            } else {
+              skipped.push(desc);
+            }
+          });
           result.replays = {
             total: importKeys.length,
             added: added,
@@ -2920,6 +3227,35 @@
             overwritten: willOverwrite ? [existing.name || "当前自定义航线"] : [],
             skipped: [],
             action: willOverwrite ? "overwrite" : "add"
+          };
+        }
+
+        if (data.dailyChallenge && typeof data.dailyChallenge === "object") {
+          const existing = DailyChallengeStore.loadHistory();
+          const importHistory = data.dailyChallenge.history || {};
+          const importDays = Object.keys(importHistory);
+          const added = [];
+          const overwritten = [];
+          const skipped = [];
+          importDays.forEach(function(dateStr) {
+            const imBest = importHistory[dateStr].bestScore || 0;
+            if (!existing[dateStr]) {
+              added.push(dateStr + " (" + imBest + " 分)");
+            } else {
+              const exBest = existing[dateStr].bestScore || 0;
+              if (imBest > exBest) {
+                overwritten.push(dateStr + " (" + exBest + " → " + imBest + ")");
+              } else {
+                skipped.push(dateStr + " (当前 " + exBest + " ≥ 导入 " + imBest + ")");
+              }
+            }
+          });
+          result.dailyChallenge = {
+            total: importDays.length,
+            added: added,
+            overwritten: overwritten,
+            skipped: skipped,
+            action: "merge"
           };
         }
 
@@ -3021,7 +3357,8 @@
           "zfl26CustomLevels", "zfl26LevelBests", "zfl26BuiltinUnlocked", "zfl26Best",
           "zfl26CampaignProgress", "zfl26CampaignRewards",
           "zfl26Achievements", "zfl26Stats", "zfl26VoyageLogs",
-          "zfl26CustomChapter", LEVEL_PACK_SOURCES_KEY
+          "zfl26CustomChapter", LEVEL_PACK_SOURCES_KEY,
+          "zfl26DailyChallengeHistory", "zfl26DailyChallengeCurrent"
         ];
         keys.forEach(function(k) {
           snapshot[k] = localStorage.getItem(k);
@@ -3224,6 +3561,34 @@
               }));
               results.customChapter = { imported: true };
             }
+          }
+
+          if (cats.indexOf("dailyChallenge") >= 0 && data.dailyChallenge) {
+            if (data.dailyChallenge.history) {
+              const existing = DailyChallengeStore.loadHistory();
+              const merged = Object.assign({}, existing);
+              Object.keys(data.dailyChallenge.history).forEach(function(dateStr) {
+                if (!merged[dateStr]) {
+                  merged[dateStr] = data.dailyChallenge.history[dateStr];
+                } else {
+                  const exBest = merged[dateStr].bestScore || 0;
+                  const imBest = data.dailyChallenge.history[dateStr].bestScore || 0;
+                  if (imBest > exBest) {
+                    merged[dateStr].bestScore = imBest;
+                  }
+                }
+              });
+              localStorage.setItem("zfl26DailyChallengeHistory", JSON.stringify(merged));
+            }
+            if (data.dailyChallenge.current) {
+              try {
+                const cur = JSON.parse(data.dailyChallenge.current);
+                if (cur && cur.dateStr) {
+                  localStorage.setItem("zfl26DailyChallengeCurrent", data.dailyChallenge.current);
+                }
+              } catch (e) {}
+            }
+            results.dailyChallenge = { imported: true };
           }
 
           return { success: true, results: results };
@@ -3462,6 +3827,199 @@
         hasInvalidCustomLevels,
         getCustomChapterInvalidLevelIds,
         getTotalBoatsForLevelIds
+      };
+    })();
+
+    // ===================== DailyChallengeConfig 模块：每日挑战配置 =====================
+    const DailyChallengeConfig = (function() {
+      var ROUTE_NAMES = [
+        "晨曦航线", "暮色航道", "星夜渡口", "潮汐秘径", "霜月航线",
+        "幽暗海峡", "碧波长廊", "银雾航路", "暗涌之途", "破晓航线",
+        "深渊航线", "极光航道", "寂夜渡口", "暴风秘径", "寒星航线",
+        "迷雾海峡", "烈焰长廊", "冰霜航路", "暗礁之途", "黄昏航线",
+        "苍穹航线", "骇浪航道", "孤灯渡口", "雷霆秘径", "血月航线",
+        "幽灵海峡", "翡翠长廊", "金辉航路", "怒涛之途", "黎明航线"
+      ];
+
+      function createSeededRNG(seed) {
+        var s = seed;
+        function next() {
+          s = (s * 1103515245 + 12345) & 0x7fffffff;
+          return s / 0x7fffffff;
+        }
+        function nextInt(min, max) {
+          return Math.floor(next() * (max - min + 1)) + min;
+        }
+        function nextFloat(min, max) {
+          return next() * (max - min) + min;
+        }
+        function shuffle(arr) {
+          var a = arr.slice();
+          for (var i = a.length - 1; i > 0; i--) {
+            var j = nextInt(0, i);
+            var tmp = a[i];
+            a[i] = a[j];
+            a[j] = tmp;
+          }
+          return a;
+        }
+        function pick(arr) {
+          return arr[nextInt(0, arr.length - 1)];
+        }
+        return { next: next, nextInt: nextInt, nextFloat: nextFloat, shuffle: shuffle, pick: pick };
+      }
+
+      function dateToSeed(dateStr) {
+        var parts = dateStr.split("-");
+        var y = parseInt(parts[0], 10);
+        var m = parseInt(parts[1], 10);
+        var d = parseInt(parts[2], 10);
+        return y * 10000 + m * 100 + d;
+      }
+
+      function getTodayStr() {
+        var now = new Date();
+        var y = now.getFullYear();
+        var m = String(now.getMonth() + 1).padStart(2, "0");
+        var d = String(now.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + d;
+      }
+
+      function generateChallenge(dateStr) {
+        var seed = dateToSeed(dateStr);
+        var rng = createSeededRNG(seed);
+
+        var allLevels = LevelData.getAllLevels();
+        if (allLevels.length === 0) {
+          allLevels = LevelData.builtinLevels.slice();
+        }
+
+        var shuffled = rng.shuffle(allLevels);
+        var levelCount = rng.nextInt(3, 5);
+        levelCount = Math.min(levelCount, shuffled.length);
+
+        var selectedLevels = [];
+        for (var i = 0; i < levelCount; i++) {
+          selectedLevels.push(shuffled[i].id);
+        }
+
+        var weatherTypes = ["seaBreeze", "denseFog", "lighthouseFlash"];
+        var weatherEnabled = {};
+        var weatherCount = rng.nextInt(1, 3);
+        var weatherShuffled = rng.shuffle(weatherTypes.slice());
+        for (var w = 0; w < weatherCount; w++) {
+          weatherEnabled[weatherShuffled[w]] = true;
+        }
+        if (!weatherEnabled.seaBreeze && !weatherEnabled.denseFog && !weatherEnabled.lighthouseFlash) {
+          weatherEnabled.seaBreeze = true;
+        }
+
+        var lives = rng.nextInt(2, 4);
+        var scoreMultiplier = Math.round(rng.nextFloat(1.2, 2.0) * 10) / 10;
+        var routeNameIndex = seed % ROUTE_NAMES.length;
+
+        var challenge = {
+          date: dateStr,
+          seed: seed,
+          routeName: ROUTE_NAMES[routeNameIndex],
+          levelIds: selectedLevels,
+          levelCount: levelCount,
+          weatherEnabled: weatherEnabled,
+          lives: lives,
+          scoreMultiplier: scoreMultiplier
+        };
+
+        return challenge;
+      }
+
+      function getLevelDataForChallenge(challenge, levelIndex) {
+        if (!challenge || levelIndex < 0 || levelIndex >= challenge.levelIds.length) return null;
+        var levelId = challenge.levelIds[levelIndex];
+        var baseLevel = LevelData.getLevelById(levelId);
+        if (!baseLevel) return null;
+
+        var level = JSON.parse(JSON.stringify(baseLevel));
+        level.id = "daily_" + challenge.date + "_" + levelIndex;
+        level.name = "【" + challenge.routeName + "】" + level.name;
+        level._originalId = levelId;
+        level._isDailyChallenge = true;
+        level._dailyDate = challenge.date;
+
+        var weather = level.weather || {
+          seaBreeze: { enabled: false },
+          denseFog: { enabled: false },
+          lighthouseFlash: { enabled: false }
+        };
+
+        if (challenge.weatherEnabled.seaBreeze) {
+          weather.seaBreeze = weather.seaBreeze || {};
+          weather.seaBreeze.enabled = true;
+          if (!weather.seaBreeze.minDuration) {
+            weather.seaBreeze.minDuration = 8;
+            weather.seaBreeze.maxDuration = 16;
+            weather.seaBreeze.minCooldown = 18;
+            weather.seaBreeze.maxCooldown = 30;
+            weather.seaBreeze.driftMultiplier = 1.8;
+            weather.seaBreeze.speedMultiplier = 1.12;
+          }
+        }
+        if (challenge.weatherEnabled.denseFog) {
+          weather.denseFog = weather.denseFog || {};
+          weather.denseFog.enabled = true;
+          if (!weather.denseFog.minDuration) {
+            weather.denseFog.minDuration = 10;
+            weather.denseFog.maxDuration = 20;
+            weather.denseFog.minCooldown = 20;
+            weather.denseFog.maxCooldown = 35;
+            weather.denseFog.beamRangeMultiplier = 0.6;
+            weather.denseFog.fogOpacity = 0.45;
+          }
+        }
+        if (challenge.weatherEnabled.lighthouseFlash) {
+          weather.lighthouseFlash = weather.lighthouseFlash || {};
+          weather.lighthouseFlash.enabled = true;
+          if (!weather.lighthouseFlash.minDuration) {
+            weather.lighthouseFlash.minDuration = 5;
+            weather.lighthouseFlash.maxDuration = 10;
+            weather.lighthouseFlash.minCooldown = 16;
+            weather.lighthouseFlash.maxCooldown = 28;
+            weather.lighthouseFlash.jitterAmount = 0.07;
+            weather.lighthouseFlash.flickerIntensity = 0.35;
+          }
+        }
+
+        level.weather = weather;
+        return level;
+      }
+
+      function getWeatherSummary(challenge) {
+        var icons = [];
+        if (challenge.weatherEnabled.seaBreeze) icons.push("🌬️");
+        if (challenge.weatherEnabled.denseFog) icons.push("🌫️");
+        if (challenge.weatherEnabled.lighthouseFlash) icons.push("⚡");
+        return icons.length > 0 ? icons.join("") : "🌤️";
+      }
+
+      function getDifficultyLabel(challenge) {
+        var score = 0;
+        if (challenge.weatherEnabled.seaBreeze) score += 1;
+        if (challenge.weatherEnabled.denseFog) score += 1;
+        if (challenge.weatherEnabled.lighthouseFlash) score += 1;
+        if (challenge.lives <= 2) score += 1;
+        if (challenge.levelCount >= 5) score += 1;
+        if (score <= 1) return { label: "轻松", color: "#7dd69b" };
+        if (score <= 2) return { label: "普通", color: "#e7c46a" };
+        if (score <= 3) return { label: "困难", color: "#e7c46a" };
+        return { label: "极限", color: "#e2685d" };
+      }
+
+      return {
+        generateChallenge: generateChallenge,
+        getLevelDataForChallenge: getLevelDataForChallenge,
+        getTodayStr: getTodayStr,
+        dateToSeed: dateToSeed,
+        getWeatherSummary: getWeatherSummary,
+        getDifficultyLabel: getDifficultyLabel
       };
     })();
 
@@ -3910,6 +4468,230 @@
       };
     })();
 
+    // ===================== DailyChallengeStore 模块：每日挑战数据存储层 =====================
+    const DailyChallengeStore = (function() {
+      var DAILY_KEY = "zfl26DailyChallengeHistory";
+      var CURRENT_KEY = "zfl26DailyChallengeCurrent";
+
+      function loadHistory() {
+        try {
+          var stored = localStorage.getItem(DAILY_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {};
+      }
+
+      function saveHistory(history) {
+        localStorage.setItem(DAILY_KEY, JSON.stringify(history));
+      }
+
+      function getDayRecord(dateStr) {
+        var history = loadHistory();
+        return history[dateStr] || null;
+      }
+
+      function saveDayRecord(dateStr, record) {
+        var history = loadHistory();
+        history[dateStr] = record;
+        saveHistory(history);
+      }
+
+      function updateDayBestScore(dateStr, score, completed) {
+        var record = getDayRecord(dateStr) || {
+          date: dateStr,
+          bestScore: 0,
+          attempts: 0,
+          completed: false,
+          completedAt: null,
+          lastPlayedAt: null
+        };
+        record.attempts = (record.attempts || 0) + 1;
+        record.lastPlayedAt = Date.now();
+        if (score > (record.bestScore || 0)) {
+          record.bestScore = score;
+        }
+        if (completed && !record.completed) {
+          record.completed = true;
+          record.completedAt = Date.now();
+        }
+        saveDayRecord(dateStr, record);
+        return record;
+      }
+
+      function getTodayBestScore() {
+        var today = DailyChallengeConfig.getTodayStr();
+        var record = getDayRecord(today);
+        return record ? record.bestScore || 0 : 0;
+      }
+
+      function getTodayRecord() {
+        return getDayRecord(DailyChallengeConfig.getTodayStr());
+      }
+
+      function loadCurrentRun() {
+        try {
+          var stored = localStorage.getItem(CURRENT_KEY);
+          if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return null;
+      }
+
+      function saveCurrentRun(runData) {
+        localStorage.setItem(CURRENT_KEY, JSON.stringify(runData));
+      }
+
+      function clearCurrentRun() {
+        localStorage.removeItem(CURRENT_KEY);
+      }
+
+      function startRun(challenge) {
+        var run = {
+          date: challenge.date,
+          routeName: challenge.routeName,
+          currentLevelIndex: 0,
+          totalScore: 0,
+          lives: challenge.lives,
+          startingLives: challenge.lives,
+          scoreMultiplier: challenge.scoreMultiplier,
+          levelScores: [],
+          startTime: Date.now(),
+          lastSavedAt: Date.now()
+        };
+        saveCurrentRun(run);
+        return run;
+      }
+
+      function updateRunProgress(levelScore) {
+        var run = loadCurrentRun();
+        if (!run) return null;
+        run.totalScore += levelScore;
+        run.levelScores.push(levelScore);
+        run.currentLevelIndex++;
+        run.lastSavedAt = Date.now();
+        saveCurrentRun(run);
+        return run;
+      }
+
+      function loseRunLife() {
+        var run = loadCurrentRun();
+        if (!run) return 0;
+        run.lives = Math.max(0, run.lives - 1);
+        run.lastSavedAt = Date.now();
+        saveCurrentRun(run);
+        return run.lives;
+      }
+
+      function completeRun() {
+        var run = loadCurrentRun();
+        if (!run) return null;
+        var finalScore = run.totalScore;
+        updateDayBestScore(run.date, finalScore, true);
+        clearCurrentRun();
+        return { date: run.date, score: finalScore, lives: run.lives, startingLives: run.startingLives, levelScores: run.levelScores };
+      }
+
+      function failRun() {
+        var run = loadCurrentRun();
+        if (!run) return null;
+        updateDayBestScore(run.date, run.totalScore, false);
+        clearCurrentRun();
+        return { date: run.date, score: run.totalScore, lives: run.lives, startingLives: run.startingLives, levelScores: run.levelScores };
+      }
+
+      function abandonRun() {
+        var run = loadCurrentRun();
+        if (!run) return;
+        updateDayBestScore(run.date, run.totalScore, false);
+        clearCurrentRun();
+      }
+
+      function hasActiveRun() {
+        var run = loadCurrentRun();
+        if (!run) return false;
+        return run.date === DailyChallengeConfig.getTodayStr();
+      }
+
+      function getActiveRunInfo() {
+        var run = loadCurrentRun();
+        if (!run || run.date !== DailyChallengeConfig.getTodayStr()) return null;
+        return run;
+      }
+
+      function getCalendarMonth(year, month) {
+        var history = loadHistory();
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        var calendar = [];
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dateStr = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+          var record = history[dateStr];
+          calendar.push({
+            date: dateStr,
+            day: d,
+            bestScore: record ? record.bestScore || 0 : 0,
+            attempts: record ? record.attempts || 0 : 0,
+            completed: record ? !!record.completed : false
+          });
+        }
+        return calendar;
+      }
+
+      function getStreak() {
+        var history = loadHistory();
+        var streak = 0;
+        var today = new Date();
+        for (var i = 0; i < 365; i++) {
+          var d = new Date(today);
+          d.setDate(d.getDate() - i);
+          var dateStr = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+          var record = history[dateStr];
+          if (record && record.completed) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+        return streak;
+      }
+
+      function getTotalCompleted() {
+        var history = loadHistory();
+        var count = 0;
+        for (var key in history) {
+          if (history[key].completed) count++;
+        }
+        return count;
+      }
+
+      function resetAll() {
+        localStorage.removeItem(DAILY_KEY);
+        localStorage.removeItem(CURRENT_KEY);
+      }
+
+      return {
+        loadHistory: loadHistory,
+        getDayRecord: getDayRecord,
+        saveDayRecord: saveDayRecord,
+        updateDayBestScore: updateDayBestScore,
+        getTodayBestScore: getTodayBestScore,
+        getTodayRecord: getTodayRecord,
+        loadCurrentRun: loadCurrentRun,
+        saveCurrentRun: saveCurrentRun,
+        clearCurrentRun: clearCurrentRun,
+        startRun: startRun,
+        updateRunProgress: updateRunProgress,
+        loseRunLife: loseRunLife,
+        completeRun: completeRun,
+        failRun: failRun,
+        abandonRun: abandonRun,
+        hasActiveRun: hasActiveRun,
+        getActiveRunInfo: getActiveRunInfo,
+        getCalendarMonth: getCalendarMonth,
+        getStreak: getStreak,
+        getTotalCompleted: getTotalCompleted,
+        resetAll: resetAll
+      };
+    })();
+
     // ===================== StatsStore 模块：统计数据存储层 =====================
     const StatsStore = (function() {
       const STATS_KEY = "zfl26Stats";
@@ -4096,6 +4878,8 @@
           levelName: "",
           isCustom: false,
           isCampaign: false,
+          isDailyChallenge: false,
+          dailyChallengeDate: null,
           campaignChapterId: null,
           campaignChapterName: "",
           startTime: Date.now(),
@@ -4173,6 +4957,7 @@
             if (f.source === "builtin" && log.isCustom) return false;
             if (f.source === "custom" && !log.isCustom) return false;
             if (f.source === "campaign" && !log.isCampaign) return false;
+            if (f.source === "daily" && !log.isDailyChallenge) return false;
           }
           if (f.failReason && f.failReason !== "all") {
             if (log.result !== "lose" || log.failReason !== f.failReason) return false;
@@ -4220,6 +5005,7 @@
         const avgDuration = logs.length > 0 ? totalDuration / logs.length : 0;
         const winRate = logs.length > 0 ? Math.round((winCount / logs.length) * 100) : 0;
         const campaignCount = logs.filter(function(l) { return l.isCampaign; }).length;
+        const dailyCount = logs.filter(function(l) { return l.isDailyChallenge; }).length;
         const replayWatchedCount = logs.filter(function(l) { return l.watchedReplay; }).length;
 
         const failReasons = {};
@@ -4239,6 +5025,7 @@
           avgDuration: avgDuration,
           winRate: winRate,
           campaignCount: campaignCount,
+          dailyCount: dailyCount,
           replayWatchedCount: replayWatchedCount,
           failReasons: failReasons
         };
@@ -5553,6 +6340,47 @@
     const restartCampaignBtn = document.querySelector("#restartCampaignBtn");
     const abandonCampaignBtn = document.querySelector("#abandonCampaignBtn");
 
+    // ===================== 每日挑战 DOM 引用 =====================
+    const dailyChallengeBtn = document.querySelector("#dailyChallengeBtn");
+    const dailyChallengePanel = document.querySelector("#dailyChallengePanel");
+    const dailyPlayPanel = document.querySelector("#dailyPlayPanel");
+    const dailySettlementPanel = document.querySelector("#dailySettlementPanel");
+    const dailyFailPanel = document.querySelector("#dailyFailPanel");
+    const dailyBadge = document.querySelector("#dailyBadge");
+    const dailyRouteName = document.querySelector("#dailyRouteName");
+    const dailyLevelCount = document.querySelector("#dailyLevelCount");
+    const dailyLives = document.querySelector("#dailyLives");
+    const dailyScoreMult = document.querySelector("#dailyScoreMult");
+    const dailyDifficulty = document.querySelector("#dailyDifficulty");
+    const dailyWeather = document.querySelector("#dailyWeather");
+    const dailyBestScore = document.querySelector("#dailyBestScore");
+    const dailyBestAttempts = document.querySelector("#dailyBestAttempts");
+    const dailyActiveRunArea = document.querySelector("#dailyActiveRunArea");
+    const dailyRunProgress = document.querySelector("#dailyRunProgress");
+    const dailyRunLives = document.querySelector("#dailyRunLives");
+    const dailyRunScore = document.querySelector("#dailyRunScore");
+    const dailyStartBtn = document.querySelector("#dailyStartBtn");
+    const dailyStatStreak = document.querySelector("#dailyStatStreak");
+    const dailyStatTotalCompleted = document.querySelector("#dailyStatTotalCompleted");
+    const dailyStatHighestScore = document.querySelector("#dailyStatHighestScore");
+    const dailyHudRouteName = document.querySelector("#dailyHudRouteName");
+    const dailyHudProgress = document.querySelector("#dailyHudProgress");
+    const dailyHudScore = document.querySelector("#dailyHudScore");
+    const dailyHudLives = document.querySelector("#dailyHudLives");
+    const dailyHudMultiplier = document.querySelector("#dailyHudMultiplier");
+    const dailyLevelText = document.querySelector("#dailyLevelText");
+    const dailyScoreText = document.querySelector("#dailyScoreText");
+    const dailyArrivedText = document.querySelector("#dailyArrivedText");
+    const dailySettlementRouteName = document.querySelector("#dailySettlementRouteName");
+    const dailySettlementScore = document.querySelector("#dailySettlementScore");
+    const dailySettlementLives = document.querySelector("#dailySettlementLives");
+    const dailySettlementMultiplier = document.querySelector("#dailySettlementMultiplier");
+    const dailySettlementBest = document.querySelector("#dailySettlementBest");
+    const dailySettlementNewRecord = document.querySelector("#dailySettlementNewRecord");
+    const dailyFailReason = document.querySelector("#dailyFailReason");
+    const dailyFailCompleted = document.querySelector("#dailyFailCompleted");
+    const dailyFailScore = document.querySelector("#dailyFailScore");
+
     // ===================== 编辑器 DOM 引用 =====================
     const editorLevelName = document.querySelector("#editorLevelName");
     const editorHint = document.querySelector("#editorHint");
@@ -5688,6 +6516,12 @@
     let logBoatLosses = [];
     let currentLogFailReason = null;
     let currentLogFailText = "";
+
+    // ===================== 每日挑战模式状态 =====================
+    let dailyChallengeState = "idle";
+    let currentDailyChallenge = null;
+    let dailyLevelStartScore = 0;
+    let dailyScoreMultiplier = 1;
 
     // ===================== 战役模式状态 =====================
     let campaignState = "idle";
@@ -6082,6 +6916,9 @@
         if (log.isCampaign) {
           tagsHtml += '<span class="log-tag weather">⚔️ 战役模式</span>';
         }
+        if (log.isDailyChallenge) {
+          tagsHtml += '<span class="log-tag daily">📅 每日挑战</span>';
+        }
         if (log.isCustom) {
           tagsHtml += '<span class="log-tag custom">自定义关卡</span>';
         }
@@ -6223,6 +7060,9 @@
       let tagsHtml = '<div class="detail-tags">';
       if (log.isCampaign) {
         tagsHtml += '<span class="detail-tag campaign">⚔️ 来自战役' + (log.campaignChapterName ? '：' + log.campaignChapterName : '') + '</span>';
+      }
+      if (log.isDailyChallenge) {
+        tagsHtml += '<span class="detail-tag daily">📅 每日挑战' + (log.dailyChallengeDate ? '（' + log.dailyChallengeDate + '）' : '') + '</span>';
       }
       if (log.isCustom) {
         tagsHtml += '<span class="detail-tag">🎨 自定义关卡</span>';
@@ -6444,12 +7284,27 @@
 
     function getCurrentLevelData() {
       if (playtestLevel) return playtestLevel;
+      if (isDailyChallengeMode()) {
+        var run = DailyChallengeStore.getActiveRunInfo();
+        if (run && currentDailyChallenge) {
+          var data = DailyChallengeConfig.getLevelDataForChallenge(currentDailyChallenge, run.currentLevelIndex);
+          if (data) return data;
+        }
+      }
       return LevelData.getLevelById(currentLevelId) || LevelData.builtinLevels[0];
     }
 
     function getCurrentLevelIndex() {
       if (playtestLevel) return -1;
+      if (isDailyChallengeMode()) {
+        var run = DailyChallengeStore.getActiveRunInfo();
+        return run ? run.currentLevelIndex : 0;
+      }
       return LevelData.getLevelIndex(currentLevelId);
+    }
+
+    function isDailyChallengeMode() {
+      return dailyChallengeState === "playing" || dailyChallengeState === "settlement";
     }
 
     // ===================== 战役模式 UI 控制器 =====================
@@ -7441,6 +8296,353 @@
       return campaignState === "playing" || campaignState === "settlement";
     }
 
+    // ===================== 每日挑战 UI 控制器 =====================
+    let dailyCalYear = new Date().getFullYear();
+    let dailyCalMonth = new Date().getMonth();
+
+    function showDailyChallengePanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
+      campaignSelectPanel.classList.add("hidden");
+      campaignPlayPanel.classList.add("hidden");
+      dailyPlayPanel.classList.add("hidden");
+      dailySettlementPanel.classList.add("hidden");
+      dailyFailPanel.classList.add("hidden");
+      dailyChallengePanel.classList.remove("hidden");
+      state = "dailyChallengeSelect";
+      cursorHint.classList.add("hidden");
+      backFromPlaytestBtn.style.display = "none";
+      renderDailyChallengePanel();
+    }
+
+    function renderDailyChallengePanel() {
+      var todayStr = DailyChallengeConfig.getTodayStr();
+      currentDailyChallenge = DailyChallengeConfig.generateChallenge(todayStr);
+
+      dailyRouteName.textContent = currentDailyChallenge.routeName;
+      dailyLevelCount.textContent = currentDailyChallenge.levelCount + " 关";
+      var hearts = "";
+      for (var i = 0; i < currentDailyChallenge.lives; i++) hearts += "❤️";
+      dailyLives.textContent = hearts;
+      dailyScoreMult.textContent = currentDailyChallenge.scoreMultiplier + "x";
+
+      var diffInfo = DailyChallengeConfig.getDifficultyLabel(currentDailyChallenge);
+      dailyDifficulty.innerHTML = '<span class="daily-difficulty-badge" style="background:' + diffInfo.color + '22;color:' + diffInfo.color + ';">' + diffInfo.label + '</span>';
+
+      dailyWeather.textContent = DailyChallengeConfig.getWeatherSummary(currentDailyChallenge);
+
+      var todayRecord = DailyChallengeStore.getTodayRecord();
+      dailyBestScore.textContent = todayRecord ? (todayRecord.bestScore || 0) : 0;
+      if (todayRecord && todayRecord.attempts > 0) {
+        dailyBestAttempts.textContent = "今日已挑战 " + todayRecord.attempts + " 次" + (todayRecord.completed ? " · 已通关 ✓" : "");
+      } else {
+        dailyBestAttempts.textContent = "今日尚未挑战";
+      }
+
+      if (DailyChallengeStore.hasActiveRun()) {
+        dailyActiveRunArea.classList.remove("hidden");
+        dailyStartBtn.classList.add("hidden");
+        var run = DailyChallengeStore.getActiveRunInfo();
+        dailyRunProgress.textContent = run.currentLevelIndex + "/" + currentDailyChallenge.levelCount;
+        var runHearts = "";
+        for (var j = 0; j < run.lives; j++) runHearts += "❤️";
+        for (var k = run.lives; k < run.startingLives; k++) runHearts += "🖤";
+        dailyRunLives.textContent = runHearts;
+        dailyRunScore.textContent = run.totalScore;
+      } else {
+        dailyActiveRunArea.classList.add("hidden");
+        dailyStartBtn.classList.remove("hidden");
+      }
+
+      dailyStatStreak.textContent = DailyChallengeStore.getStreak();
+      dailyStatTotalCompleted.textContent = DailyChallengeStore.getTotalCompleted();
+      var history = DailyChallengeStore.loadHistory();
+      var highest = 0;
+      for (var key in history) {
+        if (history[key].bestScore > highest) highest = history[key].bestScore;
+      }
+      dailyStatHighestScore.textContent = highest;
+
+      renderDailyCalendar();
+    }
+
+    function renderDailyCalendar() {
+      var grid = document.getElementById("dailyCalendarGrid");
+      var title = document.getElementById("dailyCalendarTitle");
+      var monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+      title.textContent = dailyCalYear + "年 " + monthNames[dailyCalMonth];
+
+      grid.innerHTML = "";
+      var weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+      for (var w = 0; w < 7; w++) {
+        var wdEl = document.createElement("div");
+        wdEl.className = "daily-cal-weekday";
+        wdEl.textContent = weekdays[w];
+        grid.appendChild(wdEl);
+      }
+
+      var firstDay = new Date(dailyCalYear, dailyCalMonth, 1).getDay();
+      var todayStr = DailyChallengeConfig.getTodayStr();
+      var calendar = DailyChallengeStore.getCalendarMonth(dailyCalYear, dailyCalMonth);
+
+      for (var e = 0; e < firstDay; e++) {
+        var emptyEl = document.createElement("div");
+        emptyEl.className = "daily-cal-day empty";
+        grid.appendChild(emptyEl);
+      }
+
+      for (var d = 0; d < calendar.length; d++) {
+        var dayEl = document.createElement("div");
+        var dayData = calendar[d];
+        var classes = "daily-cal-day";
+        if (dayData.date === todayStr) classes += " today";
+        if (dayData.completed) classes += " completed";
+        else if (dayData.attempts > 0) classes += " played";
+        if (dayData.date > todayStr) classes += " future";
+        dayEl.className = classes;
+        dayEl.textContent = dayData.day;
+        if (dayData.bestScore > 0) {
+          var scoreSpan = document.createElement("span");
+          scoreSpan.className = "cal-score";
+          scoreSpan.textContent = dayData.bestScore;
+          dayEl.appendChild(scoreSpan);
+        }
+        dayEl.title = dayData.date + (dayData.completed ? " ✓" : "") + (dayData.bestScore > 0 ? " (" + dayData.bestScore + "分)" : "");
+        grid.appendChild(dayEl);
+      }
+    }
+
+    function startDailyChallenge() {
+      var todayStr = DailyChallengeConfig.getTodayStr();
+      currentDailyChallenge = DailyChallengeConfig.generateChallenge(todayStr);
+      dailyScoreMultiplier = currentDailyChallenge.scoreMultiplier;
+
+      if (DailyChallengeStore.hasActiveRun()) {
+        resumeDailyChallenge();
+        return;
+      }
+
+      DailyChallengeStore.startRun(currentDailyChallenge);
+      dailyChallengeState = "playing";
+      score = 0;
+      dailyLevelStartScore = 0;
+
+      showDailyPlayPanel();
+      resetLevel();
+    }
+
+    function resumeDailyChallenge() {
+      var todayStr = DailyChallengeConfig.getTodayStr();
+      currentDailyChallenge = DailyChallengeConfig.generateChallenge(todayStr);
+      dailyScoreMultiplier = currentDailyChallenge.scoreMultiplier;
+
+      var run = DailyChallengeStore.getActiveRunInfo();
+      if (!run) {
+        startDailyChallenge();
+        return;
+      }
+
+      dailyChallengeState = "playing";
+      score = run.totalScore;
+      dailyLevelStartScore = run.totalScore;
+
+      showDailyPlayPanel();
+      resetLevel();
+    }
+
+    function restartDailyChallenge() {
+      DailyChallengeStore.abandonRun();
+      startDailyChallenge();
+    }
+
+    function abandonDailyChallenge() {
+      if (confirm("确定要放弃当前挑战吗？\n\n当前进度会被保存为最佳分记录。")) {
+        DailyChallengeStore.abandonRun();
+        dailyChallengeState = "idle";
+        currentDailyChallenge = null;
+        score = 0;
+        dailyBadge.classList.add("hidden");
+        showDailyChallengePanel();
+      }
+    }
+
+    function showDailyPlayPanel() {
+      mainMenu.classList.add("hidden");
+      levelSelectPanel.classList.add("hidden");
+      settingsPanel.classList.add("hidden");
+      editorPanel.classList.add("hidden");
+      achievementsPanel.classList.add("hidden");
+      voyageLogPanel.classList.add("hidden");
+      campaignSelectPanel.classList.add("hidden");
+      campaignPlayPanel.classList.add("hidden");
+      campaignIntroPanel.classList.add("hidden");
+      campaignSettlementPanel.classList.add("hidden");
+      campaignFailPanel.classList.add("hidden");
+      dailyChallengePanel.classList.add("hidden");
+      dailySettlementPanel.classList.add("hidden");
+      dailyFailPanel.classList.add("hidden");
+      dailyPlayPanel.classList.remove("hidden");
+      dailyBadge.classList.remove("hidden");
+      overlay.classList.add("hidden");
+    }
+
+    function updateDailyChallengeHud() {
+      var run = DailyChallengeStore.getActiveRunInfo();
+      if (!run) return;
+      var challenge = currentDailyChallenge;
+      if (!challenge) return;
+
+      dailyHudRouteName.textContent = challenge.routeName;
+      dailyHudProgress.textContent = (run.currentLevelIndex + 1) + "/" + challenge.levelCount;
+      dailyHudScore.textContent = score;
+      var hearts = "";
+      for (var i = 0; i < run.lives; i++) hearts += "❤️";
+      for (var j = run.lives; j < run.startingLives; j++) hearts += "🖤";
+      dailyHudLives.textContent = hearts;
+      dailyHudMultiplier.textContent = challenge.scoreMultiplier + "x";
+
+      var currentLevelScore = score - dailyLevelStartScore;
+      dailyLevelText.textContent = (run.currentLevelIndex + 1) + " / " + challenge.levelCount;
+      dailyScoreText.textContent = currentLevelScore;
+      dailyArrivedText.textContent = boats.filter(function(b) { return b.arrived; }).length;
+    }
+
+    function handleDailyChallengeLevelWin() {
+      var currentLevelScore = score - dailyLevelStartScore;
+      var updated = DailyChallengeStore.updateRunProgress(currentLevelScore);
+      if (!updated) return;
+
+      score = updated.totalScore;
+
+      if (updated.currentLevelIndex >= currentDailyChallenge.levelCount) {
+        var result = DailyChallengeStore.completeRun();
+        showDailySettlement(result);
+      } else {
+        dailyLevelStartScore = score;
+        showDailyBetweenLevels(currentLevelScore);
+      }
+    }
+
+    function handleDailyChallengeLevelLose(failReason, failReasonText) {
+      var livesLeft = DailyChallengeStore.loseRunLife();
+
+      if (livesLeft <= 0) {
+        var result = DailyChallengeStore.failRun();
+        showDailyFail(failReason, failReasonText, result);
+      } else {
+        showDailyRetry(failReason, failReasonText, livesLeft);
+      }
+    }
+
+    function showDailyBetweenLevels(levelScore) {
+      state = "dailyBetween";
+      var run = DailyChallengeStore.getActiveRunInfo();
+
+      overlayTitle.textContent = "第 " + (run.currentLevelIndex) + " 关完成";
+      var btnParent = overlayBtn.parentElement;
+      var extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+      overlayText.textContent = "本关得分：" + levelScore + "。累计：" + run.totalScore + " 分。准备进入下一关。";
+      overlayBtn.textContent = "继续";
+      overlayBtn.onclick = function() {
+        dailyLevelStartScore = score;
+        resetLevel();
+      };
+      overlayBtn.style.display = "";
+      overlay.classList.remove("hidden");
+    }
+
+    function showDailyRetry(failReason, failReasonText, livesLeft) {
+      state = "dailyRetry";
+      var run = DailyChallengeStore.getActiveRunInfo();
+
+      var hearts = "";
+      for (var i = 0; i < livesLeft; i++) hearts += "❤️";
+      for (var j = livesLeft; j < run.startingLives; j++) hearts += "🖤";
+
+      overlayTitle.textContent = "船只失事！";
+      var btnParent = overlayBtn.parentElement;
+      var extraBtns = btnParent.querySelectorAll(".extra-overlay-btn");
+      extraBtns.forEach(function(b) { b.remove(); });
+      overlayText.textContent = failReasonText + " 剩余生命：" + hearts;
+      overlayBtn.textContent = "重试本关";
+      overlayBtn.onclick = function() {
+        dailyLevelStartScore = score;
+        resetLevel();
+      };
+      overlayBtn.style.display = "";
+      overlay.classList.remove("hidden");
+    }
+
+    function showDailySettlement(result) {
+      dailyChallengeState = "settlement";
+      dailyPlayPanel.classList.add("hidden");
+      dailySettlementPanel.classList.remove("hidden");
+      overlay.classList.add("hidden");
+      dailyBadge.classList.add("hidden");
+
+      dailySettlementRouteName.textContent = "【" + currentDailyChallenge.routeName + "】" + result.date;
+      dailySettlementScore.textContent = result.score;
+      dailySettlementLives.textContent = result.lives + " / " + result.startingLives;
+      dailySettlementMultiplier.textContent = currentDailyChallenge.scoreMultiplier + "x";
+
+      var todayBest = DailyChallengeStore.getTodayBestScore();
+      dailySettlementBest.textContent = todayBest;
+
+      if (result.score >= todayBest) {
+        dailySettlementNewRecord.classList.remove("hidden");
+      } else {
+        dailySettlementNewRecord.classList.add("hidden");
+      }
+
+      SoundManager.victory();
+    }
+
+    function showDailyFail(failReason, failReasonText, result) {
+      dailyChallengeState = "idle";
+      dailyPlayPanel.classList.add("hidden");
+      dailyFailPanel.classList.remove("hidden");
+      overlay.classList.add("hidden");
+      dailyBadge.classList.add("hidden");
+
+      dailyFailReason.textContent = failReasonText || "生命已耗尽";
+      dailyFailCompleted.textContent = result ? result.levelScores.length : 0;
+      dailyFailScore.textContent = result ? result.score : 0;
+    }
+
+    function showDailyChallengeFromSettlement() {
+      dailyChallengeState = "idle";
+      currentDailyChallenge = null;
+      score = 0;
+      showDailyChallengePanel();
+    }
+
+    function retryDailyChallenge() {
+      var todayStr = DailyChallengeConfig.getTodayStr();
+      currentDailyChallenge = DailyChallengeConfig.generateChallenge(todayStr);
+      dailyScoreMultiplier = currentDailyChallenge.scoreMultiplier;
+
+      DailyChallengeStore.startRun(currentDailyChallenge);
+      dailyChallengeState = "playing";
+      score = 0;
+      dailyLevelStartScore = 0;
+      dailyFailPanel.classList.add("hidden");
+
+      showDailyPlayPanel();
+      resetLevel();
+    }
+
+    function showDailyChallengeFromFail() {
+      dailyChallengeState = "idle";
+      currentDailyChallenge = null;
+      score = 0;
+      showDailyChallengePanel();
+    }
+
     // ===================== 关卡选择渲染 =====================
     function renderLevelCards() {
       const builtinUnlocked = LevelData.loadBuiltinUnlocked();
@@ -7524,6 +8726,8 @@
       editorPanel.classList.add("hidden");
       achievementsPanel.classList.add("hidden");
       voyageLogPanel.classList.add("hidden");
+      dailyChallengePanel.classList.add("hidden");
+      dailyPlayPanel.classList.add("hidden");
       levelSelectPanel.classList.remove("hidden");
       renderLevelCards();
       state = "levelSelect";
@@ -7543,10 +8747,17 @@
       campaignIntroPanel.classList.add("hidden");
       campaignSettlementPanel.classList.add("hidden");
       campaignFailPanel.classList.add("hidden");
+      dailyChallengePanel.classList.add("hidden");
+      dailyPlayPanel.classList.add("hidden");
+      dailySettlementPanel.classList.add("hidden");
+      dailyFailPanel.classList.add("hidden");
       state = "menu";
       playtestLevel = null;
+      dailyChallengeState = "idle";
+      currentDailyChallenge = null;
       cursorHint.classList.add("hidden");
       backFromPlaytestBtn.style.display = "none";
+      dailyBadge.classList.add("hidden");
       show("夜间灯塔守望", "照亮航道，护送全部船只抵达右侧港湾。", "开始游戏", function() {
         currentLevelId = "builtin_0";
         score = 0;
@@ -7926,6 +9137,8 @@
           levelName: data.name || "",
           isCustom: LevelData.isCustomLevel(currentLevelId),
           isCampaign: false,
+          isDailyChallenge: isDailyChallengeMode(),
+          dailyChallengeDate: isDailyChallengeMode() ? currentDailyChallenge.date : null,
           startTime: Date.now(),
           result: null
         });
@@ -8018,6 +9231,7 @@
       }
 
       const inCampaign = isCampaignMode();
+      const inDaily = isDailyChallengeMode();
 
       for (const boat of boats) {
         if (boat.arrived || boat.lost) continue;
@@ -8088,6 +9302,19 @@
               }
             }
             handleCampaignLevelLose(failReason, reasonText);
+          } else if (inDaily) {
+            completeCurrentVoyageLog("lose", failReason, reasonText);
+            if (ReplayRecorder.isRecording()) {
+              ReplayRecorder.recordEvent("levelEnd", { win: false, score: score });
+              const replayData = ReplayRecorder.stop(score, "lose");
+              if (replayData && currentLogId && !playtestLevel) {
+                const replayId = ReplayStore.save(replayData);
+                if (replayId) {
+                  setLogReplayDataId(currentLogId, replayId);
+                }
+              }
+            }
+            handleDailyChallengeLevelLose(failReason, reasonText);
           } else {
             end(false, describeFailure(failReason));
           }
@@ -8099,6 +9326,9 @@
           let bonus = Math.round(100 + boat.lit * 20);
           if (inCampaign) {
             bonus = Math.round(bonus * campaignScoreMultiplier);
+          }
+          if (inDaily) {
+            bonus = Math.round(bonus * dailyScoreMultiplier);
           }
           score += bonus;
           if (!playtestLevel) {
@@ -8146,6 +9376,27 @@
 
         if (playtestLevel) {
           end(true, "试玩通关！本关得分：" + currentLevelScore + "。" + describeScoreRule() + " 你可以继续调整关卡或保存。");
+        } else if (inDaily) {
+          completeCurrentVoyageLog("win", null, "");
+          if (ReplayRecorder.isRecording()) {
+            ReplayRecorder.recordFrame({
+              beamAngle: beamAngle,
+              beamWide: beamWide,
+              paused: false,
+              score: score,
+              arrivedCount: boats.length,
+              boats: boats
+            }, 1 / 30);
+            ReplayRecorder.recordEvent("dailyLevelEnd", { win: true, score: score });
+            const replayData = ReplayRecorder.stop(score, "win");
+            if (replayData && currentLogId && !playtestLevel) {
+              const replayId = ReplayStore.save(replayData);
+              if (replayId) {
+                setLogReplayDataId(currentLogId, replayId);
+              }
+            }
+          }
+          handleDailyChallengeLevelWin();
         } else if (inCampaign) {
           completeCurrentVoyageLog("win", null, "");
           if (ReplayRecorder.isRecording()) {
@@ -8210,6 +9461,8 @@
 
       if (inCampaign) {
         updateCampaignHud();
+      } else if (inDaily) {
+        updateDailyChallengeHud();
       } else {
         updateHud();
       }
@@ -10074,6 +11327,41 @@
       });
     }
     campaignBtn.onclick = showCampaignSelectPanel;
+    dailyChallengeBtn.onclick = showDailyChallengePanel;
+    backFromDailyBtn.onclick = showMainMenu;
+    dailyStartBtn.onclick = startDailyChallenge;
+    document.getElementById("dailyResumeBtn").onclick = resumeDailyChallenge;
+    document.getElementById("dailyRestartBtn").onclick = restartDailyChallenge;
+    document.getElementById("dailyAbandonBtn").onclick = abandonDailyChallenge;
+    document.getElementById("dailyPauseBtn").onclick = togglePause;
+    document.getElementById("dailyQuitBtn").onclick = function() {
+      if (confirm("确定要退出当前每日挑战吗？\n\n当前进度会被保存，可以下次继续。")) {
+        dailyChallengeState = "idle";
+        score = 0;
+        dailyBadge.classList.add("hidden");
+        showDailyChallengePanel();
+      }
+    };
+    document.getElementById("dailySettlementBackBtn").onclick = showDailyChallengeFromSettlement;
+    document.getElementById("dailyRetryBtn").onclick = retryDailyChallenge;
+    document.getElementById("dailyFailBackBtn").onclick = showDailyChallengeFromFail;
+    document.getElementById("dailyCalPrevBtn").onclick = function() {
+      dailyCalMonth--;
+      if (dailyCalMonth < 0) { dailyCalMonth = 11; dailyCalYear--; }
+      renderDailyCalendar();
+    };
+    document.getElementById("dailyCalNextBtn").onclick = function() {
+      dailyCalMonth++;
+      if (dailyCalMonth > 11) { dailyCalMonth = 0; dailyCalYear++; }
+      renderDailyCalendar();
+    };
+    document.getElementById("resetDailyChallengeBtn").onclick = function() {
+      if (confirm("确定要重置所有每日挑战数据吗？\n\n此操作不会影响其他模式的数据。")) {
+        DailyChallengeStore.resetAll();
+        renderDailyChallengePanel();
+        alert("每日挑战数据已重置。");
+      }
+    };
     backFromCampaignBtn.onclick = function() {
       campaignState = "idle";
       score = 0;
